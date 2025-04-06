@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tokio = { version = "1.44.2", features = ["full"] }
 
 [dev-dependencies]
 watchexec-cli = "2.3.0"
