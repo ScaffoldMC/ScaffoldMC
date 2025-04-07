@@ -12,6 +12,8 @@
 	--font-size-normal: 1rem;
 	--font-size-small: 0.875rem;
 
+	--border-radius: 8px;
+
 	font-size: 16px;
 	font-family: var(--font-family-normal);
 	color: var(--color-text);
@@ -20,7 +22,7 @@
 
 /*================================ CSS Reset ================================*/
 
-// Sourced from https://piccalil.li/blog/a-more-modern-css-reset/
+/* Sourced from https://piccalil.li/blog/a-more-modern-css-reset/ */
 
 /* Box sizing rules */
 *,
