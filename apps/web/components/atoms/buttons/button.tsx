@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ComponentType } from "react";
+import { ButtonHTMLAttributes } from "react";
 import { cva } from "class-variance-authority";
 import styles from "./button.module.css";
 
@@ -9,8 +9,6 @@ export enum ButtonPriority {
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-	label: string;
-	icon?: ComponentType;
 	level?: ButtonPriority;
 }
 
@@ -27,11 +25,7 @@ const buttonStyles = cva(styles.base, {
 	},
 });
 
-export function Button({ label, level, ...props }: ButtonProps) {
+export function Button({ level, ...props }: ButtonProps) {
 	const className = buttonStyles({ level });
-	return (
-		<button className={className} {...props}>
-			{label}
-		</button>
-	);
+	return <button className={className} {...props}></button>;
 }
