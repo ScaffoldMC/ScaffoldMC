@@ -1,0 +1,69 @@
+.base {
+	border-radius: var(--border-radius);
+	font-size: var(--font-size);
+	font-family: var(--font-family-normal);
+	color: var(--color-text);
+
+	width: fit-content;
+	height: 32px;
+	border: none;
+
+	cursor: pointer;
+	padding: 0 16px;
+	transition: background-color 100ms ease-in-out;
+}
+
+.base:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.primary {
+	background-color: var(--color-primary);
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.primary:enabled:hover {
+	background-color: hsl(from var(--color-primary) h s calc(l - 10));
+}
+
+.secondary {
+	background-color: #e6e6e6;
+	color: #000000;
+}
+
+.secondary:enabled:hover {
+	background-color: #cccccc;
+}
+
+.destructive {
+	background-color: rgba(255, 0, 0, 0.1);
+	color: #cc0000;
+	font-weight: bold;
+}
+
+.destructive:enabled:hover {
+	background-color: rgba(255, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+	.base {
+		color: #ffffff;
+	}
+
+	.primary {
+		background-color: var(--color-primary);
+		color: #ffffff;
+	}
+
+	.secondary {
+		background-color: #333333;
+		color: #ffffff;
+	}
+
+	.destructive {
+		background-color: rgba(255, 0, 0, 0.1);
+		color: #cc0000;
+	}
+}
