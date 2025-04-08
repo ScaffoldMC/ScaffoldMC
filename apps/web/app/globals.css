@@ -1,11 +1,10 @@
 /*============================= Global Variables =============================*/
 
 :root {
-	--color-accent: #87b59d;
-	--color-primary: #7ad331;
-	--color-secondary: #bae59a;
-	--color-background: #eff3ec;
-	--color-text: #141910;
+	--color-primary: #3441e1;
+	--color-secondary: #e6e6e6;
+	--color-background: #ffffff;
+	--color-text: #000000;
 
 	--font-size-large: 1.25rem;
 	--font-size-normal: 1rem;
@@ -20,11 +19,10 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--color-accent: #4a7860;
-		--color-primary: #75ce2c;
-		--color-secondary: #3b651a;
-		--color-background: #0f130c;
-		--color-text: #eaefe6;
+		--color-primary: #1e2dcc;
+		--color-secondary: #262626;
+		--color-background: #0d0d0d;
+		--color-text: #ffffff;
 	}
 }
 
