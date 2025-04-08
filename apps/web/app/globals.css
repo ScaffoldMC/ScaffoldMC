@@ -5,9 +5,6 @@
 	--color-background: #ffffff;
 	--color-text: #000000;
 
-	--font-family-normal: "Helvetica Neue", Arial, sans-serif;
-	--font-family-mono: "Courier New", Courier, monospace;
-
 	--font-size-large: 1.25rem;
 	--font-size-normal: 1rem;
 	--font-size-small: 0.875rem;
@@ -15,7 +12,6 @@
 	--border-radius: 6px;
 
 	font-size: 16px;
-	font-family: var(--font-family-normal);
 	color: var(--color-text);
 	background-color: var(--color-background);
 }

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 const manropeFont = localFont({
 	src: "../public/fonts/Manrope-VariableFont_wght.ttf",
+	variable: "--font-manrope",
 });
 
 export default function RootLayout({
@@ -17,8 +18,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className={manropeFont.className}>
-			<body>{children}</body>
+		<html lang="en">
+			<body className={manropeFont.className}>{children}</body>
 		</html>
 	);
 }
