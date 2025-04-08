@@ -4,6 +4,11 @@
 	font-size: 14px;
 	color: var(--color-text);
 
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	align-items: center;
+
 	width: fit-content;
 	height: 32px;
 	border: none;
