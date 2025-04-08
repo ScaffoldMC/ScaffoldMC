@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,13 +7,17 @@ export const metadata: Metadata = {
 	description: "Minecraft Server UI",
 };
 
+const manropeFont = localFont({
+	src: "../public/fonts/Manrope-VariableFont_wght.ttf",
+});
+
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" className={manropeFont.className}>
 			<body>{children}</body>
 		</html>
 	);
