@@ -2,14 +2,8 @@ import { ButtonHTMLAttributes } from "react";
 import { cva } from "class-variance-authority";
 import styles from "./button.module.css";
 
-export enum ButtonPriority {
-	Primary = "primary",
-	Secondary = "secondary",
-	Destructive = "destructive",
-}
-
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-	level?: ButtonPriority;
+	level?: "primary" | "secondary" | "destructive";
 }
 
 const buttonStyles = cva(styles.base, {
@@ -21,7 +15,7 @@ const buttonStyles = cva(styles.base, {
 		},
 	},
 	defaultVariants: {
-		level: ButtonPriority.Secondary,
+		level: "secondary",
 	},
 });
 
