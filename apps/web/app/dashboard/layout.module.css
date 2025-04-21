@@ -1,0 +1,14 @@
+.dashboard {
+	display: flex;
+	flex-direction: row;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	height: 100vh;
+	overflow: auto;
+	margin: 0;
+	padding: 0;
+}
