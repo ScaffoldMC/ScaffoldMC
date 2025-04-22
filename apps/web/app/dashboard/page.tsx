@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Home() {
+export default function Dashboard() {
 	return (
 		<div>
 			<Link href="/servers/1"> Server 1</Link>
