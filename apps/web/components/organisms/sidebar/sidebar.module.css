@@ -1,6 +1,25 @@
 .sidebar {
+	display: flex;
+	flex-direction: column;
 	height: 100vh;
 	width: 250px;
 	padding: 12px;
 	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebarLinks {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow-y: auto;
+	margin: 16px 0;
+}
+
+.sidebarHeader {
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebarBottom {
+	margin-top: auto;
 }

@@ -10,7 +10,16 @@ export default function DashboardLayout({
 	return (
 		<div className={styles.dashboard}>
 			<Sidebar>
-				<User />
+				<Sidebar.Header>
+					<h1 className={styles.logo}>App Name</h1>
+					<p className={styles.tagline}>Some other info, probably.</p>
+				</Sidebar.Header>
+				<Sidebar.Links>
+					<p> :3 </p>
+				</Sidebar.Links>
+				<Sidebar.Bottom>
+					<User />
+				</Sidebar.Bottom>
 			</Sidebar>
 			<div className={styles.content}>{children}</div>
 		</div>
