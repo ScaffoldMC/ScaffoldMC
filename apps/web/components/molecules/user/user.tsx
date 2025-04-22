@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/atoms/avatar/avatar";
-import styles from "./account.module.css";
+import styles from "./user.module.css";
 
-export function Account() {
+export function User() {
 	// TODO: Get user data from server's API
 
 	return (
