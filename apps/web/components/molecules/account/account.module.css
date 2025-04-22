@@ -1,0 +1,23 @@
+.root {
+	display: flex;
+	gap: 10px;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+}
+
+.logo {
+	align-self: start;
+}
+
+.details {
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: start;
+}
+
+.email {
+	font-size: var(--font-size-small);
+	color: var(--color-text);
+}
