@@ -15,7 +15,7 @@ Avatar.displayName = AvatarPrimitive.Root.displayName;
 export function AvatarImage({
 	...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-	return <AvatarPrimitive.Image {...props} />;
+	return <AvatarPrimitive.Image className={styles.base} {...props} />;
 }
 
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
@@ -23,7 +23,12 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 export function AvatarFallback({
 	...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-	return <AvatarPrimitive.Fallback className={styles.fallback} {...props} />;
+	return (
+		<AvatarPrimitive.Fallback
+			className={(styles.base, styles.fallback)}
+			{...props}
+		/>
+	);
 }
 
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
