@@ -4,10 +4,18 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import styles from "./avatar.module.css";
 
-export function Avatar({
-	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
-	return <AvatarPrimitive.Root className={styles.base} {...props} />;
+type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
+	size: number;
+};
+
+export function Avatar({ size, ...props }: AvatarProps) {
+	return (
+		<AvatarPrimitive.Root
+			style={{ width: size, height: size }}
+			className={styles.base}
+			{...props}
+		/>
+	);
 }
 
 Avatar.displayName = AvatarPrimitive.Root.displayName;
