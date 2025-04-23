@@ -6,7 +6,7 @@
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
-	background-color: var(--color-accent);
+	background-color: var(--color-secondary);
 	object-fit: cover;
 	vertical-align: middle;
 }

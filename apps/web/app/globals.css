@@ -2,9 +2,8 @@
 
 :root {
 	--color-primary: #3441e1;
-	--color-secondary: #e6e6e6;
+	--color-secondary: #f1f1f1;
 	--color-background: #ffffff;
-	--color-accent: #f1f1f1;
 	--color-text: #000000;
 
 	--font-size-large: 1.25rem;
@@ -21,8 +20,7 @@
 @media (prefers-color-scheme: dark) {
 	:root {
 		--color-primary: #1e2dcc;
-		--color-secondary: #262626;
-		--color-accent: #1a1a1a;
+		--color-secondary: #1a1a1a;
 		--color-background: #0d0d0d;
 		--color-text: #ffffff;
 	}
