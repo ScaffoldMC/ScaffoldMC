@@ -1,5 +1,6 @@
 mod logger;
 mod routes;
+mod user;
 
 use std::net::SocketAddr;
 
