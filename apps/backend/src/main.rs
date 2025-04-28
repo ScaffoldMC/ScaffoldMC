@@ -1,6 +1,8 @@
 mod logger;
 mod routes;
 
+use std::net::SocketAddr;
+
 use axum::Router;
 use log::{info, LevelFilter};
 
@@ -14,6 +16,10 @@ async fn main() {
 
 	info!("Starting server...");
 	let app: Router = Router::new().merge(routes::create_router());
-	let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-	axum::serve(listener, app).await.unwrap();
+
+	let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+	axum_server::bind(addr)
+		.serve(app.into_make_service())
+		.await
+		.unwrap();
 }
