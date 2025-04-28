@@ -14,10 +14,10 @@ async fn main() {
 		.map(|()| log::set_max_level(LevelFilter::Info))
 		.expect("Failed to set logger");
 
-	info!("Starting server...");
 	let app: Router = Router::new().merge(routes::create_router());
-
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+	info!("Starting server on {}", addr);
 	axum_server::bind(addr)
 		.serve(app.into_make_service())
 		.await
