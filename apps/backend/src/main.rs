@@ -1,3 +1,4 @@
+mod backend;
 mod logger;
 mod routes;
 mod user;
