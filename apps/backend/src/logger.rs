@@ -1,5 +1,3 @@
-use std::default;
-
 use colored::Colorize;
 use log::{Level, Metadata, Record};
 
