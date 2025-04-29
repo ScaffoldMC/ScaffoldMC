@@ -4,13 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-trait = "0.1.88"
 axum = "0.8.3"
 axum-login = "0.17.0"
 axum-server = "0.7.2"
 colored = "3.0.0"
 log = "0.4.27"
+password-auth = "1.0.0"
 serde = "1.0.219"
-sqlx = { version = "0.8.5", features = ["sqlite", "time", "runtime-tokio"] }
+sqlx = { version = "0.8.5", features = [
+	"sqlite",
+	"time",
+	"runtime-tokio",
+	"uuid",
+] }
+thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = ["full"] }
 toml = "0.8.20"
 uuid = { version = "1.16.0", features = ["serde"] }
