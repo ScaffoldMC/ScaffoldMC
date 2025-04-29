@@ -1,7 +1,6 @@
 use axum_login::AuthUser;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
-use uuid::Uuid;
+use sqlx::{types::Uuid, FromRow};
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
 pub struct User {
@@ -9,6 +8,16 @@ pub struct User {
 	name: String,
 	username: String,
 	password_hash: String,
+}
+
+impl User {
+	pub fn username(&self) -> &str {
+		&self.username
+	}
+
+	pub fn password_hash(&self) -> &str {
+		&self.password_hash
+	}
 }
 
 impl std::fmt::Debug for User {
