@@ -1,13 +1,19 @@
-import Link from "next/link";
+import styles from "./page.module.css";
+import { Server } from "lucide-react";
+import { ServerList } from "@/components/organisms/serverlist/serverlist";
 
 export default function Dashboard() {
 	return (
-		<div>
-			<div>
-				<Link href="/dashboard/1"> Server 1</Link>
-				<Link href="/dashboard/2"> Server 2</Link>
-				<Link href="/dashboard/3"> Server 3</Link>
-			</div>
+		<div className={styles.dashboard}>
+			<h1>
+				<Server size={24} /> Servers
+			</h1>
+			<ServerList>
+				<ServerList.Item />
+				<ServerList.Item />
+				<ServerList.Item />
+				<ServerList.Item />
+			</ServerList>
 		</div>
 	);
 }

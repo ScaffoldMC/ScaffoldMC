@@ -1,0 +1,10 @@
+.dashboard {
+	display: flex;
+	flex-direction: column;
+	padding: 32px;
+	gap: 16px;
+	background-color: var(--color-background);
+	height: 100%;
+	width: 100%;
+	color: var(--color-text);
+}
