@@ -22,6 +22,7 @@
 	:root {
 		--color-primary: #1e2dcc;
 		--color-secondary: #1a1a1a;
+		--color-foreground: #101010;
 		--color-background: #0d0d0d;
 		--color-text: #ffffff;
 	}
