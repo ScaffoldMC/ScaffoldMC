@@ -3,7 +3,8 @@
 :root {
 	--color-primary: #3441e1;
 	--color-secondary: #f1f1f1;
-	--color-background: #ffffff;
+	--color-foreground: #ffffff;
+	--color-background: #fcfcfc;
 	--color-text: #000000;
 
 	--font-size-large: 1.25rem;
