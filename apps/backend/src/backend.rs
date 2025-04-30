@@ -7,7 +7,7 @@ use thiserror::Error;
 use tokio::task;
 
 #[derive(Clone)]
-struct Backend {
+pub struct Backend {
 	db: SqlitePool,
 }
 
@@ -60,3 +60,5 @@ impl AuthnBackend for Backend {
 		Ok(user)
 	}
 }
+
+pub type AuthSession = axum_login::AuthSession<Backend>;
