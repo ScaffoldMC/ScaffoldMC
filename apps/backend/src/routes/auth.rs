@@ -1,13 +1,41 @@
-use axum::{routing::get, Router};
+use axum::{
+	http::StatusCode,
+	response::{IntoResponse, Redirect},
+	routing::{get, post},
+	Form, Router,
+};
+
+use axum_messages::{Message, Messages};
+
+use crate::backend::{AuthSession, Credentials};
 
 pub fn create_router() -> Router {
 	Router::new()
-		.route("/login", get(login))
-		.route("/logout", get(logout))
+		.route("/login", post(login))
+		.route("/logout", post(logout))
 }
 
-async fn login() {
-	todo!("Login logic");
+pub async fn login(
+	mut auth_session: AuthSession,
+	messages: Messages,
+	Form(creds): Form<Credentials>,
+) -> impl IntoResponse {
+	let user = match auth_session.authenticate(creds.clone()).await {
+		Ok(Some(user)) => user,
+		Ok(None) => {
+			messages.error("Invalid username or password");
+			return StatusCode::UNAUTHORIZED.into_response();
+		}
+		Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+	};
+
+	if auth_session.login(&user).await.is_err() {
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+	}
+
+	messages.success(format!("Successfully logged in as {}", user.username()));
+
+	StatusCode::OK.into_response()
 }
 
 async fn logout() {
