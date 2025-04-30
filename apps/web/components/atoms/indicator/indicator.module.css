@@ -1,0 +1,20 @@
+.base {
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	margin: 4px;
+	box-shadow: 0 0 3px 2px var(--indicator-color);
+	background-color: var(--indicator-color);
+}
+
+.success {
+	--indicator-color: #00ff00;
+}
+
+.working {
+	--indicator-color: #ffcc00;
+}
+
+.error {
+	--indicator-color: #ff0000;
+}
