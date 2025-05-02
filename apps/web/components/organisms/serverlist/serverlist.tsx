@@ -20,23 +20,20 @@ export function ServerList({ children }: { children?: React.ReactNode }) {
 
 function ServerListItem() {
 	return (
-		<div className={styles.item}>
-			<Link href="/dashboard/1">Server 1</Link>
+		<Link href="/dashboard/1" className={styles.link}>
+			<div className={styles.item}>
+				<p>Server name</p>
 
-			<div className={styles.cluster}>
-				<Indicator state="success" />
-				<p>8/16 Active</p>
-			</div>
+				<div className={styles.statusCluster}>
+					<p>1/10 Online</p>
+				</div>
 
-			<div className={styles.cluster}>
-				<Button size="icon" level="destructive">
-					<OctagonX size={18} />
-				</Button>
-				<Button size="icon" level="secondary">
-					<FolderSync size={18} />
-				</Button>
+				<div className={styles.statusCluster}>
+					<Indicator state="success" />
+					<p>Active</p>
+				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }
 
