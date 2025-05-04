@@ -32,7 +32,7 @@ export default async function Page({
 				</div>
 			</div>
 
-			<Tabs>
+			<Tabs defaultValue="console">
 				<TabsList>
 					<TabsTrigger value="console">Console</TabsTrigger>
 					<TabsTrigger value="settings">Settings</TabsTrigger>
