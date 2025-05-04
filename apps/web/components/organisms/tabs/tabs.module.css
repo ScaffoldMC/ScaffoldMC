@@ -12,6 +12,7 @@
 	border: transparent;
 	border-radius: 6px;
 	padding: 8px 16px;
+	flex-grow: 1;
 	background-color: transparent;
 	color: var(--color-text);
 	transition: background-color 100ms ease-in-out;
@@ -30,7 +31,7 @@
 	align-items: center;
 	justify-content: space-between;
 	border-radius: 10px;
-	width: fit-content;
+	width: 100%;
 	padding: 4px;
 	gap: 8px;
 	background-color: var(--color-foreground);
