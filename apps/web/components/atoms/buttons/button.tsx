@@ -4,7 +4,7 @@ import styles from "./button.module.css";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	size?: "icon" | "default";
-	level?: "primary" | "secondary" | "destructive";
+	level?: "primary" | "secondary" | "destructive" | "ghost";
 }
 
 const buttonStyles = cva(styles.base, {
@@ -13,6 +13,7 @@ const buttonStyles = cva(styles.base, {
 			primary: styles.primary,
 			secondary: styles.secondary,
 			destructive: styles.destructive,
+			ghost: styles.ghost,
 		},
 		size: {
 			default: styles.defaultSize,
