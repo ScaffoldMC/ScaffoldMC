@@ -4,6 +4,13 @@ import {
 	AvatarImage,
 } from "@/components/atoms/avatar/avatar";
 
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@/components/organisms/tabs/tabs";
+
 import styles from "./page.module.css";
 
 export default async function Page({
@@ -13,7 +20,7 @@ export default async function Page({
 }) {
 	const { slug } = await params;
 	return (
-		<div>
+		<div className={styles.page}>
 			<div className={styles.title}>
 				<Avatar size={64} shape="square">
 					<AvatarFallback>?</AvatarFallback>
@@ -24,6 +31,23 @@ export default async function Page({
 					<p>Additional info</p>
 				</div>
 			</div>
+
+			<Tabs>
+				<TabsList>
+					<TabsTrigger value="console">Console</TabsTrigger>
+					<TabsTrigger value="settings">Settings</TabsTrigger>
+					<TabsTrigger value="backups">Backups</TabsTrigger>
+				</TabsList>
+				<TabsContent value="console">
+					<b>Console</b>
+				</TabsContent>
+				<TabsContent value="settings">
+					<b>Settings</b>
+				</TabsContent>
+				<TabsContent value="backups">
+					<b>Backups</b>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }
