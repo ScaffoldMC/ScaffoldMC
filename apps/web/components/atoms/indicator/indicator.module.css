@@ -1,9 +1,10 @@
 .base {
-	width: 4px;
-	height: 4px;
+	width: 6px;
+	height: 6px;
 	border-radius: 50%;
 	margin: 4px;
-	box-shadow: 0 0 3px 2px var(--indicator-color);
+	box-shadow: 0 0 2px 1px
+		color-mix(in srgb, var(--indicator-color) 50%, transparent);
 	background-color: var(--indicator-color);
 }
 
