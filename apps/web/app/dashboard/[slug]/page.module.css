@@ -1,0 +1,13 @@
+.title {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: start;
+	flex-direction: row;
+}
+
+.titleInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
