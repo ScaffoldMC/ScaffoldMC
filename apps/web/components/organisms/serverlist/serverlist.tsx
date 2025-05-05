@@ -11,6 +11,7 @@ import {
 } from "@/components/atoms/avatar/avatar";
 
 // TODO: Hook up to backend logic
+// TODO: Make brief & detailed view of server list
 
 export function ServerList() {
 	return (
