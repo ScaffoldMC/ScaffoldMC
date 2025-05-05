@@ -1,3 +1,4 @@
+import Link, { LinkProps } from "next/link";
 import styles from "./sidebar.module.css";
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
@@ -21,3 +22,16 @@ export function Footer({ children }: { children: React.ReactNode }) {
 }
 
 Sidebar.Footer = Footer;
+
+export function SidebarLink({
+	children,
+	...props
+}: { children: React.ReactNode } & LinkProps) {
+	return (
+		<Link className={styles.sidebarLink} {...props}>
+			{children}
+		</Link>
+	);
+}
+
+Sidebar.Link = SidebarLink;

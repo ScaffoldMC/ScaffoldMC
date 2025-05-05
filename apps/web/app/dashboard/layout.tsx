@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/organisms/sidebar/sidebar";
 import styles from "./layout.module.css";
 import { User } from "@/components/molecules/user/user";
+import { Server } from "lucide-react";
 
 export default function DashboardLayout({
 	children,
@@ -14,7 +15,12 @@ export default function DashboardLayout({
 					<h1 className={styles.logo}>App Name</h1>
 					<p className={styles.tagline}>Some other info, probably.</p>
 				</Sidebar.Header>
-				<Sidebar.Content></Sidebar.Content>
+				<Sidebar.Content>
+					<Sidebar.Link href="/dashboard">
+						<Server size={16} className={styles.icon} />
+						Dashboard
+					</Sidebar.Link>
+				</Sidebar.Content>
 				<Sidebar.Footer>
 					<User />
 				</Sidebar.Footer>
