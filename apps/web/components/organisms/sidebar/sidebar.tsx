@@ -16,8 +16,8 @@ export function Links({ children }: { children: React.ReactNode }) {
 
 Sidebar.Links = Links;
 
-export function Bottom({ children }: { children: React.ReactNode }) {
-	return <div className={styles.sidebarBottom}>{children}</div>;
+export function Footer({ children }: { children: React.ReactNode }) {
+	return <div className={styles.sidebarFooter}>{children}</div>;
 }
 
-Sidebar.Bottom = Bottom;
+Sidebar.Footer = Footer;

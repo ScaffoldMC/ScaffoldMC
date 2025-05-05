@@ -17,9 +17,9 @@ export default function DashboardLayout({
 				<Sidebar.Links>
 					<p> :3 </p>
 				</Sidebar.Links>
-				<Sidebar.Bottom>
+				<Sidebar.Footer>
 					<User />
-				</Sidebar.Bottom>
+				</Sidebar.Footer>
 			</Sidebar>
 			<div className={styles.content}>{children}</div>
 		</div>

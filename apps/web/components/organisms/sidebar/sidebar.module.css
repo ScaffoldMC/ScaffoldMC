@@ -19,8 +19,12 @@
 .sidebarHeader {
 	display: flex;
 	flex-direction: column;
+	position: sticky;
+	top: 0;
 }
 
-.sidebarBottom {
+.sidebarFooter {
 	margin-top: auto;
+	position: sticky;
+	bottom: 0;
 }
