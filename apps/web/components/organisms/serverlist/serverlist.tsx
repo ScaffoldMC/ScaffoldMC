@@ -9,46 +9,51 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@/components/atoms/avatar/avatar";
+import { List, ListItem } from "@/components/organisms/list/list";
 
 // TODO: Hook up to backend logic
 // TODO: Make brief & detailed view of server list
 
 export function ServerList() {
 	return (
-		<div className={styles.root}>
-			<div className={styles.header}>
-				<b>n servers</b>
-			</div>
+		<List
+			names={{
+				singular: "Server",
+				plural: "Servers",
+			}}
+		>
 			<ServerListItem />
 			<ServerListItem />
 			<ServerListItem />
 			<ServerListItem />
-		</div>
+		</List>
 	);
 }
 
 function ServerListItem() {
 	return (
-		<Link href="/dashboard/servers/1" className={styles.link}>
-			<div className={styles.item}>
-				<div className={styles.statusCluster}>
-					<Avatar size={28} shape="square-small">
-						<AvatarFallback>?</AvatarFallback>
-						<AvatarImage src="/images/server-default.png" />
-					</Avatar>
+		<ListItem>
+			<Link href="/dashboard/servers/1" className={styles.link}>
+				<div className={styles.item}>
+					<div className={styles.statusCluster}>
+						<Avatar size={28} shape="square-small">
+							<AvatarFallback>?</AvatarFallback>
+							<AvatarImage src="/images/server-default.png" />
+						</Avatar>
 
-					<p>Server name</p>
-				</div>
+						<p>Server name</p>
+					</div>
 
-				<div className={styles.statusCluster}>
-					<p>1/10 Online</p>
-				</div>
+					<div className={styles.statusCluster}>
+						<p>1/10 Online</p>
+					</div>
 
-				<div className={styles.statusCluster}>
-					<Indicator state="success" />
-					<p>Active</p>
+					<div className={styles.statusCluster}>
+						<Indicator state="success" />
+						<p>Active</p>
+					</div>
 				</div>
-			</div>
-		</Link>
+			</Link>
+		</ListItem>
 	);
 }

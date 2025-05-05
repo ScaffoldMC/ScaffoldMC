@@ -1,0 +1,26 @@
+.root {
+	border-radius: var(--border-radius);
+	border: 1px solid var(--color-secondary);
+	overflow: hidden;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.content > .item:last-child {
+	border-bottom: none;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid var(--color-secondary);
+	padding: 8px;
+}
+
+.item {
+	border-bottom: 1px solid var(--color-secondary);
+}
