@@ -12,13 +12,16 @@ import {
 
 // TODO: Hook up to backend logic
 
-export function ServerList({ children }: { children?: React.ReactNode }) {
+export function ServerList() {
 	return (
 		<div className={styles.root}>
 			<div className={styles.header}>
 				<b>n servers</b>
 			</div>
-			{children}
+			<ServerListItem />
+			<ServerListItem />
+			<ServerListItem />
+			<ServerListItem />
 		</div>
 	);
 }
@@ -48,5 +51,3 @@ function ServerListItem() {
 		</Link>
 	);
 }
-
-ServerList.Item = ServerListItem;
