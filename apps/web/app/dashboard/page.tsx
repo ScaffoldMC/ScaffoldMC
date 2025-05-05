@@ -5,9 +5,7 @@ import { ServerList } from "@/components/organisms/serverlist/serverlist";
 export default function Dashboard() {
 	return (
 		<div className={styles.dashboard}>
-			<h1>
-				<Server size={24} /> Servers
-			</h1>
+			<h2>Servers</h2>
 			<ServerList />
 		</div>
 	);
