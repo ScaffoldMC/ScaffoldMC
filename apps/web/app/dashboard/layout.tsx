@@ -14,9 +14,7 @@ export default function DashboardLayout({
 					<h1 className={styles.logo}>App Name</h1>
 					<p className={styles.tagline}>Some other info, probably.</p>
 				</Sidebar.Header>
-				<Sidebar.Links>
-					<p> :3 </p>
-				</Sidebar.Links>
+				<Sidebar.Content></Sidebar.Content>
 				<Sidebar.Footer>
 					<User />
 				</Sidebar.Footer>

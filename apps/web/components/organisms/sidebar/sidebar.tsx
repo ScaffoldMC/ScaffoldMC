@@ -10,11 +10,11 @@ export function Header({ children }: { children: React.ReactNode }) {
 
 Sidebar.Header = Header;
 
-export function Links({ children }: { children: React.ReactNode }) {
-	return <div className={styles.sidebarLinks}>{children}</div>;
+export function Content({ children }: { children?: React.ReactNode }) {
+	return <div className={styles.sidebarContent}>{children}</div>;
 }
 
-Sidebar.Links = Links;
+Sidebar.Content = Content;
 
 export function Footer({ children }: { children: React.ReactNode }) {
 	return <div className={styles.sidebarFooter}>{children}</div>;
