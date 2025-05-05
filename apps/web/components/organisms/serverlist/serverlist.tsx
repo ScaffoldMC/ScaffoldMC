@@ -28,7 +28,7 @@ function ServerListItem() {
 		<Link href="/dashboard/1" className={styles.link}>
 			<div className={styles.item}>
 				<div className={styles.statusCluster}>
-					<Avatar size={28} shape="square">
+					<Avatar size={28} shape="square-small">
 						<AvatarFallback>?</AvatarFallback>
 						<AvatarImage src="images/server-default.png" />
 					</Avatar>

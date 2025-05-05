@@ -22,7 +22,7 @@ export default async function Page({
 	return (
 		<div className={styles.page}>
 			<div className={styles.title}>
-				<Avatar size={64} shape="square">
+				<Avatar size={64} shape="square-medium">
 					<AvatarFallback>?</AvatarFallback>
 					<AvatarImage src="/images/server-default.png" />
 				</Avatar>

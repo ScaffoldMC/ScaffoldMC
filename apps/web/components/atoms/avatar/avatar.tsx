@@ -6,7 +6,7 @@ import styles from "./avatar.module.css";
 import { cva } from "class-variance-authority";
 
 type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
-	shape?: "circle" | "square";
+	shape?: "circle" | "square-small" | "square-medium";
 	size: number;
 };
 
@@ -14,7 +14,8 @@ const avatarStyles = cva(styles.base, {
 	variants: {
 		shape: {
 			circle: styles.circle,
-			square: styles.square,
+			"square-small": styles.squareSmall,
+			"square-medium": styles.squareMedium,
 		},
 	},
 	defaultVariants: {

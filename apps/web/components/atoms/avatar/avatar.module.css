@@ -11,8 +11,12 @@
 	user-select: none;
 }
 
-.square {
+.squareSmall {
 	border-radius: 6px;
+}
+
+.squareMedium {
+	border-radius: 10px;
 }
 
 .circle {
