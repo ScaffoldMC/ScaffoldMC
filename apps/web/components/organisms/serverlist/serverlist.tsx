@@ -29,12 +29,12 @@ export function ServerList() {
 
 function ServerListItem() {
 	return (
-		<Link href="/dashboard/1" className={styles.link}>
+		<Link href="/dashboard/servers/1" className={styles.link}>
 			<div className={styles.item}>
 				<div className={styles.statusCluster}>
 					<Avatar size={28} shape="square-small">
 						<AvatarFallback>?</AvatarFallback>
-						<AvatarImage src="images/server-default.png" />
+						<AvatarImage src="/images/server-default.png" />
 					</Avatar>
 
 					<p>Server name</p>
