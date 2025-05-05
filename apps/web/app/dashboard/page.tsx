@@ -8,12 +8,7 @@ export default function Dashboard() {
 			<h1>
 				<Server size={24} /> Servers
 			</h1>
-			<ServerList>
-				<ServerList.Item />
-				<ServerList.Item />
-				<ServerList.Item />
-				<ServerList.Item />
-			</ServerList>
+			<ServerList />
 		</div>
 	);
 }
