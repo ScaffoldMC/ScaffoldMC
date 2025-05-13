@@ -5,8 +5,11 @@ import { ServerList } from "@/components/organisms/serverlist/serverlist";
 export default function Dashboard() {
 	return (
 		<div className={styles.dashboard}>
-			<h2>Servers</h2>
-			<ServerList />
+			<h1>Hello John Doe</h1>
+			<div className={styles.dashboardGrid}>
+				<ServerList />
+				<div style={{ backgroundColor: "red" }}></div>
+			</div>
 		</div>
 	);
 }
