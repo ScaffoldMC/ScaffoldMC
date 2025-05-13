@@ -7,7 +7,7 @@ import {
 } from "@/components/organisms/sidebar/sidebar";
 import styles from "./layout.module.css";
 import { User } from "@/components/molecules/user/user";
-import { Home, Server, Settings } from "lucide-react";
+import { Home, Server, Settings, Users } from "lucide-react";
 
 export default function DashboardLayout({
 	children,
@@ -29,6 +29,10 @@ export default function DashboardLayout({
 					<SidebarLink href="/dashboard/servers">
 						<Server size={16} className={styles.icon} />
 						Servers
+					</SidebarLink>
+					<SidebarLink href="/dashboard/users">
+						<Users size={16} className={styles.icon} />
+						Users
 					</SidebarLink>
 					<SidebarLink href="/dashboard/settings">
 						<Settings size={16} className={styles.icon} />
