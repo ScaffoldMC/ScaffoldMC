@@ -22,7 +22,7 @@ export default function DashboardLayout({
 					<p className={styles.tagline}>Some other info, probably.</p>
 				</SidebarHeader>
 				<SidebarContent>
-					<SidebarLink href="/dashboard">
+					<SidebarLink href="/dashboard" activeCriteria="exact">
 						<Home size={16} className={styles.icon} />
 						Dashboard
 					</SidebarLink>
