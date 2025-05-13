@@ -1,3 +1,5 @@
+"use client";
+
 import { ButtonHTMLAttributes } from "react";
 import { cva } from "class-variance-authority";
 import styles from "./button.module.css";
