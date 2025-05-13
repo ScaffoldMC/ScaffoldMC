@@ -1,8 +1,6 @@
-import { Button } from "@/components/atoms/buttons/button";
 import React from "react";
 import styles from "./serverlist.module.css";
 import Link from "next/link";
-import { OctagonX, FolderSync } from "lucide-react";
 import { Indicator } from "@/components/atoms/indicator/indicator";
 import {
 	Avatar,
