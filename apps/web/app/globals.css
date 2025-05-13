@@ -1,7 +1,8 @@
 /*============================= Global Variables =============================*/
 
 :root {
-	--color-primary: #3441e1;
+	--color-primary: #59b800;
+	--color-primary-background: #59b80010;
 	--color-secondary: #f1f1f1;
 	--color-foreground: #ffffff;
 	--color-background: #fcfcfc;
@@ -20,7 +21,8 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--color-primary: #1e2dcc;
+		--color-primary: #9fff46;
+		--color-primary-background: #9fff4610;
 		--color-secondary: #1a1a1a;
 		--color-foreground: #101010;
 		--color-background: #0d0d0d;

@@ -30,8 +30,8 @@
 }
 
 .sidebarLinkActive {
-	color: #9fff46;
-	background-color: #9fff4611;
+	color: var(--color-primary);
+	background-color: var(--color-primary-background);
 }
 
 .sidebarLink:hover:not(.sidebarLinkActive) {
