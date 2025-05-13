@@ -28,7 +28,12 @@
 	transition: background-color 100ms ease-in-out;
 }
 
-.sidebarLink:hover {
+.sidebarLinkActive {
+	color: #9fff46;
+	background-color: #9fff4611;
+}
+
+.sidebarLink:hover:not(.sidebarLinkActive) {
 	background-color: var(--color-secondary);
 }
 
