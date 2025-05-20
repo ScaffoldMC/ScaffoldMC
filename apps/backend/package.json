@@ -1,7 +1,0 @@
-{
-	"name": "@repo/backend",
-	"scripts": {
-		"build": "cargo build --release",
-		"dev": "watchexec -r -e rs -- cargo run"
-	}
-}
