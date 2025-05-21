@@ -29,10 +29,10 @@
 .iconSize {
 	width: 32px;
 	padding: 0;
+}
 
-	svg {
-		display: block;
-	}
+.iconSize svg {
+	display: block;
 }
 
 .primary {

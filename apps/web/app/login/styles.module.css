@@ -14,11 +14,11 @@
 	justify-content: center;
 	gap: 16px;
 	width: 100%;
+}
 
-	input,
-	button {
-		width: 100%;
-	}
+.form input,
+.form button {
+	width: 100%;
 }
 
 .login {
