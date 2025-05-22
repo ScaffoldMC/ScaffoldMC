@@ -1,12 +1,14 @@
 {
-	"name": "mc-server-ui",
-	"private": true,
-	"devDependencies": {
-		"prettier": "^3.5.3",
-		"typescript": "5.8.2"
-	},
-	"packageManager": "pnpm@9.0.0",
-	"engines": {
-		"node": ">=18"
-	}
+  "name": "mc-server-ui",
+  "private": true,
+  "devDependencies": {
+    "@monodon/rust": "^2.3.0",
+    "nx": "21.1.1",
+    "prettier": "^3.5.3",
+    "typescript": "5.8.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  }
 }
