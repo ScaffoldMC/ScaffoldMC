@@ -17,7 +17,7 @@ async fn main() {
 		.expect("Failed to set logger");
 
 	let app: Router = Router::new().merge(routes::create_router());
-	let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
 	info!("Starting server on {}", addr);
 	axum_server::bind(addr)
