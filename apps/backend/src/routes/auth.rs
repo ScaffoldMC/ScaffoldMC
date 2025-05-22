@@ -1,11 +1,5 @@
-use axum::{
-	http::StatusCode,
-	response::{IntoResponse, Redirect},
-	routing::{get, post},
-	Form, Router,
-};
-
-use axum_messages::{Message, Messages};
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Form, Router};
+use axum_messages::Messages;
 
 use crate::backend::{AuthSession, Credentials};
 
