@@ -10,6 +10,7 @@ use axum_login::{
 	tower_sessions::{MemoryStore, SessionManagerLayer},
 	AuthManagerLayerBuilder,
 };
+use axum_messages::MessagesManagerLayer;
 use log::{info, LevelFilter};
 
 static LOGGER: logger::Logger = logger::Logger;
@@ -29,7 +30,9 @@ async fn main() {
 	let backend = backend::Backend::new(db);
 	let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
-	let app: Router = routes::create_router().layer(auth_layer);
+	let app: Router = routes::create_router()
+		.layer(MessagesManagerLayer)
+		.layer(auth_layer);
 
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
