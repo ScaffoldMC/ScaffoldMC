@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::post, Form, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use axum_messages::Messages;
 
 use crate::backend::{AuthSession, Credentials};
@@ -12,7 +12,7 @@ pub fn create_router() -> Router {
 pub async fn login(
 	mut auth_session: AuthSession,
 	messages: Messages,
-	Form(creds): Form<Credentials>,
+	Json(creds): Json<Credentials>,
 ) -> impl IntoResponse {
 	let user = match auth_session.authenticate(creds.clone()).await {
 		Ok(Some(user)) => user,
