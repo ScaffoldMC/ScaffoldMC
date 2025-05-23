@@ -11,6 +11,12 @@ pub struct Backend {
 	db: SqlitePool,
 }
 
+impl Backend {
+	pub fn new(db: SqlitePool) -> Self {
+		Self { db }
+	}
+}
+
 #[derive(Error, Debug)]
 pub enum AuthError {
 	#[error(transparent)]
