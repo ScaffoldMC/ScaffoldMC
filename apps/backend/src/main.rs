@@ -3,7 +3,7 @@ mod logger;
 mod routes;
 mod user;
 
-use std::net::SocketAddr;
+use std::{env, net::SocketAddr, path::PathBuf};
 
 use axum::Router;
 use axum_login::{
@@ -12,8 +12,10 @@ use axum_login::{
 };
 use axum_messages::MessagesManagerLayer;
 use log::{info, LevelFilter};
+use std::sync::OnceLock;
 
 static LOGGER: logger::Logger = logger::Logger;
+static BASE_DIR: OnceLock<PathBuf> = OnceLock::new();
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +23,15 @@ async fn main() {
 		.map(|()| log::set_max_level(LevelFilter::Info))
 		.expect("Failed to set logger");
 
-	let db = sqlx::SqlitePool::connect("sqlite://:memory:")
+	let base_dir = BASE_DIR.get_or_init(|| env::current_dir().unwrap().join("/data"));
+
+	let db_connect_options = sqlx::sqlite::SqliteConnectOptions::new()
+		.filename(base_dir.join("db.sqlite"))
+		.create_if_missing(true);
+
+	// TODO: Run migrations & create initial migration
+
+	let db = sqlx::SqlitePool::connect_with(db_connect_options)
 		.await
 		.unwrap();
 
