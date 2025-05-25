@@ -29,8 +29,6 @@ async fn main() {
 		.filename(base_dir.join("db.sqlite"))
 		.create_if_missing(true);
 
-	// TODO: Run migrations & create initial migration
-
 	let db = sqlx::SqlitePool::connect_with(db_connect_options)
 		.await
 		.unwrap();
