@@ -23,7 +23,7 @@ async fn main() {
 		.map(|()| log::set_max_level(LevelFilter::Info))
 		.expect("Failed to set logger");
 
-	let base_dir = BASE_DIR.get_or_init(|| env::current_dir().unwrap().join("/data/"));
+	let base_dir = BASE_DIR.get_or_init(|| env::current_dir().unwrap().join("data/"));
 
 	if !base_dir.exists() {
 		std::fs::create_dir_all(base_dir).expect("Failed to create base directory");
