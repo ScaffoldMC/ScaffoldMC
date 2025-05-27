@@ -23,7 +23,7 @@ impl std::fmt::Debug for User {
 }
 
 impl Database {
-	async fn get_user_by_id(&self, user_id: Uuid) -> Result<User, sqlx::Error> {
+	pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
 			User,
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE id = ?"#,
@@ -35,7 +35,7 @@ impl Database {
 		return user;
 	}
 
-	async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
+	pub async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
 			User, 
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE username = ?"#,
@@ -43,7 +43,6 @@ impl Database {
 		)
 		.fetch_one(&self.pool)
 		.await;
-	
 		return user;
 	}
 }
