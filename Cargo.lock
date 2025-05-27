@@ -383,42 +383,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-login"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0da8e8e4cf127a9b71b578e9a8fa9833e70f893e428ed5453c85e44bf0fd8eb"
-dependencies = [
- "async-trait",
- "axum",
- "form_urlencoded",
- "serde",
- "subtle",
- "thiserror 2.0.12",
- "tower-cookies",
- "tower-layer",
- "tower-service",
- "tower-sessions",
- "tracing",
- "urlencoding",
-]
-
-[[package]]
-name = "axum-messages"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d67ce6e7bc1e1e71f2a4e86d418045a29c63c4ebb631f3d9bb2f81c4958ea391"
-dependencies = [
- "axum-core",
- "http",
- "parking_lot",
- "serde",
- "serde_json",
- "tower",
- "tower-sessions-core",
- "tracing",
-]
-
-[[package]]
 name = "axum-server"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -440,8 +404,6 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "axum",
- "axum-login",
- "axum-messages",
  "axum-server",
  "colored",
  "log",
