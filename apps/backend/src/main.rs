@@ -1,6 +1,6 @@
+mod db;
 mod logger;
 mod routes;
-mod user;
 
 use std::{env, net::SocketAddr, path::PathBuf};
 
