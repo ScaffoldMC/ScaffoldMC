@@ -1,3 +1,5 @@
+use log::info;
+
 pub mod user;
 
 pub struct Database {
@@ -10,12 +12,17 @@ impl Database {
 			.filename(db_path)
 			.create_if_missing(true);
 
-		let pool = sqlx::SqlitePool::connect_with(options).await?;
-		Ok(Self { pool })
-	}
+		info!("Connecting to database at {}", db_path);
+		let pool = sqlx::SqlitePool::connect_with(options)
+			.await
+			.expect("Failed to connect to database");
 
-	pub async fn migrate(&self) -> Result<(), sqlx::Error> {
-		sqlx::migrate!("./migrations").run(&self.pool).await?;
-		Ok(())
+		info!("Running database migrations");
+		sqlx::migrate!("./migrations")
+			.run(&pool)
+			.await
+			.expect("Failed to run migrations");
+
+		Ok(Self { pool })
 	}
 }
