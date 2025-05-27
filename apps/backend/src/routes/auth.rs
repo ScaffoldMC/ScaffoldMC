@@ -8,9 +8,7 @@ pub struct Credentials {
 }
 
 pub fn create_router() -> Router {
-	Router::new()
-		.route("/login", post(login))
-		.route("/logout", post(logout))
+	Router::new().route("/login", post(login))
 }
 
 pub async fn login(Json(creds): Json<Credentials>) -> impl IntoResponse {
@@ -18,8 +16,4 @@ pub async fn login(Json(creds): Json<Credentials>) -> impl IntoResponse {
 	// Note: Use spawn_blocking for password verification.
 
 	StatusCode::OK.into_response()
-}
-
-async fn logout() {
-	todo!("Logout logic");
 }
