@@ -2,11 +2,10 @@ mod db;
 mod logger;
 mod routes;
 
-use std::{env, net::SocketAddr, path::PathBuf};
-
 use axum::Router;
 use log::{info, LevelFilter};
 use std::sync::OnceLock;
+use std::{env, net::SocketAddr, path::PathBuf};
 
 static LOGGER: logger::Logger = logger::Logger;
 static BASE_DIR: OnceLock<PathBuf> = OnceLock::new();
