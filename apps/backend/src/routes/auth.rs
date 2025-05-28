@@ -1,13 +1,15 @@
 use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use serde::Deserialize;
 
+use super::RouterWithState;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Credentials {
 	pub username: String,
 	pub password: String,
 }
 
-pub fn create_router() -> Router {
+pub fn create_router() -> RouterWithState {
 	Router::new()
 		.route("/login", post(login))
 		.route("/logout", post(logout))

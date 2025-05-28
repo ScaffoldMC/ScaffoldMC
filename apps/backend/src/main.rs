@@ -7,6 +7,7 @@ use axum::Router;
 use log::{info, LevelFilter};
 use std::sync::OnceLock;
 use std::{env, net::SocketAddr, path::PathBuf};
+use tower_cookies::CookieManagerLayer;
 
 static LOGGER: logger::Logger = logger::Logger;
 static BASE_DIR: OnceLock<PathBuf> = OnceLock::new();
@@ -23,15 +24,14 @@ async fn main() {
 		std::fs::create_dir_all(base_dir).expect("Failed to create base directory");
 	}
 
-	let db_connect_options = sqlx::sqlite::SqliteConnectOptions::new()
-		.filename(base_dir.join("db.sqlite"))
-		.create_if_missing(true);
-
-	let db = sqlx::SqlitePool::connect_with(db_connect_options)
+	let db = db::Database::new(&base_dir.join("db.sqlite"))
 		.await
-		.unwrap();
+		.expect("Failed to initialize database");
 
-	let app: Router = routes::create_router();
+	let app = Router::new()
+		.merge(routes::create_router())
+		.layer(CookieManagerLayer::new())
+		.with_state(db);
 
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
