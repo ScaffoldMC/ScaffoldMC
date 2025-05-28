@@ -9,6 +9,8 @@ use tower_cookies::Cookies;
 use crate::auth;
 use crate::db;
 
+static REFRESH_COOKIE_NAME: &str = "refresh_token";
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Credentials {
 	pub username: String,
@@ -57,7 +59,7 @@ pub async fn login(
 
 	// TODO: Add refresh token to DB
 
-	let refresh_cookie = Cookie::build(("refresh_token", refresh_token))
+	let refresh_cookie = Cookie::build((REFRESH_COOKIE_NAME, refresh_token))
 		.path("/")
 		.http_only(true)
 		.secure(true)
@@ -68,13 +70,29 @@ pub async fn login(
 	(StatusCode::OK, Json(auth_token)).into_response()
 }
 
-pub async fn refresh() -> impl IntoResponse {
-	// TODO: Refresh token logic. Allow with header or cookie.
+pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl IntoResponse {
+	// TODO: Check token is in DB, if so then drop if not then 401
 
-	StatusCode::OK.into_response()
+	let new_refresh_token = auth::create_refresh_token();
+
+	// TODO: Add refresh token to DB
+
+	let new_cookie = Cookie::build((REFRESH_COOKIE_NAME, new_refresh_token))
+		.path("/")
+		.http_only(true)
+		.secure(true)
+		.same_site(tower_cookies::cookie::SameSite::Strict)
+		.build();
+
+	cookies.add(new_cookie);
+
+	StatusCode::OK.into_response() // TODO: Return new auth token
 }
 
-pub async fn logout() -> impl IntoResponse {
-	// TODO: Logout logic.
+pub async fn logout(cookies: Cookies, State(db): State<db::Database>) -> impl IntoResponse {
+	cookies.remove(Cookie::build(REFRESH_COOKIE_NAME).build());
+
+	// TODO: Drop refresh token from DB
+
 	StatusCode::OK.into_response()
 }
