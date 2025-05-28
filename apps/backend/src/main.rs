@@ -1,3 +1,4 @@
+mod auth;
 mod db;
 mod logger;
 mod routes;
