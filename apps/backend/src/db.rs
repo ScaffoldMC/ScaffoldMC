@@ -1,18 +1,20 @@
 use log::info;
+use std::path::PathBuf;
 
 pub mod user;
 
+#[derive(Clone)]
 pub struct Database {
 	pub pool: sqlx::SqlitePool,
 }
 
 impl Database {
-	pub async fn new(db_path: &str) -> Result<Self, sqlx::Error> {
+	pub async fn new(db_path: &PathBuf) -> Result<Self, sqlx::Error> {
 		let options = sqlx::sqlite::SqliteConnectOptions::new()
 			.filename(db_path)
 			.create_if_missing(true);
 
-		info!("Connecting to database at {}", db_path);
+		info!("Connecting to database at {}", db_path.display());
 		let pool = sqlx::SqlitePool::connect_with(options)
 			.await
 			.expect("Failed to connect to database");
