@@ -402,10 +402,10 @@ dependencies = [
 name = "backend"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "axum",
  "axum-server",
  "colored",
+ "futures-util",
  "jsonwebtoken",
  "log",
  "password-auth",
@@ -414,7 +414,9 @@ dependencies = [
  "thiserror 2.0.12",
  "tokio",
  "toml",
+ "tower",
  "tower-cookies",
+ "tower-service",
  "uuid",
  "watchexec-cli",
 ]
