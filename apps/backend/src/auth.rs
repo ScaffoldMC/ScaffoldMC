@@ -1,6 +1,7 @@
 use crate::db::user::User;
 use axum::{extract::Request, response::Response};
 use futures_util::future::BoxFuture;
+use jsonwebtoken::EncodingKey;
 use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -16,26 +17,31 @@ pub struct AuthTokenClaims {
 	pub sub: String,
 }
 
-impl AuthTokenClaims {
-	pub fn new(user_id: String, length: Duration) -> Self {
-		let time_now = std::time::SystemTime::now();
-		let issued_at_secs = time_now
-			.duration_since(std::time::UNIX_EPOCH)
-			.expect("Failed to convert to UNIX timestamp")
-			.as_secs();
-		let expiration_secs = time_now
-			.checked_add(length)
-			.expect("Failed to calculate expiration time")
-			.duration_since(std::time::UNIX_EPOCH)
-			.expect("Failed to convert to UNIX timestamp")
-			.as_secs();
+pub fn create_auth_token(user_id: String) -> String {
+	let time_now = std::time::SystemTime::now();
+	let issued_at_secs = time_now
+		.duration_since(std::time::UNIX_EPOCH)
+		.expect("Failed to convert to UNIX timestamp")
+		.as_secs();
+	let expiration_secs = time_now
+		.checked_add(AUTH_TOKEN_LENGTH)
+		.expect("Failed to calculate expiration time")
+		.duration_since(std::time::UNIX_EPOCH)
+		.expect("Failed to convert to UNIX timestamp")
+		.as_secs();
 
-		Self {
-			iat: issued_at_secs,
-			exp: expiration_secs,
-			sub: user_id,
-		}
-	}
+	let auth_jwt_claims = AuthTokenClaims {
+		iat: issued_at_secs,
+		exp: expiration_secs,
+		sub: user_id,
+	};
+
+	jsonwebtoken::encode(
+		&jsonwebtoken::Header::default(),
+		&auth_jwt_claims,
+		&EncodingKey::from_secret(b"hunter2"), // TODO: Make randomized secret
+	)
+	.expect("Failed to create auth token")
 }
 
 // TODO: Use tower layer to extract user, create a middleware to ensure user is present (authenticated).
