@@ -7,6 +7,8 @@ use std::time::Duration;
 use tower::{Layer, Service};
 use tower_cookies::Cookies;
 
+static AUTH_TOKEN_LENGTH: Duration = Duration::from_secs(60 * 5); // 5 minutes
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthTokenClaims {
 	pub iat: u64,
@@ -15,7 +17,7 @@ pub struct AuthTokenClaims {
 }
 
 impl AuthTokenClaims {
-	fn new(user_id: String, length: Duration) -> Self {
+	pub fn new(user_id: String, length: Duration) -> Self {
 		let time_now = std::time::SystemTime::now();
 		let issued_at_secs = time_now
 			.duration_since(std::time::UNIX_EPOCH)
