@@ -6,9 +6,7 @@ use tower_cookies::CookieManagerLayer;
 
 use crate::db;
 
-pub type RouterWithState = Router<db::Database>;
-
-pub fn create_router() -> RouterWithState {
+pub fn create_router() -> Router<db::Database> {
 	Router::new()
 		.nest("/servers", servers::create_router())
 		// TODO: Create auth middleware

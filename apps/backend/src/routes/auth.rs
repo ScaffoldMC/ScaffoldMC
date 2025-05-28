@@ -1,7 +1,7 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use serde::Deserialize;
 
-use super::RouterWithState;
+use crate::db;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Credentials {
@@ -9,7 +9,7 @@ pub struct Credentials {
 	pub password: String,
 }
 
-pub fn create_router() -> RouterWithState {
+pub fn create_router() -> Router<db::Database> {
 	Router::new()
 		.route("/login", post(login))
 		.route("/logout", post(logout))
