@@ -8,12 +8,12 @@ use tower::{Layer, Service};
 use tower_cookies::Cookies;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CookieTokenClaims {
+pub struct AuthTokenClaims {
 	pub exp: u64,
 	pub sub: String,
 }
 
-impl CookieTokenClaims {
+impl AuthTokenClaims {
 	fn new(user_id: String, length: Duration) -> Self {
 		let time_now = std::time::SystemTime::now();
 		let expiration = time_now
