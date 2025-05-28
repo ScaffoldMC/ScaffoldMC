@@ -1,7 +1,10 @@
 use crate::db::user::User;
 use axum::{extract::Request, response::Response};
+use base64::engine::general_purpose;
+use base64::Engine;
 use futures_util::future::BoxFuture;
 use jsonwebtoken::EncodingKey;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -42,6 +45,12 @@ pub fn create_auth_token(user_id: String) -> String {
 		&EncodingKey::from_secret(b"hunter2"), // TODO: Make randomized secret
 	)
 	.expect("Failed to create auth token")
+}
+
+pub fn create_refresh_token() -> String {
+	let mut bytes = [0u8; 32];
+	rand::rng().fill(&mut bytes);
+	general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
 }
 
 // TODO: Use tower layer to extract user, create a middleware to ensure user is present (authenticated).
