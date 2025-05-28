@@ -1,5 +1,5 @@
 use crate::db::user::User;
-use axum::{extract::Request, http::StatusCode, response::Response};
+use axum::{extract::Request, response::Response};
 use futures_util::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
@@ -9,6 +9,7 @@ use tower_cookies::Cookies;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthTokenClaims {
+	pub iat: u64,
 	pub exp: u64,
 	pub sub: String,
 }
@@ -16,7 +17,11 @@ pub struct AuthTokenClaims {
 impl AuthTokenClaims {
 	fn new(user_id: String, length: Duration) -> Self {
 		let time_now = std::time::SystemTime::now();
-		let expiration = time_now
+		let issued_at_secs = time_now
+			.duration_since(std::time::UNIX_EPOCH)
+			.expect("Failed to convert to UNIX timestamp")
+			.as_secs();
+		let expiration_secs = time_now
 			.checked_add(length)
 			.expect("Failed to calculate expiration time")
 			.duration_since(std::time::UNIX_EPOCH)
@@ -24,7 +29,8 @@ impl AuthTokenClaims {
 			.as_secs();
 
 		Self {
-			exp: expiration,
+			iat: issued_at_secs,
+			exp: expiration_secs,
 			sub: user_id,
 		}
 	}
