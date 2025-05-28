@@ -1,4 +1,3 @@
-use crate::db::user::User;
 use axum::{extract::Request, response::Response};
 use base64::engine::general_purpose;
 use base64::Engine;
