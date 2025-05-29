@@ -6,31 +6,26 @@ use jsonwebtoken::EncodingKey;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
-use std::time::Duration;
+use time::Duration;
 use tower::{Layer, Service};
 use tower_cookies::Cookies;
 
-static AUTH_TOKEN_LENGTH: Duration = Duration::from_secs(60 * 5); // 5 minutes
+static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthTokenClaims {
-	pub iat: u64,
-	pub exp: u64,
+	pub iat: i64,
+	pub exp: i64,
 	pub sub: String,
 }
 
 pub fn create_auth_token(user_id: String) -> String {
-	let time_now = std::time::SystemTime::now();
-	let issued_at_secs = time_now
-		.duration_since(std::time::UNIX_EPOCH)
-		.expect("Failed to convert to UNIX timestamp")
-		.as_secs();
+	let time_now = time::UtcDateTime::now();
+	let issued_at_secs = time_now.unix_timestamp();
 	let expiration_secs = time_now
 		.checked_add(AUTH_TOKEN_LENGTH)
-		.expect("Failed to calculate expiration time")
-		.duration_since(std::time::UNIX_EPOCH)
-		.expect("Failed to convert to UNIX timestamp")
-		.as_secs();
+		.expect("Failed to add duration")
+		.unix_timestamp();
 
 	let auth_jwt_claims = AuthTokenClaims {
 		iat: issued_at_secs,
