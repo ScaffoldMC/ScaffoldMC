@@ -3,6 +3,9 @@ name = "backend"
 version = "0.1.0"
 edition = "2021"
 
+[lints.rust]
+unused = "allow"
+
 [dependencies]
 axum = "0.8.3"
 axum-server = "0.7.2"
