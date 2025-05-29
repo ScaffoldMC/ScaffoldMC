@@ -2,7 +2,6 @@ mod auth;
 mod servers;
 
 use axum::Router;
-use tower_cookies::CookieManagerLayer;
 
 use crate::db;
 
