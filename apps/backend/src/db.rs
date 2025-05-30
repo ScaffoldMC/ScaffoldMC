@@ -1,6 +1,7 @@
 use log::info;
 use std::path::PathBuf;
 
+pub mod refresh_token;
 pub mod user;
 
 #[derive(Clone)]
