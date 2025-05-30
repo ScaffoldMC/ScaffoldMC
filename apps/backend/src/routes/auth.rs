@@ -57,7 +57,9 @@ pub async fn login(
 	let auth_token = auth::create_auth_token(user.id.to_string());
 	let refresh_token = auth::create_refresh_token();
 
-	// TODO: Add refresh token to DB
+	db.add_refresh_token(&refresh_token, user.id)
+		.await
+		.expect("Failed to add refresh token");
 
 	let refresh_cookie = Cookie::build((REFRESH_COOKIE_NAME, refresh_token))
 		.path("/")
@@ -90,9 +92,18 @@ pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl I
 }
 
 pub async fn logout(cookies: Cookies, State(db): State<db::Database>) -> impl IntoResponse {
-	cookies.remove(Cookie::build(REFRESH_COOKIE_NAME).build());
+	let refresh_token = cookies
+		.get(REFRESH_COOKIE_NAME)
+		.map(|cookie| cookie.value().to_string());
 
-	// TODO: Drop refresh token from DB
+	if let Some(ref_token) = refresh_token {
+		if let Err(e) = db.delete_refresh_token(&ref_token).await {
+			error!("Failed to delete refresh token: {}", e);
+			return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
+		}
+	}
+
+	cookies.remove(Cookie::build(REFRESH_COOKIE_NAME).build());
 
 	StatusCode::OK.into_response()
 }
