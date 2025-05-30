@@ -1,14 +1,19 @@
-use axum::{extract::Request, response::Response};
+use axum::{
+	extract::{Request, State},
+	http::StatusCode,
+	middleware::Next,
+	response::Response,
+};
 use base64::engine::general_purpose;
 use base64::Engine;
-use futures_util::future::BoxFuture;
-use jsonwebtoken::EncodingKey;
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Validation};
+use log::error;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::task::{Context, Poll};
 use time::Duration;
-use tower::{Layer, Service};
-use tower_cookies::Cookies;
+use uuid::Uuid;
+
+use crate::db::Database;
 
 pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
 pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
@@ -48,48 +53,39 @@ pub fn create_refresh_token() -> String {
 	general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
 }
 
-// TODO: Use tower layer to extract user, create a middleware to ensure user is present (authenticated).
-// https://docs.rs/tower/latest/tower/trait.Layer.html
+async fn require_auth(
+	State(db): State<Database>,
+	mut req: Request,
+	next: Next,
+) -> Result<Response, StatusCode> {
+	let token = match req.headers().get("Authorization") {
+		Some(token) => token,
+		None => return Err(StatusCode::UNAUTHORIZED),
+	};
 
-#[derive(Clone)]
-pub struct AuthLayer;
+	let token_str = token.to_str().unwrap_or("");
+	let tk_data = match jsonwebtoken::decode::<AuthTokenClaims>(
+		token_str,
+		&DecodingKey::from_secret(b"hunter2"),
+		&Validation::new(Algorithm::HS256),
+	) {
+		Ok(data) => data,
+		Err(_) => return Err(StatusCode::UNAUTHORIZED),
+	};
 
-impl<S> Layer<S> for AuthLayer {
-	type Service = AuthMiddleware<S>;
+	let user_uuid = match Uuid::parse_str(&tk_data.claims.sub) {
+		Ok(uuid) => uuid,
+		Err(err) => {
+			error!("Unable to parse UUID: {}", err);
+			return Err(StatusCode::UNAUTHORIZED);
+		}
+	};
 
-	fn layer(&self, inner: S) -> Self::Service {
-		AuthMiddleware { inner }
-	}
-}
+	let user = match db.get_user_by_id(user_uuid).await {
+		Ok(user) => user,
+		Err(_) => return Err(StatusCode::UNAUTHORIZED),
+	};
 
-#[derive(Clone)]
-pub struct AuthMiddleware<S> {
-	inner: S,
-}
-
-impl<S> Service<Request> for AuthMiddleware<S>
-where
-	S: Service<Request, Response = Response> + Send + 'static,
-	S::Future: Send + 'static,
-{
-	type Response = S::Response;
-	type Error = S::Error;
-	type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
-
-	fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-		self.inner.poll_ready(cx)
-	}
-
-	fn call(&mut self, request: Request) -> Self::Future {
-		let cookies = request
-			.extensions()
-			.get::<Cookies>()
-			.expect("CookieManagerLayer must be applied before AuthLayer");
-
-		let future = self.inner.call(request);
-		Box::pin(async move {
-			let response: Response = future.await?;
-			Ok(response)
-		})
-	}
+	req.extensions_mut().insert(user);
+	Ok(next.run(req).await)
 }
