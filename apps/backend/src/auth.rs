@@ -10,7 +10,8 @@ use time::Duration;
 use tower::{Layer, Service};
 use tower_cookies::Cookies;
 
-static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
+pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
+pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthTokenClaims {
@@ -84,8 +85,6 @@ where
 			.extensions()
 			.get::<Cookies>()
 			.expect("CookieManagerLayer must be applied before AuthLayer");
-
-		// TODO: Validate the auth token and extract user information.
 
 		let future = self.inner.call(request);
 		Box::pin(async move {
