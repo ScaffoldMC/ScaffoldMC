@@ -13,7 +13,7 @@ pub struct RefreshToken {
 impl Database {
 	pub async fn add_refresh_token(
 		&self,
-		token_id: String,
+		token_id: &str,
 		user_id: Uuid,
 	) -> Result<(), sqlx::Error> {
 		// Then insert the new token
