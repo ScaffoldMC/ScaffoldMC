@@ -1,4 +1,3 @@
-use axum::response::Response;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use log::error;
 use password_auth::{verify_password, VerifyError};
