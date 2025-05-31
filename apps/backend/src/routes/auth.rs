@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use log::error;
 use password_auth::{verify_password, VerifyError};
@@ -8,7 +10,7 @@ use tower_cookies::Cookies;
 
 use crate::auth;
 use crate::auth::REFRESH_TOKEN_LENGTH;
-use crate::db;
+use crate::AppState;
 
 static REFRESH_COOKIE_NAME: &str = "refresh_token";
 
@@ -18,7 +20,7 @@ pub struct Credentials {
 	pub password: String,
 }
 
-pub fn create_router() -> Router<db::Database> {
+pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new()
 		.route("/login", post(login))
 		.route("/logout", post(logout))
@@ -27,10 +29,10 @@ pub fn create_router() -> Router<db::Database> {
 
 pub async fn login(
 	cookies: Cookies,
-	State(db): State<db::Database>,
+	State(state): State<Arc<AppState>>,
 	Json(creds): Json<Credentials>,
 ) -> impl IntoResponse {
-	let user = db.get_user_by_username(creds.username.as_str()).await;
+	let user = state.db.get_user_by_username(creds.username.as_str()).await;
 	if let Err(_) = user {
 		// Handle error, e.g., user not found or database error.
 		return (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response();
@@ -58,7 +60,9 @@ pub async fn login(
 	let auth_token = auth::create_auth_token(user.id.to_string());
 	let refresh_token = auth::create_refresh_token();
 
-	db.add_refresh_token(&refresh_token, user.id)
+	state
+		.db
+		.add_refresh_token(&refresh_token, user.id)
 		.await
 		.expect("Failed to add refresh token");
 
@@ -79,7 +83,7 @@ struct RefreshResponseBody {
 	pub auth_token: String,
 }
 
-pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl IntoResponse {
+pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let ref_token = cookies
 		.get(REFRESH_COOKIE_NAME)
 		.map(|cookie| cookie.value().to_string());
@@ -90,7 +94,7 @@ pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl I
 
 	let ref_token = ref_token.unwrap();
 
-	let db_entry = db.get_refresh_token(&ref_token).await;
+	let db_entry = state.db.get_refresh_token(&ref_token).await;
 
 	if let Err(err) = db_entry {
 		error!("Failed to get refresh token from DB: {}", err);
@@ -109,7 +113,9 @@ pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl I
 	let token_age = current_time - db_entry.created_at;
 
 	if token_age > REFRESH_TOKEN_LENGTH {
-		db.delete_refresh_token(&ref_token)
+		state
+			.db
+			.delete_refresh_token(&ref_token)
 			.await
 			.expect("Failed to delete refresh token");
 
@@ -119,7 +125,11 @@ pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl I
 	let auth_token = auth::create_auth_token(db_entry.user_id.to_string());
 	let new_ref_token = auth::create_refresh_token();
 
-	if let Err(err) = db.add_refresh_token(&new_ref_token, db_entry.user_id).await {
+	if let Err(err) = state
+		.db
+		.add_refresh_token(&new_ref_token, db_entry.user_id)
+		.await
+	{
 		error!("Failed to store refresh token in DB: {}", err);
 		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
@@ -143,13 +153,13 @@ pub async fn refresh(cookies: Cookies, State(db): State<db::Database>) -> impl I
 		.into_response()
 }
 
-pub async fn logout(cookies: Cookies, State(db): State<db::Database>) -> impl IntoResponse {
+pub async fn logout(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let refresh_token = cookies
 		.get(REFRESH_COOKIE_NAME)
 		.map(|cookie| cookie.value().to_string());
 
 	if let Some(ref_token) = refresh_token {
-		if let Err(e) = db.delete_refresh_token(&ref_token).await {
+		if let Err(e) = state.db.delete_refresh_token(&ref_token).await {
 			error!("Failed to delete refresh token: {}", e);
 			return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
 		}

@@ -4,13 +4,19 @@ mod logger;
 mod routes;
 
 use axum::Router;
+use db::Database;
 use log::{info, LevelFilter};
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::{env, net::SocketAddr, path::PathBuf};
 use tower_cookies::CookieManagerLayer;
 
 static LOGGER: logger::Logger = logger::Logger;
 static BASE_DIR: OnceLock<PathBuf> = OnceLock::new();
+
+#[derive(Clone)]
+struct AppState {
+	pub db: Database,
+}
 
 #[tokio::main]
 async fn main() {
@@ -28,10 +34,12 @@ async fn main() {
 		.await
 		.expect("Failed to initialize database");
 
+	let state = Arc::new(AppState { db });
+
 	let app = Router::new()
 		.merge(routes::create_router())
 		.layer(CookieManagerLayer::new())
-		.with_state(db);
+		.with_state(state);
 
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
