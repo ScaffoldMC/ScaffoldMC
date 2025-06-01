@@ -136,6 +136,11 @@ pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> im
 		return (StatusCode::UNAUTHORIZED, "Token expired").into_response();
 	}
 
+	if let Err(err) = state.db.delete_refresh_token(&ref_token).await {
+		error!("Error deleting refresh token: {}", err);
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+	}
+
 	let auth_token = auth::create_auth_token(db_entry.user_id.to_string());
 	let new_ref_token = auth::create_refresh_token();
 
