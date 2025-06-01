@@ -97,6 +97,8 @@ struct RefreshResponseBody {
 	pub auth_token: String,
 }
 
+// FIXME: Unused refresh tokens need to be cleared from the db occasionally (perhaps on program startup?)
+
 pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let ref_token = cookies
 		.get(REFRESH_COOKIE_NAME)
