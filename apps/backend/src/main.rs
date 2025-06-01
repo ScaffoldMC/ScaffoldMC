@@ -35,12 +35,7 @@ async fn main() {
 		.expect("Failed to initialize database");
 
 	let state = Arc::new(AppState { db });
-
-	let app = Router::new()
-		.merge(routes::create_router())
-		.layer(CookieManagerLayer::new())
-		.with_state(state);
-
+	let app = routes::create_router(state);
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
 	info!("Starting server on {}", addr);
