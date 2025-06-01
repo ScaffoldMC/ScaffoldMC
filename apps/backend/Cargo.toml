@@ -12,10 +12,12 @@ axum-server = "0.7.2"
 base64 = "0.22.1"
 colored = "3.0.0"
 futures-util = "0.3.31"
-jsonwebtoken = "9.3.1"
+jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 log = "0.4.27"
 password-auth = "1.0.0"
+pem = { version = "3.0.5", features = ["serde"] }
 rand = "0.9.1"
+rsa = { version = "0.9.8", features = ["pkcs5"] }
 serde = "1.0.219"
 sqlx = { version = "0.8.5", features = [
 	"sqlite",
