@@ -58,14 +58,28 @@ pub async fn require_auth(
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, StatusCode> {
-	let token = match req.headers().get("Authorization") {
+	let token_header = match req.headers().get("Authorization") {
 		Some(token) => token,
 		None => return Err(StatusCode::UNAUTHORIZED),
 	};
 
-	let token_str = token.to_str().unwrap_or("");
+	let token_parts = token_header
+		.to_str()
+		.unwrap_or("")
+		.split(" ")
+		.collect::<Vec<&str>>();
+
+	if token_parts.len() != 2 || token_parts[0] != "Bearer" {
+		return Err(StatusCode::UNAUTHORIZED);
+	}
+
+	let token = match token_parts.get(1) {
+		Some(token) => token,
+		None => return Err(StatusCode::UNAUTHORIZED),
+	};
+
 	let tk_data = match jsonwebtoken::decode::<AuthTokenClaims>(
-		token_str,
+		token,
 		&DecodingKey::from_secret(b"hunter2"),
 		&Validation::new(Algorithm::HS256),
 	) {
