@@ -78,7 +78,7 @@ pub async fn require_auth(
 		None => return Err(StatusCode::UNAUTHORIZED),
 	};
 
-	let tk_data = match jsonwebtoken::decode::<AuthTokenClaims>(
+	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
 		token,
 		&DecodingKey::from_secret(b"hunter2"),
 		&Validation::new(Algorithm::HS256),
@@ -87,7 +87,7 @@ pub async fn require_auth(
 		Err(_) => return Err(StatusCode::UNAUTHORIZED),
 	};
 
-	let user_uuid = match Uuid::parse_str(&tk_data.claims.sub) {
+	let user_uuid = match Uuid::parse_str(&token_data.claims.sub) {
 		Ok(uuid) => uuid,
 		Err(err) => {
 			error!("Unable to parse UUID: {}", err);
