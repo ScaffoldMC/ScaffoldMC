@@ -63,7 +63,7 @@ pub async fn login(
 		};
 	}
 
-	let auth_token = auth::create_auth_token(user.id.to_string());
+	let auth_token = auth::create_auth_token(&state, user.id.to_string());
 	let ref_token = auth::create_refresh_token();
 
 	state
@@ -143,7 +143,7 @@ pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> im
 		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
 
-	let auth_token = auth::create_auth_token(db_entry.user_id.to_string());
+	let auth_token = auth::create_auth_token(&state, db_entry.user_id.to_string());
 	let new_ref_token = auth::create_refresh_token();
 
 	if let Err(err) = state

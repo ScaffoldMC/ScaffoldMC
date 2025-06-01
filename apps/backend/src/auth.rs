@@ -7,7 +7,7 @@ use axum::{
 };
 use base64::engine::general_purpose;
 use base64::Engine;
-use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Validation};
+use jsonwebtoken::{Algorithm, Validation};
 use log::error;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,7 @@ pub struct AuthTokenClaims {
 	pub sub: String,
 }
 
-pub fn create_auth_token(user_id: String) -> String {
+pub fn create_auth_token(state: &Arc<AppState>, user_id: String) -> String {
 	let time_now = time::UtcDateTime::now();
 	let issued_at_secs = time_now.unix_timestamp();
 	let expiration_secs = time_now
@@ -42,7 +42,7 @@ pub fn create_auth_token(user_id: String) -> String {
 	jsonwebtoken::encode(
 		&jsonwebtoken::Header::default(),
 		&auth_jwt_claims,
-		&EncodingKey::from_secret(b"hunter2"), // TODO: Make randomized secret
+		&state.secrets.jwt_enc,
 	)
 	.expect("Failed to create auth token")
 }
@@ -80,7 +80,7 @@ pub async fn require_auth(
 
 	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
 		token,
-		&DecodingKey::from_secret(b"hunter2"),
+		&state.secrets.jwt_dec,
 		&Validation::new(Algorithm::HS256),
 	) {
 		Ok(data) => data,
