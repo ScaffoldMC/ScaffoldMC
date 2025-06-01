@@ -40,7 +40,7 @@ pub fn create_auth_token(state: &Arc<AppState>, user_id: String) -> String {
 	};
 
 	jsonwebtoken::encode(
-		&jsonwebtoken::Header::default(),
+		&jsonwebtoken::Header::new(Algorithm::RS256),
 		&auth_jwt_claims,
 		&state.secrets.jwt_enc,
 	)
@@ -81,7 +81,7 @@ pub async fn require_auth(
 	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
 		token,
 		&state.secrets.jwt_dec,
-		&Validation::new(Algorithm::HS256),
+		&Validation::new(Algorithm::RS256),
 	) {
 		Ok(data) => data,
 		Err(_) => return Err(StatusCode::UNAUTHORIZED),
