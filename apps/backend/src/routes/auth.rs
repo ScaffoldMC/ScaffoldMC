@@ -27,6 +27,12 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/refresh", post(refresh))
 }
 
+#[derive(Serialize)]
+struct LoginResponseBody {
+	pub ref_token: String,
+	pub auth_token: String,
+}
+
 pub async fn login(
 	cookies: Cookies,
 	State(state): State<Arc<AppState>>,
@@ -58,15 +64,15 @@ pub async fn login(
 	}
 
 	let auth_token = auth::create_auth_token(user.id.to_string());
-	let refresh_token = auth::create_refresh_token();
+	let ref_token = auth::create_refresh_token();
 
 	state
 		.db
-		.add_refresh_token(&refresh_token, user.id)
+		.add_refresh_token(&ref_token, user.id)
 		.await
 		.expect("Failed to add refresh token");
 
-	let refresh_cookie = Cookie::build((REFRESH_COOKIE_NAME, refresh_token))
+	let refresh_cookie = Cookie::build((REFRESH_COOKIE_NAME, ref_token.clone()))
 		.path("/")
 		.http_only(true)
 		.secure(true)
@@ -74,7 +80,15 @@ pub async fn login(
 		.build();
 
 	cookies.add(refresh_cookie);
-	(StatusCode::OK, Json(auth_token)).into_response()
+
+	(
+		StatusCode::OK,
+		Json(LoginResponseBody {
+			ref_token,
+			auth_token,
+		}),
+	)
+		.into_response()
 }
 
 #[derive(Serialize)]
