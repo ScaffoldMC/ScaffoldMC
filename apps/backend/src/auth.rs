@@ -1,3 +1,4 @@
+use crate::AppState;
 use axum::{
 	extract::{Request, State},
 	http::StatusCode,
@@ -10,10 +11,9 @@ use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Validation};
 use log::error;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use time::Duration;
 use uuid::Uuid;
-
-use crate::db::Database;
 
 pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
 pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
@@ -53,8 +53,8 @@ pub fn create_refresh_token() -> String {
 	general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
 }
 
-async fn require_auth(
-	State(db): State<Database>,
+pub async fn require_auth(
+	State(state): State<Arc<AppState>>,
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, StatusCode> {
@@ -81,7 +81,7 @@ async fn require_auth(
 		}
 	};
 
-	let user = match db.get_user_by_id(user_uuid).await {
+	let user = match state.db.get_user_by_id(user_uuid).await {
 		Ok(user) => user,
 		Err(_) => return Err(StatusCode::UNAUTHORIZED),
 	};
