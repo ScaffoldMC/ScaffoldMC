@@ -1,7 +1,7 @@
+use super::Database;
+use crate::auth::REFRESH_TOKEN_LENGTH;
 use serde::{Deserialize, Serialize};
 use sqlx::{types::time::OffsetDateTime, types::Uuid, FromRow};
-
-use super::Database;
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
 pub struct RefreshToken {
@@ -58,5 +58,18 @@ impl Database {
 		)
 		.fetch_optional(&self.pool)
 		.await
+	}
+
+	pub async fn purge_refresh_tokens(&self) -> Result<(), sqlx::Error> {
+		let earliest_timestamp = OffsetDateTime::now_utc() - REFRESH_TOKEN_LENGTH;
+
+		sqlx::query!(
+			r#"DELETE FROM refresh_tokens WHERE created_at < ?"#,
+			earliest_timestamp
+		)
+		.execute(&self.pool)
+		.await?;
+
+		Ok(())
 	}
 }
