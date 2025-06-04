@@ -433,6 +433,7 @@ dependencies = [
  "tower",
  "tower-cookies",
  "tower-service",
+ "ts-rs",
  "uuid",
  "watchexec-cli",
 ]
@@ -4479,6 +4480,28 @@ dependencies = [
  "tracing-core",
  "tracing-log",
  "tracing-serde",
+]
+
+[[package]]
+name = "ts-rs"
+version = "11.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47df775b87ff513e3ca73b75fe9e4cb976163e8823f230d81b9550eb243ed5bf"
+dependencies = [
+ "thiserror 2.0.12",
+ "ts-rs-macros",
+]
+
+[[package]]
+name = "ts-rs-macros"
+version = "11.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4670fc59df470519c7cc0fc2068fc00cad35cc8258d236b18412ff13de9ff480"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "termcolor",
 ]
 
 [[package]]

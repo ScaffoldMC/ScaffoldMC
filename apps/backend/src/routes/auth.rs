@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use tokio::task::spawn_blocking;
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
+use ts_rs::TS;
 
 use crate::auth;
 use crate::auth::REFRESH_TOKEN_LENGTH;
@@ -14,10 +15,25 @@ use crate::AppState;
 
 static REFRESH_COOKIE_NAME: &str = "refresh_token";
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct Credentials {
+#[derive(TS, Debug, Clone, Deserialize)]
+#[ts(export)]
+pub struct LoginRequestBody {
 	pub username: String,
 	pub password: String,
+}
+
+#[derive(TS, Serialize)]
+#[ts(export)]
+struct LoginResponseBody {
+	pub ref_token: String,
+	pub auth_token: String,
+}
+
+#[derive(TS, Serialize)]
+#[ts(export)]
+struct RefreshResponseBody {
+	pub ref_token: String,
+	pub auth_token: String,
 }
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -27,16 +43,10 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/refresh", post(refresh))
 }
 
-#[derive(Serialize)]
-struct LoginResponseBody {
-	pub ref_token: String,
-	pub auth_token: String,
-}
-
 pub async fn login(
 	cookies: Cookies,
 	State(state): State<Arc<AppState>>,
-	Json(creds): Json<Credentials>,
+	Json(creds): Json<LoginRequestBody>,
 ) -> impl IntoResponse {
 	let user = state.db.get_user_by_username(creds.username.as_str()).await;
 	if let Err(_) = user {
@@ -89,12 +99,6 @@ pub async fn login(
 		}),
 	)
 		.into_response()
-}
-
-#[derive(Serialize)]
-struct RefreshResponseBody {
-	pub ref_token: String,
-	pub auth_token: String,
 }
 
 // FIXME: Unused refresh tokens need to be cleared from the db occasionally (perhaps on program startup?)
