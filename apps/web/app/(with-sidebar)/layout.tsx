@@ -30,10 +30,6 @@ export default function DashboardLayout({
 						<Server size={16} className={styles.icon} />
 						Servers
 					</SidebarLink>
-					<SidebarLink href="/users">
-						<Users size={16} className={styles.icon} />
-						Users
-					</SidebarLink>
 					<SidebarLink href="/settings">
 						<Settings size={16} className={styles.icon} />
 						Settings
