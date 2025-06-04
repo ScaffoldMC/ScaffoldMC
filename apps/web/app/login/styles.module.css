@@ -42,3 +42,12 @@
 	width: 100%;
 	gap: 4px;
 }
+
+.line {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	align-items: center;
+	gap: 12px;
+}

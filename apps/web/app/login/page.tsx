@@ -3,6 +3,7 @@ import { Button } from "@/components/atoms/buttons/button";
 import styles from "./styles.module.css";
 import { TextInput } from "@/components/atoms/input/textinput";
 import { Label } from "@/components/atoms/label/label";
+import { Checkbox } from "@/components/atoms/checkbox/checkbox";
 
 export default function LoginPage() {
 	return (
@@ -27,6 +28,10 @@ export default function LoginPage() {
 							name="password"
 							required
 						/>
+					</div>
+					<div className={styles.line}>
+						<Checkbox id="remember" />
+						<Label htmlFor="remember">Remember Me</Label>
 					</div>
 					<Button type="submit" level="primary">
 						Sign In
