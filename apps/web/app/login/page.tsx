@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/atoms/buttons/button";
 import styles from "./styles.module.css";
-import { Input } from "@/components/atoms/input/input";
+import { TextInput } from "@/components/atoms/input/textinput";
 import { Label } from "@/components/atoms/label/label";
 
 export default function LoginPage() {
@@ -12,7 +12,7 @@ export default function LoginPage() {
 				<form className={styles.form}>
 					<div className={styles.field}>
 						<Label htmlFor="username">Username</Label>
-						<Input
+						<TextInput
 							type="text"
 							id="username"
 							name="username"
@@ -21,7 +21,7 @@ export default function LoginPage() {
 					</div>
 					<div className={styles.field}>
 						<Label htmlFor="password">Password</Label>
-						<Input
+						<TextInput
 							type="password"
 							id="password"
 							name="password"
