@@ -10,6 +10,10 @@
 	transition: border-color 100ms ease-in-out;
 }
 
+.base:hover {
+	border-color: var(--color-border-hover);
+}
+
 .base:focus {
 	outline: none;
 	border-color: var(--color-text);

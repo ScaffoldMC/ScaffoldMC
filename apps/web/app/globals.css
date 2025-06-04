@@ -9,6 +9,7 @@
 	--color-text: #000000;
 	--color-border-light: #f1f1f1;
 	--color-border-strong: #e6e6e6;
+	--color-border-hover: #bfbfbf;
 
 	--font-size-xl: 28px;
 	--font-size-large: 24px;
@@ -32,6 +33,7 @@
 		--color-text: #ffffff;
 		--color-border-light: #1a1a1a;
 		--color-border-strong: #1f1f1f;
+		--color-border-hover: #555555;
 	}
 }
 
