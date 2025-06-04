@@ -23,15 +23,15 @@ export default function DashboardLayout({
 				</SidebarHeader>
 				<SidebarContent>
 					<SidebarLink href="/home" activeCriteria="exact">
-						<Home size={16} className={styles.icon} />
+						<Home size={18} className={styles.icon} />
 						Dashboard
 					</SidebarLink>
 					<SidebarLink href="/servers">
-						<Server size={16} className={styles.icon} />
+						<Server size={18} className={styles.icon} />
 						Servers
 					</SidebarLink>
 					<SidebarLink href="/settings">
-						<Settings size={16} className={styles.icon} />
+						<Settings size={18} className={styles.icon} />
 						Settings
 					</SidebarLink>
 				</SidebarContent>
