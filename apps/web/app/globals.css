@@ -8,13 +8,14 @@
 	--color-background: #fcfcfc;
 	--color-text: #000000;
 
-	--font-size-large: 1.25rem;
-	--font-size-normal: 1rem;
-	--font-size-small: 0.875rem;
+	--font-size-xl: 28px;
+	--font-size-large: 24px;
+	--font-size-medium: 18px;
+	--font-size-small: 16px;
 
 	--border-radius: 6px;
 
-	font-size: 16px;
+	font-size: var(--font-size-medium);
 	color: var(--color-text);
 	background-color: var(--color-background);
 }

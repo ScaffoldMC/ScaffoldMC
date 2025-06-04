@@ -1,7 +1,7 @@
 .base {
 	border-radius: var(--border-radius);
 	color: var(--color-text);
-	font-size: 14px;
+	font-size: var(--font-size-medium);
 	padding: 0 8px;
 	width: fit-content;
 	height: 32px;
