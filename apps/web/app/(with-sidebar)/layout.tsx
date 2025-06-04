@@ -22,19 +22,19 @@ export default function DashboardLayout({
 					<p className={styles.tagline}>Some other info, probably.</p>
 				</SidebarHeader>
 				<SidebarContent>
-					<SidebarLink href="/dashboard" activeCriteria="exact">
+					<SidebarLink href="/home" activeCriteria="exact">
 						<Home size={16} className={styles.icon} />
 						Dashboard
 					</SidebarLink>
-					<SidebarLink href="/dashboard/servers">
+					<SidebarLink href="/servers">
 						<Server size={16} className={styles.icon} />
 						Servers
 					</SidebarLink>
-					<SidebarLink href="/dashboard/users">
+					<SidebarLink href="/users">
 						<Users size={16} className={styles.icon} />
 						Users
 					</SidebarLink>
-					<SidebarLink href="/dashboard/settings">
+					<SidebarLink href="/settings">
 						<Settings size={16} className={styles.icon} />
 						Settings
 					</SidebarLink>

@@ -31,7 +31,7 @@ export function ServerList() {
 function ServerListItem() {
 	return (
 		<ListItem>
-			<Link href="/dashboard/servers/1" className={styles.link}>
+			<Link href="/servers/1" className={styles.link}>
 				<div className={styles.item}>
 					<div className={styles.statusCluster}>
 						<Avatar size={28} shape="square-small">
