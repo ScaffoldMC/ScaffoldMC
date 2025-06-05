@@ -4490,6 +4490,7 @@ checksum = "47df775b87ff513e3ca73b75fe9e4cb976163e8823f230d81b9550eb243ed5bf"
 dependencies = [
  "thiserror 2.0.12",
  "ts-rs-macros",
+ "uuid",
 ]
 
 [[package]]
