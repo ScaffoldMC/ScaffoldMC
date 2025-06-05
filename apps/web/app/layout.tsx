@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Providers from "@/lib/providers";
 
 export const metadata: Metadata = {
 	title: "MC Server UI",
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={manropeFont.className}>{children}</body>
+			<body className={manropeFont.className}>
+				<Providers>{children}</Providers>
+			</body>
 		</html>
 	);
 }
