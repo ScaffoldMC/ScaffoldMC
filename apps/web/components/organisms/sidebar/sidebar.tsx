@@ -34,26 +34,19 @@ const activeClassName = cva(styles.sidebarLink, {
 	},
 });
 
-export interface SidebarLinkProps extends LinkProps {
-	activeCriteria?: "exact" | "startsWith";
-}
-
 export function SidebarLink({
 	children,
-	activeCriteria = "startsWith",
 	...props
-}: { children: React.ReactNode } & SidebarLinkProps) {
+}: {
+	children: React.ReactNode;
+} & LinkProps) {
 	const pathname = usePathname();
 	const [isActive, setIsActive] = useState(false);
 	const className = activeClassName({ active: isActive });
 
 	useEffect(() => {
-		if (activeCriteria === "exact") {
-			setIsActive(pathname === props.href.toString());
-		} else if (activeCriteria === "startsWith") {
-			setIsActive(pathname.startsWith(props.href.toString()));
-		}
-	}, [pathname, props.href, activeCriteria]);
+		setIsActive(pathname === props.href.toString());
+	}, [pathname, props.href]);
 
 	return (
 		<Link className={className} {...props}>
