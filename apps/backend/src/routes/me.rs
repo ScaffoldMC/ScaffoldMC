@@ -14,8 +14,8 @@ struct UserResponse {
 	username: String,
 }
 
-impl UserResponse {
-	pub fn from(db_user: User) -> Self {
+impl From<User> for UserResponse {
+	fn from(db_user: User) -> Self {
 		UserResponse {
 			id: db_user.id,
 			fullname: db_user.fullname,
