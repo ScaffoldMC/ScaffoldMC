@@ -23,8 +23,8 @@
 
 .login {
 	background-color: var(--color-foreground);
-	border: 1px solid var(--color-border-light);
-	border-radius: 6px;
+	box-shadow: var(--foreground-shadow);
+	border-radius: 8px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;

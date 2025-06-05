@@ -5,7 +5,7 @@
 	padding: 0 8px;
 	width: fit-content;
 	height: 36px;
-	border: 1px solid var(--color-border-strong);
+	border: 1px solid var(--color-border);
 	background-color: transparent;
 	transition: border-color 100ms ease-in-out;
 }

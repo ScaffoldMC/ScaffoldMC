@@ -3,7 +3,7 @@
 	width: 24px;
 	max-width: 24px;
 	max-height: 24px;
-	border: 1px solid var(--color-border-strong);
+	border: 1px solid var(--color-border);
 	background-color: transparent;
 	border-radius: 4px;
 	transition:
