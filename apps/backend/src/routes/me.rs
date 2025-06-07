@@ -1,4 +1,4 @@
-use crate::db::user::User;
+use crate::db::user::DBUser;
 use crate::AppState;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Extension, Json, Router};
 use serde::Serialize;
@@ -14,8 +14,8 @@ struct UserResponse {
 	username: String,
 }
 
-impl From<User> for UserResponse {
-	fn from(db_user: User) -> Self {
+impl From<DBUser> for UserResponse {
+	fn from(db_user: DBUser) -> Self {
 		UserResponse {
 			id: db_user.id,
 			fullname: db_user.fullname,
@@ -28,6 +28,6 @@ pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new().route("/", get(me))
 }
 
-pub async fn me(Extension(user): Extension<User>) -> impl IntoResponse {
+pub async fn me(Extension(user): Extension<DBUser>) -> impl IntoResponse {
 	(StatusCode::OK, Json(UserResponse::from(user))).into_response()
 }
