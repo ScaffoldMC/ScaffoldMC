@@ -45,4 +45,28 @@ impl Database {
 		.await;
 		return user;
 	}
+
+	pub async fn update_user_username(&self, user_id: Uuid, username: &str) -> Result<(), sqlx::Error> {
+		sqlx::query!(
+			r#"UPDATE users SET username = ? WHERE id = ?"#,
+			username,
+			user_id
+		)
+		.execute(&self.pool)
+		.await?;
+		
+		Ok(())
+	}
+
+	pub async fn update_user_fullname(&self, user_id: Uuid, fullname: &str) -> Result<(), sqlx::Error> {
+		sqlx::query!(
+			r#"UPDATE users SET fullname = ? WHERE id = ?"#,
+			fullname,
+			user_id
+		)
+		.execute(&self.pool)
+		.await?;
+		
+		Ok(())
+	}
 }
