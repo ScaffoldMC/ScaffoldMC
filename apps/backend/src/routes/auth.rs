@@ -17,21 +17,21 @@ static REFRESH_COOKIE_NAME: &str = "refresh_token";
 
 #[derive(TS, Debug, Clone, Deserialize)]
 #[ts(export)]
-pub struct LoginRequestBody {
+pub struct LoginRequest {
 	pub username: String,
 	pub password: String,
 }
 
 #[derive(TS, Serialize)]
 #[ts(export)]
-struct LoginResponseBody {
+struct LoginResponse {
 	pub ref_token: String,
 	pub auth_token: String,
 }
 
 #[derive(TS, Serialize)]
 #[ts(export)]
-struct RefreshResponseBody {
+struct RefreshResponse {
 	pub ref_token: String,
 	pub auth_token: String,
 }
@@ -46,7 +46,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 pub async fn login(
 	cookies: Cookies,
 	State(state): State<Arc<AppState>>,
-	Json(creds): Json<LoginRequestBody>,
+	Json(creds): Json<LoginRequest>,
 ) -> impl IntoResponse {
 	let user = state.db.get_user_by_username(creds.username.as_str()).await;
 	if let Err(_) = user {
@@ -93,7 +93,7 @@ pub async fn login(
 
 	(
 		StatusCode::OK,
-		Json(LoginResponseBody {
+		Json(LoginResponse {
 			ref_token,
 			auth_token,
 		}),
@@ -170,7 +170,7 @@ pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> im
 
 	(
 		StatusCode::OK,
-		Json(RefreshResponseBody {
+		Json(RefreshResponse {
 			ref_token,
 			auth_token,
 		}),
