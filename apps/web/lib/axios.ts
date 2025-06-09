@@ -1,12 +1,5 @@
 import axios from "axios";
-
-let accessToken = "";
-
-export const setAccessToken = (token: string) => {
-	accessToken = token;
-};
-
-export const getAccessToken = () => accessToken;
+import { getAccessToken, setAccessToken } from "./accesstoken";
 
 const api = axios.create({
 	baseURL: process.env.API_BASE_URL,
@@ -14,8 +7,8 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-	if (accessToken && config.headers) {
-		config.headers.Authorization = `Bearer ${accessToken}`;
+	if (getAccessToken() && config.headers) {
+		config.headers.Authorization = `Bearer ${getAccessToken()}`;
 	}
 	return config;
 });
