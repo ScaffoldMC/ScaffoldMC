@@ -10,10 +10,8 @@ use tower_cookies::Cookies;
 use ts_rs::TS;
 
 use crate::auth;
-use crate::auth::REFRESH_TOKEN_LENGTH;
+use crate::auth::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME, REFRESH_TOKEN_LENGTH};
 use crate::AppState;
-
-static REFRESH_COOKIE_NAME: &str = "refresh_token";
 
 #[derive(TS, Debug, Clone, Deserialize)]
 #[ts(export)]
@@ -91,6 +89,15 @@ pub async fn login(
 
 	cookies.add(refresh_cookie);
 
+	let auth_cookie = Cookie::build((AUTH_COOKIE_NAME, auth_token.clone()))
+		.path("/")
+		.http_only(true)
+		.secure(true)
+		.same_site(tower_cookies::cookie::SameSite::Strict)
+		.build();
+
+	cookies.add(auth_cookie);
+
 	(
 		StatusCode::OK,
 		Json(LoginResponse {
@@ -159,14 +166,23 @@ pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> im
 		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
 
-	let new_cookie = Cookie::build((REFRESH_COOKIE_NAME, new_ref_token))
+	let new_ref_cookie = Cookie::build((REFRESH_COOKIE_NAME, new_ref_token))
 		.path("/")
 		.http_only(true)
 		.secure(true)
 		.same_site(tower_cookies::cookie::SameSite::Strict)
 		.build();
 
-	cookies.add(new_cookie);
+	cookies.add(new_ref_cookie);
+
+	let new_auth_cookie = Cookie::build((AUTH_COOKIE_NAME, auth_token.clone()))
+		.path("/")
+		.http_only(true)
+		.secure(true)
+		.same_site(tower_cookies::cookie::SameSite::Strict)
+		.build();
+
+	cookies.add(new_auth_cookie);
 
 	(
 		StatusCode::OK,
@@ -190,7 +206,8 @@ pub async fn logout(cookies: Cookies, State(state): State<Arc<AppState>>) -> imp
 		}
 	}
 
-	cookies.remove(Cookie::build(REFRESH_COOKIE_NAME).build());
+	cookies.remove(Cookie::build(REFRESH_COOKIE_NAME).path("/").build());
+	cookies.remove(Cookie::build(AUTH_COOKIE_NAME).path("/").build());
 
 	StatusCode::OK.into_response()
 }

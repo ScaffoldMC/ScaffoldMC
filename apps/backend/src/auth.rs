@@ -13,7 +13,11 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use time::Duration;
+use tower_cookies::Cookies;
 use uuid::Uuid;
+
+pub static REFRESH_COOKIE_NAME: &str = "ref_token";
+pub static AUTH_COOKIE_NAME: &str = "auth_token";
 
 pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
 pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
@@ -54,32 +58,34 @@ pub fn create_refresh_token() -> String {
 }
 
 pub async fn require_auth(
+	cookies: Cookies,
 	State(state): State<Arc<AppState>>,
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, StatusCode> {
-	let token_header = match req.headers().get("Authorization") {
-		Some(token) => token,
-		None => return Err(StatusCode::UNAUTHORIZED),
-	};
-
-	let token_parts = token_header
-		.to_str()
-		.unwrap_or("")
-		.split(" ")
-		.collect::<Vec<&str>>();
-
-	if token_parts.len() != 2 || token_parts[0] != "Bearer" {
-		return Err(StatusCode::UNAUTHORIZED);
-	}
-
-	let token = match token_parts.get(1) {
+	let token = match req
+		.headers()
+		.get("Authorization")
+		.and_then(|header| {
+			let header_str = header.to_str().ok()?;
+			let parts = header_str.split(' ').collect::<Vec<&str>>();
+			if parts.len() == 2 && parts[0] == "Bearer" {
+				Some(parts[1].to_string())
+			} else {
+				None
+			}
+		})
+		.or_else(|| {
+			cookies
+				.get(AUTH_COOKIE_NAME)
+				.map(|cookie| cookie.value().to_string())
+		}) {
 		Some(token) => token,
 		None => return Err(StatusCode::UNAUTHORIZED),
 	};
 
 	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
-		token,
+		&token,
 		&state.secrets.jwt_dec,
 		&Validation::new(Algorithm::RS256),
 	) {
