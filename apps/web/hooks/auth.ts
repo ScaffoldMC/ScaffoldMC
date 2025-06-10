@@ -1,7 +1,6 @@
 import api from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { setAccessToken } from "@/lib/accesstoken";
 
 export const useAuth = () => {
 	const queryClient = useQueryClient();
@@ -14,14 +13,8 @@ export const useAuth = () => {
 	});
 
 	const loginMutation = useMutation({
-		mutationFn: async (credentials: {
-			email: string;
-			password: string;
-		}) => {
-			const res = await api.post("/auth/login", credentials);
-			setAccessToken(res.data.accessToken);
-			return res.data;
-		},
+		mutationFn: async (credentials: { email: string; password: string }) =>
+			await api.post("/auth/login", credentials),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["me"] });
 			router.push("/dashboard");
@@ -31,7 +24,6 @@ export const useAuth = () => {
 	const logoutMutation = useMutation({
 		mutationFn: async () => {
 			await api.post("/auth/logout");
-			setAccessToken("");
 			queryClient.invalidateQueries({ queryKey: ["me"] });
 			router.push("/login");
 		},

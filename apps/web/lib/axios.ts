@@ -1,16 +1,8 @@
 import axios from "axios";
-import { getAccessToken, setAccessToken } from "./accesstoken";
 
 const api = axios.create({
 	baseURL: process.env.API_BASE_URL,
 	withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-	if (getAccessToken() && config.headers) {
-		config.headers.Authorization = `Bearer ${getAccessToken()}`;
-	}
-	return config;
 });
 
 api.interceptors.response.use(
@@ -20,10 +12,7 @@ api.interceptors.response.use(
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
-				const { data } = await api.post("/auth/refresh");
-				setAccessToken(data.accessToken);
-				originalRequest.headers["Authorization"] =
-					`Bearer ${data.accessToken}`;
+				await api.post("/auth/refresh");
 				return api(originalRequest);
 			} catch (err) {
 				return Promise.reject(err);
