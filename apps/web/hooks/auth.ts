@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { LoginRequest } from "@/lib/servertypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +14,7 @@ export const useAuth = () => {
 	});
 
 	const loginMutation = useMutation({
-		mutationFn: async (credentials: { email: string; password: string }) =>
+		mutationFn: async (credentials: LoginRequest) =>
 			await api.post("/auth/login", credentials),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["me"] });
