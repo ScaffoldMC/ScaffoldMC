@@ -1,0 +1,44 @@
+.form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 24px;
+	width: 100%;
+}
+
+.form input,
+.form button {
+	width: 100%;
+}
+
+.login {
+	background-color: var(--color-foreground);
+	box-shadow: var(--foreground-shadow);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 24px;
+	width: 400px;
+	padding: 48px;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+	justify-content: start;
+	width: 100%;
+	gap: 4px;
+}
+
+.line {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	align-items: center;
+	gap: 12px;
+}
