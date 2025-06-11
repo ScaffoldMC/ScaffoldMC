@@ -26,7 +26,6 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--color-primary: #9fff46;
 		--color-primary-background: #9fff4610;
 		--color-secondary: #1a1a1a;
 		--color-foreground: #101010;
