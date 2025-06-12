@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { LoginRequest } from "@/lib/servertypes";
+import { LoginRequest, UserResponse } from "@/lib/servertypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -34,9 +34,25 @@ export const useAuth = () => {
 
 	return {
 		authenticated,
-		isLoading: user.isLoading,
-		user,
 		login: loginMutation.mutateAsync,
 		logout: logoutMutation.mutateAsync,
 	};
 };
+
+export function useUser() {
+	const user = useQuery<UserResponse>({
+		queryKey: ["me"],
+		queryFn: () => api.get("/auth/me").then((res) => res.data),
+		retry: false,
+	});
+
+	if (user.isError) {
+		const router = useRouter();
+		router.push("/login");
+	}
+
+	return {
+		loading: user.isLoading,
+		user: user.data,
+	};
+}
