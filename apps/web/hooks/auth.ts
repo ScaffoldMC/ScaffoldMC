@@ -37,7 +37,7 @@ export function useAuth() {
 	const router = useRouter();
 	const user = useQuery({
 		queryKey: ["me"],
-		queryFn: () => api.get("/auth/me").then((res) => res.data),
+		queryFn: () => api.get("/me").then((res) => res.data),
 		retry: false,
 	});
 
