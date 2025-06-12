@@ -7,7 +7,7 @@ import {
 } from "@/components/organisms/sidebar/sidebar";
 import styles from "./layout.module.css";
 import { User } from "@/components/molecules/user/user";
-import { Home, Server, Settings, Users } from "lucide-react";
+import { Home, Server, Settings } from "lucide-react";
 
 export default function DashboardLayout({
 	children,
