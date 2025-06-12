@@ -63,26 +63,15 @@ pub async fn require_auth(
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, StatusCode> {
-	let token = match req
-		.headers()
-		.get("Authorization")
-		.and_then(|header| {
-			let header_str = header.to_str().ok()?;
-			let parts = header_str.split(' ').collect::<Vec<&str>>();
-			if parts.len() == 2 && parts[0] == "Bearer" {
-				Some(parts[1].to_string())
-			} else {
-				None
-			}
-		})
-		.or_else(|| {
-			cookies
-				.get(AUTH_COOKIE_NAME)
-				.map(|cookie| cookie.value().to_string())
-		}) {
-		Some(token) => token,
-		None => return Err(StatusCode::UNAUTHORIZED),
-	};
+	let token = cookies
+		.get(AUTH_COOKIE_NAME)
+		.map(|cookie| cookie.value().to_string());
+
+	if token.is_none() {
+		return Err(StatusCode::UNAUTHORIZED);
+	}
+
+	let token = token.unwrap();
 
 	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
 		&token,

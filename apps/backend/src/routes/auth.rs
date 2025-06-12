@@ -13,25 +13,11 @@ use crate::auth;
 use crate::auth::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME, REFRESH_TOKEN_LENGTH};
 use crate::AppState;
 
-#[derive(TS, Debug, Clone, Deserialize)]
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
 #[ts(export)]
 pub struct LoginRequest {
 	pub username: String,
 	pub password: String,
-}
-
-#[derive(TS, Serialize)]
-#[ts(export)]
-struct LoginResponse {
-	pub ref_token: String,
-	pub auth_token: String,
-}
-
-#[derive(TS, Serialize)]
-#[ts(export)]
-struct RefreshResponse {
-	pub ref_token: String,
-	pub auth_token: String,
 }
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -98,14 +84,7 @@ pub async fn login(
 
 	cookies.add(auth_cookie);
 
-	(
-		StatusCode::OK,
-		Json(LoginResponse {
-			ref_token,
-			auth_token,
-		}),
-	)
-		.into_response()
+	StatusCode::OK.into_response()
 }
 
 // FIXME: Unused refresh tokens need to be cleared from the db occasionally (perhaps on program startup?)
@@ -184,14 +163,7 @@ pub async fn refresh(cookies: Cookies, State(state): State<Arc<AppState>>) -> im
 
 	cookies.add(new_auth_cookie);
 
-	(
-		StatusCode::OK,
-		Json(RefreshResponse {
-			ref_token,
-			auth_token,
-		}),
-	)
-		.into_response()
+	StatusCode::OK.into_response()
 }
 
 pub async fn logout(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
