@@ -1,9 +1,12 @@
+"use client";
+
 import api from "@/lib/axios";
 import { LoginRequest, UserResponse } from "@/lib/servertypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export const useAuth = () => {
+export function useAuth() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
@@ -37,7 +40,7 @@ export const useAuth = () => {
 		login: loginMutation.mutateAsync,
 		logout: logoutMutation.mutateAsync,
 	};
-};
+}
 
 export function useUser() {
 	const user = useQuery<UserResponse>({
@@ -46,10 +49,13 @@ export function useUser() {
 		retry: false,
 	});
 
-	if (user.isError) {
-		const router = useRouter();
-		router.push("/login");
-	}
+	const router = useRouter();
+
+	useEffect(() => {
+		if (user.isError) {
+			router.push("/login");
+		}
+	}, [user.isError, router]);
 
 	return {
 		loading: user.isLoading,
