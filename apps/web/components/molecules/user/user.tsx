@@ -8,13 +8,15 @@ import { useAuth, useLogout } from "@/hooks/auth";
 
 export function User() {
 	const logout = useLogout();
-	const { user, authenticated } = useAuth();
+	const { user, authenticated, isLoading } = useAuth();
 
 	// TODO: Display user profile picture
 
-	if (!authenticated) {
+	if (!authenticated && !isLoading) {
 		return null;
 	}
+
+	// TODO: Create loading skeleton
 
 	return (
 		<div className={styles.root}>
@@ -22,7 +24,7 @@ export function User() {
 				<AvatarFallback>JD</AvatarFallback>
 			</Avatar>
 			<div className={styles.details}>
-				<b>{user.fullname}</b>
+				<b>{user?.fullname || ""}</b>
 			</div>
 			<Button size="icon" level="secondary" onClick={() => logout()}>
 				<LogOut size={16} />
