@@ -6,59 +6,52 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export function useAuth() {
+export function useLogin() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
-	const user = useQuery({
-		queryKey: ["me"],
-		queryFn: () => api.get("/auth/me").then((res) => res.data),
-		retry: false,
-	});
-
-	const loginMutation = useMutation({
+	return useMutation({
 		mutationFn: async (credentials: LoginRequest) =>
 			await api.post("/auth/login", credentials),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["me"] });
 			router.push("/dashboard");
 		},
-	});
+	}).mutateAsync;
+}
 
-	const logoutMutation = useMutation({
+export function useLogout() {
+	const queryClient = useQueryClient();
+	const router = useRouter();
+
+	return useMutation({
 		mutationFn: async () => {
 			await api.post("/auth/logout");
 			queryClient.invalidateQueries({ queryKey: ["me"] });
 			router.push("/login");
 		},
-	});
-
-	const authenticated = Boolean(user.data) && !user.isError;
-
-	return {
-		authenticated,
-		login: loginMutation.mutateAsync,
-		logout: logoutMutation.mutateAsync,
-	};
+	}).mutateAsync;
 }
 
-export function useUser() {
-	const user = useQuery<UserResponse>({
+export function useAuth() {
+	const router = useRouter();
+	const user = useQuery({
 		queryKey: ["me"],
 		queryFn: () => api.get("/auth/me").then((res) => res.data),
 		retry: false,
 	});
 
-	const router = useRouter();
+	const authenticated = Boolean(user.data) && !user.isError;
 
 	useEffect(() => {
 		if (user.isError) {
-			router.push("/login");
+			router.replace("/login");
 		}
-	}, [user.isError, router]);
+	}, [user.isError]);
 
 	return {
-		loading: user.isLoading,
-		user: user.data,
+		user: user.data as UserResponse | null,
+		authenticated,
+		isLoading: user.isLoading,
 	};
 }

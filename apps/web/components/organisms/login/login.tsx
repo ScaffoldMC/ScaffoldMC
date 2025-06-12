@@ -5,11 +5,11 @@ import { TextInput } from "@/components/atoms/input/textinput";
 import { Button } from "@/components/atoms/buttons/button";
 import { Checkbox } from "@/components/atoms/checkbox/checkbox";
 import styles from "./login.module.css";
-import { useAuth } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
+import { useLogin } from "@/hooks/auth";
 
 export function Login() {
-	const { login } = useAuth();
+	const login = useLogin();
 	const router = useRouter();
 
 	const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
