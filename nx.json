@@ -1,17 +1,26 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "cache": true
-    },
-    "lint": {
-      "cache": true
-    },
-    "check-types": {
-      "cache": true
-    }
-  }
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"targetDefaults": {
+		"build": {
+			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"lint": {
+			"cache": true
+		},
+		"check-types": {
+			"cache": true
+		}
+	},
+	"plugins": [
+		{
+			"plugin": "@nx/storybook/plugin",
+			"options": {
+				"serveStorybookTargetName": "storybook",
+				"buildStorybookTargetName": "build-storybook",
+				"testStorybookTargetName": "test-storybook",
+				"staticStorybookTargetName": "static-storybook"
+			}
+		}
+	]
 }

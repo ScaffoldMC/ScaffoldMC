@@ -1,14 +1,25 @@
 {
-  "name": "mc-server-ui",
-  "private": true,
-  "devDependencies": {
-    "@monodon/rust": "^2.3.0",
-    "nx": "21.1.1",
-    "prettier": "^3.5.3",
-    "typescript": "5.8.2"
-  },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=18"
-  }
+	"name": "mc-server-ui",
+	"private": true,
+	"devDependencies": {
+		"@monodon/rust": "^2.3.0",
+		"@nx/js": "21.2.0",
+		"@nx/storybook": "21.2.0",
+		"@nx/web": "21.2.0",
+		"@storybook/nextjs": "9.0.9",
+		"@swc-node/register": "~1.9.1",
+		"@swc/core": "~1.5.7",
+		"@swc/helpers": "~0.5.11",
+		"nx": "21.1.1",
+		"prettier": "^3.5.3",
+		"storybook": "9.0.9",
+		"ts-node": "10.9.1",
+		"tslib": "^2.3.0",
+		"typescript": "5.8.2"
+	},
+	"packageManager": "pnpm@9.0.0",
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {}
 }
