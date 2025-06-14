@@ -20,7 +20,7 @@ export default async function DashboardLayout({
 	// This isn't an actual auth check, but a cleaner way to redirect without a
 	// flash of web content.
 
-	const refresh_token = (await cookies()).get("refresh_token")?.value;
+	const refresh_token = (await cookies()).get("ref_token")?.value;
 
 	if (!refresh_token) {
 		redirect("/login");
