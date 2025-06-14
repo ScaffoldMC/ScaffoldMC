@@ -1,6 +1,7 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
+		"noEmit": false,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"composite": true,
@@ -9,12 +10,15 @@
 	},
 	"exclude": ["components/**/*.spec.ts", "components/**/*.test.ts"],
 	"include": [
+		"**/*.ts",
+		"**/*.tsx",
 		"components/**/*.stories.ts",
 		"components/**/*.stories.js",
 		"components/**/*.stories.jsx",
 		"components/**/*.stories.tsx",
 		"components/**/*.stories.mdx",
 		".storybook/*.js",
-		".storybook/*.ts"
+		".storybook/*.ts",
+		".storybook/preview.tsx"
 	]
 }
