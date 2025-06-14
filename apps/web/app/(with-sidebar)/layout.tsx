@@ -8,12 +8,24 @@ import {
 import styles from "./layout.module.css";
 import { User } from "@/components/molecules/user/user";
 import { Home, Server, Settings } from "lucide-react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	// Redirect if the user doesn't have a refresh token.
+	// This isn't an actual auth check, but a cleaner way to redirect without a
+	// flash of web content.
+
+	const refresh_token = (await cookies()).get("refresh_token")?.value;
+
+	if (!refresh_token) {
+		redirect("/login");
+	}
+
 	return (
 		<div className={styles.dashboard}>
 			<Sidebar>
