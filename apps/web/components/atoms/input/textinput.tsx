@@ -8,5 +8,5 @@ export type TextInputProps = Omit<
 };
 
 export function TextInput({ type, ...props }: TextInputProps) {
-	return <input className={styles.base} {...props} />;
+	return <input type={type} className={styles.base} {...props} />;
 }
