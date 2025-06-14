@@ -35,6 +35,7 @@ export function useLogout() {
 
 export function useAuth() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const user = useQuery({
 		queryKey: ["me"],
 		queryFn: () => api.get("/me").then((res) => res.data),
@@ -44,10 +45,11 @@ export function useAuth() {
 	const authenticated = Boolean(user.data) && !user.isError;
 
 	useEffect(() => {
-		if (user.isError) {
+		if (user.isError && !user.isLoading) {
+			queryClient.removeQueries({ queryKey: ["me"] });
 			router.replace("/login");
 		}
-	}, [user.isError]);
+	}, [user.isError, user.isLoading]);
 
 	return {
 		user: user.data as UserResponse | null,
