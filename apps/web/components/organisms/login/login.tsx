@@ -3,35 +3,28 @@
 import { Label } from "@/components/atoms/label/label";
 import { TextInput } from "@/components/atoms/input/textinput";
 import { Button } from "@/components/atoms/buttons/button";
-import { Checkbox } from "@/components/atoms/checkbox/checkbox";
 import styles from "./login.module.css";
-import { useRouter } from "next/navigation";
-import { useLogin } from "@/hooks/auth";
 
-export function Login() {
-	const login = useLogin();
-	const router = useRouter();
+interface LoginProps {
+	onLogin?: (username: string, password: string) => Promise<void>;
+}
 
-	const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+export function Login({ onLogin }: LoginProps) {
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
 		const username = formData.get("username") as string;
 		const password = formData.get("password") as string;
 
-		login({ username, password })
-			.then(() => {
-				// TODO: Display success message
-				router.push("/home");
-			})
-			.catch((error) => {
-				// TODO: Make field items red to indicate error
-			});
+		onLogin(username, password).catch(() => {
+			// TODO: Make field items red to indicate error
+		});
 	};
 
 	return (
 		<div className={styles.login}>
-			<h2>Sign In</h2>
-			<form className={styles.form} onSubmit={handleLogin}>
+			<h3>Sign in to continue</h3>
+			<form className={styles.form} onSubmit={handleSubmit}>
 				<div className={styles.field}>
 					<Label htmlFor="username">Username</Label>
 					<TextInput
@@ -49,10 +42,6 @@ export function Login() {
 						name="password"
 						required
 					/>
-				</div>
-				<div className={styles.line}>
-					<Checkbox id="remember" />
-					<Label htmlFor="remember">Remember Me</Label>
 				</div>
 				<Button type="submit" level="primary">
 					Sign In
