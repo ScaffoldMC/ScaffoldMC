@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { Button } from "./Button";
+import { Globe } from "lucide-react";
 
 const meta = {
 	component: Button,
@@ -11,29 +12,49 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-	render: (args) => <Button {...args}>Button</Button>,
 	args: {
 		level: "primary",
+		children: "Button",
 	},
 };
 
 export const Secondary: Story = {
-	render: (args) => <Button {...args}>Button</Button>,
 	args: {
 		level: "secondary",
+		children: "Button",
 	},
 };
 
 export const Destructive: Story = {
-	render: (args) => <Button {...args}>Button</Button>,
 	args: {
 		level: "destructive",
+		children: "Button",
 	},
 };
 
 export const Ghost: Story = {
-	render: (args) => <Button {...args}>Button</Button>,
 	args: {
 		level: "ghost",
+		children: "Button",
+	},
+};
+
+export const Icon: Story = {
+	args: {
+		level: "secondary",
+		size: "icon",
+		children: <Globe size={18} />,
+	},
+};
+
+export const IconWithText: Story = {
+	args: {
+		level: "secondary",
+		children: (
+			<>
+				<Globe size={18} />
+				Button
+			</>
+		),
 	},
 };
