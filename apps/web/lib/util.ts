@@ -5,3 +5,10 @@ export function singularOrPlural(
 ): string {
 	return count === 1 ? singular : plural;
 }
+
+export function makeInitials(name: string): string {
+	return name
+		.split(" ")
+		.map((part) => part.charAt(0).toUpperCase())
+		.join("");
+}

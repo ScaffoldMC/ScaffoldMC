@@ -5,6 +5,9 @@ import styles from "./User.module.css";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
 import { useAuth, useLogout } from "@/hooks/auth";
+import { makeInitials } from "@/lib/util";
+
+// TODO: Abstract out business logic
 
 export function User() {
 	const logout = useLogout();
@@ -21,7 +24,7 @@ export function User() {
 	return (
 		<div className={styles.root}>
 			<Avatar size={40}>
-				<AvatarFallback>JD</AvatarFallback>
+				<AvatarFallback>{makeInitials(user.fullname)}</AvatarFallback>
 			</Avatar>
 			<div className={styles.details}>
 				<b>{user?.fullname || ""}</b>
