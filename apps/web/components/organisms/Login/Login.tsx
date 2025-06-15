@@ -4,12 +4,15 @@ import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Button } from "@/components/atoms/Button/Button";
 import styles from "./Login.module.css";
+import { useState } from "react";
 
 interface LoginProps {
 	onLogin?: (username: string, password: string) => Promise<void>;
 }
 
 export function Login({ onLogin }: LoginProps) {
+	const [isError, setIsError] = useState(false);
+
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
@@ -17,7 +20,7 @@ export function Login({ onLogin }: LoginProps) {
 		const password = formData.get("password") as string;
 
 		onLogin(username, password).catch(() => {
-			// TODO: Make field items red to indicate error
+			setIsError(true);
 		});
 	};
 
@@ -31,6 +34,7 @@ export function Login({ onLogin }: LoginProps) {
 						type="text"
 						id="username"
 						name="username"
+						invalid={isError}
 						required
 					/>
 				</div>
@@ -40,6 +44,7 @@ export function Login({ onLogin }: LoginProps) {
 						type="password"
 						id="password"
 						name="password"
+						invalid={isError}
 						required
 					/>
 				</div>
