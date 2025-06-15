@@ -22,3 +22,7 @@
 .base::placeholder {
 	color: hsl(from var(--color-background) 0 0 50%);
 }
+
+.invalid {
+	outline: 1px solid var(--color-error);
+}

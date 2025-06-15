@@ -15,3 +15,10 @@ export const Default: Story = {
 		placeholder: "Enter text",
 	},
 };
+
+export const Invalid: Story = {
+	args: {
+		placeholder: "Password",
+		invalid: true,
+	},
+};
