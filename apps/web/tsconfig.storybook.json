@@ -10,6 +10,7 @@
 	},
 	"exclude": ["components/**/*.spec.ts", "components/**/*.test.ts"],
 	"include": [
+		"../backend/bindings",
 		"**/*.ts",
 		"**/*.tsx",
 		"components/**/*.stories.ts",
