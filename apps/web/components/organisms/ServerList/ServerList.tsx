@@ -1,13 +1,13 @@
 import React from "react";
-import styles from "./serverlist.module.css";
+import styles from "./ServerList.module.css";
 import Link from "next/link";
-import { Indicator } from "@/components/atoms/indicator/indicator";
+import { Indicator } from "@/components/atoms/Indicator/Indicator";
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from "@/components/atoms/avatar/avatar";
-import { List, ListItem } from "@/components/organisms/list/list";
+} from "@/components/atoms/Avatar/Avatar";
+import { List, ListItem } from "@/components/organisms/List/List";
 
 // TODO: Hook up to backend logic
 // TODO: Make brief & detailed view of server list

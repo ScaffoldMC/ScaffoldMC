@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import styles from "./indicator.module.css";
+import styles from "./Indicator.module.css";
 
 interface IndicatorProps {
 	state: "success" | "working" | "error";

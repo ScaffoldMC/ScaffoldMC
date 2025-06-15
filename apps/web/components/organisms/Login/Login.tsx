@@ -1,9 +1,9 @@
 "use client";
 
-import { Label } from "@/components/atoms/label/label";
-import { TextInput } from "@/components/atoms/input/textinput";
-import { Button } from "@/components/atoms/buttons/button";
-import styles from "./login.module.css";
+import { Label } from "@/components/atoms/Label/Label";
+import { TextInput } from "@/components/atoms/Input/TextInput";
+import { Button } from "@/components/atoms/Button/Button";
+import styles from "./Login.module.css";
 
 interface LoginProps {
 	onLogin?: (username: string, password: string) => Promise<void>;

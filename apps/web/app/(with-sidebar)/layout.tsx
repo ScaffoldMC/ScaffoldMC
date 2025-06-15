@@ -4,9 +4,9 @@ import {
 	SidebarHeader,
 	SidebarFooter,
 	SidebarLink,
-} from "@/components/organisms/sidebar/sidebar";
+} from "@/components/organisms/Sidebar/Sidebar";
 import styles from "./layout.module.css";
-import { User } from "@/components/molecules/user/user";
+import { User } from "@/components/molecules/User/User";
 import { Home, Server, Settings } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

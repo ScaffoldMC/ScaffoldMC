@@ -2,14 +2,14 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from "@/components/atoms/avatar/avatar";
+} from "@/components/atoms/Avatar/Avatar";
 
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@/components/organisms/tabs/tabs";
+} from "@/components/organisms/Tabs/Tabs";
 
 import styles from "./page.module.css";
 

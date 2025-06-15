@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "./styles.module.css";
-import { Login } from "@/components/organisms/login/login";
+import { Login } from "@/components/organisms/Login/Login";
 import { useLogin } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
 

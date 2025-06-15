@@ -1,7 +1,7 @@
 "use client";
 
 import Link, { LinkProps } from "next/link";
-import styles from "./sidebar.module.css";
+import styles from "./Sidebar.module.css";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cva } from "class-variance-authority";

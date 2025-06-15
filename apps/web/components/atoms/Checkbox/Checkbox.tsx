@@ -1,6 +1,6 @@
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 
-import styles from "./checkbox.module.css";
+import styles from "./Checkbox.module.css";
 import { Check } from "lucide-react";
 
 export function Checkbox({

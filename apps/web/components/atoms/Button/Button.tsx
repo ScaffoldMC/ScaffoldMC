@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes } from "react";
 import { cva } from "class-variance-authority";
-import styles from "./button.module.css";
+import styles from "./Button.module.css";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	size?: "icon" | "default";

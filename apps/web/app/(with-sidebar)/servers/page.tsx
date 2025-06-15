@@ -1,4 +1,4 @@
-import { ServerList } from "@/components/organisms/serverlist/serverlist";
+import { ServerList } from "@/components/organisms/ServerList/ServerList";
 
 export default function Servers() {
 	return (

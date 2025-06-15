@@ -1,5 +1,5 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import styles from "./tabs.module.css";
+import styles from "./Tabs.module.css";
 
 export function Tabs({ children, ...props }: TabsPrimitive.TabsProps) {
 	return (

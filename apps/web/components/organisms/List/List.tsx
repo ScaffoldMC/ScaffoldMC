@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import styles from "./list.module.css";
+import styles from "./List.module.css";
 import { singularOrPlural } from "@/lib/util";
 
 interface ListProps {

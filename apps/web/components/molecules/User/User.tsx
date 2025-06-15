@@ -1,9 +1,9 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/atoms/avatar/avatar";
-import styles from "./user.module.css";
+import { Avatar, AvatarFallback } from "@/components/atoms/Avatar/Avatar";
+import styles from "./User.module.css";
 import { LogOut } from "lucide-react";
-import { Button } from "@/components/atoms/buttons/button";
+import { Button } from "@/components/atoms/Button/Button";
 import { useAuth, useLogout } from "@/hooks/auth";
 
 export function User() {
