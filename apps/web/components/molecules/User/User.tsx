@@ -20,6 +20,9 @@ export function User() {
 	}
 
 	// TODO: Create loading skeleton
+	if (isLoading) {
+		return null;
+	}
 
 	return (
 		<div className={styles.root}>
@@ -27,10 +30,10 @@ export function User() {
 				<AvatarFallback>{makeInitials(user.fullname)}</AvatarFallback>
 			</Avatar>
 			<div className={styles.details}>
-				<b>{user?.fullname || ""}</b>
+				<b>{user.fullname}</b>
 			</div>
 			<Button size="icon" level="secondary" onClick={() => logout()}>
-				<LogOut size={16} />
+				<LogOut size={18} />
 			</Button>
 		</div>
 	);
