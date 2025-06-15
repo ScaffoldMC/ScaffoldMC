@@ -1,7 +1,7 @@
 "use client";
 
 import { Label } from "@/components/atoms/Label/Label";
-import { TextInput } from "@/components/atoms/Input/TextInput";
+import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Button } from "@/components/atoms/Button/Button";
 import styles from "./Login.module.css";
 
