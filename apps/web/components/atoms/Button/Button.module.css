@@ -4,16 +4,16 @@
 	font-size: var(--font-size-medium);
 
 	display: flex;
-	align-content: center;
 	justify-content: center;
 	align-items: center;
 	gap: 4px;
 
 	height: 36px;
+	min-width: 36px;
 	border: none;
 
 	cursor: pointer;
-	padding: 0 16px;
+
 	transition: background-color 100ms ease-in-out;
 }
 
@@ -23,12 +23,12 @@
 }
 
 .defaultSize {
+	padding: 0 16px;
 	width: fit-content;
 }
 
 .iconSize {
-	width: 32px;
-	padding: 0;
+	padding: 0 0;
 }
 
 .iconSize svg {
