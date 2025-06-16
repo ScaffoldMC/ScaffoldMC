@@ -54,3 +54,24 @@ export function SidebarLink({
 		</Link>
 	);
 }
+
+export function SublinkGroup({
+	children,
+	baseUrl,
+}: {
+	children: React.ReactNode;
+	baseUrl: string;
+}) {
+	const pathname = usePathname();
+	const [isActive, setIsActive] = useState(false);
+
+	useEffect(() => {
+		setIsActive(pathname.startsWith(baseUrl));
+	}, [pathname, baseUrl]);
+
+	return isActive ? (
+		<div className={styles.sublinkGroup}>
+			<div className={styles.sublinkChildren}>{children}</div>
+		</div>
+	) : null;
+}

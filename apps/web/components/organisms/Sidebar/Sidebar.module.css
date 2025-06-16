@@ -38,6 +38,23 @@
 	background-color: var(--color-secondary);
 }
 
+.sublinkGroup .sidebarLink {
+	font-size: var(--font-size-small);
+}
+
+.sublinkGroup {
+	display: flex;
+	flex-direction: row;
+	gap: 2px;
+	padding-left: 16px;
+}
+
+.sublinkChildren {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
 .sidebarHeader {
 	display: flex;
 	position: sticky;
