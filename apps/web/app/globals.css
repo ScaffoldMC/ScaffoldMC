@@ -19,10 +19,10 @@
 	--font-size-small: 16px;
 
 	--border-radius: 6px;
+	background-color: var(--color-background);
+	color: var(--color-text);
 
 	font-size: var(--font-size-medium);
-	color: var(--color-text);
-	background-color: var(--color-background);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -104,15 +104,15 @@ h4 {
 
 /* A elements that don't have a class get default styles */
 a:not([class]) {
-	text-decoration-skip-ink: auto;
 	color: currentColor;
+	text-decoration-skip-ink: auto;
 }
 
 /* Make images easier to work with */
 img,
 picture {
-	max-width: 100%;
 	display: block;
+	max-width: 100%;
 }
 
 /* Inherit fonts for inputs and buttons */
@@ -120,8 +120,8 @@ input,
 button,
 textarea,
 select {
-	font-family: inherit;
 	font-size: inherit;
+	font-family: inherit;
 }
 
 /* Make sure textareas without a rows attribute are not tiny */

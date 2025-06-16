@@ -5,10 +5,10 @@
 
 .content {
 	display: flex;
-	flex-direction: column;
 	flex: 1;
-	height: 100vh;
-	overflow: auto;
+	flex-direction: column;
 	margin: 0;
 	padding: 32px;
+	height: 100vh;
+	overflow: auto;
 }

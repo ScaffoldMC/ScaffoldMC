@@ -1,14 +1,14 @@
 .root {
 	display: flex;
-	gap: 10px;
 	flex-direction: row;
 	align-items: center;
+	gap: 10px;
 	width: 100%;
 }
 
 .root > *:last-child {
-	margin-left: auto;
 	margin-right: 0;
+	margin-left: auto;
 }
 
 .logo {
@@ -23,6 +23,6 @@
 }
 
 .email {
-	font-size: var(--font-size-small);
 	color: var(--color-text);
+	font-size: var(--font-size-small);
 }

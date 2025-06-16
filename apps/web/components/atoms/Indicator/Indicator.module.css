@@ -1,11 +1,11 @@
 .base {
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
 	margin: 4px;
 	box-shadow: 0 0 2px 1px
 		color-mix(in srgb, var(--indicator-color) 50%, transparent);
+	border-radius: 50%;
 	background-color: var(--indicator-color);
+	width: 6px;
+	height: 6px;
 }
 
 .success {

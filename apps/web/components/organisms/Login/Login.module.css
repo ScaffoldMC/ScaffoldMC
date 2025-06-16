@@ -1,8 +1,8 @@
 .form {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	justify-content: center;
+	align-items: center;
 	gap: 24px;
 	width: 100%;
 }
@@ -13,32 +13,32 @@
 }
 
 .login {
-	background-color: var(--color-foreground);
-	box-shadow: var(--foreground-shadow);
-	border-radius: 8px;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	justify-content: center;
+	align-items: center;
 	gap: 24px;
-	width: 400px;
+	box-shadow: var(--foreground-shadow);
+	border-radius: 8px;
+	background-color: var(--color-foreground);
 	padding: 48px;
+	width: 400px;
 }
 
 .field {
 	display: flex;
 	flex-direction: column;
-	align-items: start;
 	justify-content: start;
-	width: 100%;
+	align-items: start;
 	gap: 4px;
+	width: 100%;
 }
 
 .line {
-	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: start;
 	align-items: center;
 	gap: 12px;
+	width: 100%;
 }

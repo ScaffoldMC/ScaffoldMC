@@ -7,15 +7,15 @@
 
 .trigger {
 	display: flex;
+	flex-grow: 1;
 	justify-content: center;
 	align-items: center;
+	transition: background-color 100ms ease-in-out;
 	border: transparent;
 	border-radius: 6px;
-	padding: 8px 16px;
-	flex-grow: 1;
 	background-color: transparent;
+	padding: 8px 16px;
 	color: var(--color-text);
-	transition: background-color 100ms ease-in-out;
 }
 
 .trigger:hover {
@@ -23,18 +23,18 @@
 }
 
 .trigger[data-state="active"] {
-	color: var(--color-primary);
 	background-color: var(--color-primary-background);
+	color: var(--color-primary);
 }
 
 .list {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
-	border-radius: 10px;
-	width: 100%;
-	padding: 4px;
+	align-items: center;
 	gap: 8px;
-	background-color: var(--color-foreground);
 	box-shadow: var(--foreground-shadow);
+	border-radius: 10px;
+	background-color: var(--color-foreground);
+	padding: 4px;
+	width: 100%;
 }

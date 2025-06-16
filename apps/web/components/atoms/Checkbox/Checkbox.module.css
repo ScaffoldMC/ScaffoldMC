@@ -1,14 +1,14 @@
 .checkboxRoot {
-	height: 24px;
-	width: 24px;
-	max-width: 24px;
-	max-height: 24px;
-	border: 1px solid var(--color-border);
-	background-color: transparent;
-	border-radius: 4px;
 	transition:
 		background-color 50ms ease-in-out,
 		border-color 100ms ease-in-out;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	background-color: transparent;
+	width: 24px;
+	max-width: 24px;
+	height: 24px;
+	max-height: 24px;
 }
 
 .checkboxRoot:hover {
@@ -16,8 +16,8 @@
 }
 
 .checkboxRoot[data-state="checked"] {
-	background-color: var(--color-text);
 	border-color: var(--color-text);
+	background-color: var(--color-text);
 }
 
 .checkboxRoot[data-state="checked"] .checkboxIndicator {
@@ -25,9 +25,9 @@
 }
 
 .checkboxIndicator {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	width: 100%;
 	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 }

@@ -6,10 +6,10 @@
 
 .title {
 	display: flex;
-	gap: 16px;
-	align-items: center;
-	justify-content: start;
 	flex-direction: row;
+	justify-content: start;
+	align-items: center;
+	gap: 16px;
 }
 
 .titleInfo {
