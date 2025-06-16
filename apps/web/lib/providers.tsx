@@ -5,6 +5,7 @@ import {
 	QueryClient,
 	QueryClientProvider,
 } from "@tanstack/react-query";
+import { SkeletonTheme } from "react-loading-skeleton";
 
 function makeQueryClient() {
 	return new QueryClient({
@@ -32,7 +33,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			{children}
+			<SkeletonTheme enableAnimation>{children}</SkeletonTheme>
 		</QueryClientProvider>
 	);
 }
