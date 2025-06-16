@@ -3,36 +3,29 @@
 	font-weight: 600;
 	font-size: var(--font-size-medium);
 
-	display: flex;
+	display: inline-flex;
 	justify-content: center;
 	align-items: center;
-	gap: 4px;
+	gap: 8px;
 
 	height: 36px;
 	min-width: 36px;
 	border: none;
-
+	width: fit-content;
 	cursor: pointer;
 
+	padding: 0 8px;
+
 	transition: background-color 100ms ease-in-out;
+}
+
+.base svg {
+	display: inline-block;
 }
 
 .base:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
-}
-
-.defaultSize {
-	padding: 0 16px;
-	width: fit-content;
-}
-
-.iconSize {
-	padding: 0 0;
-}
-
-.iconSize svg {
-	display: block;
 }
 
 .primary {

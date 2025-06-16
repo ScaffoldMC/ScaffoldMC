@@ -17,18 +17,13 @@ const buttonStyles = cva(styles.base, {
 			destructive: styles.destructive,
 			ghost: styles.ghost,
 		},
-		size: {
-			default: styles.defaultSize,
-			icon: styles.iconSize,
-		},
 	},
 	defaultVariants: {
 		level: "secondary",
-		size: "default",
 	},
 });
 
-export function Button({ level, size, ...props }: ButtonProps) {
-	const className = buttonStyles({ level, size });
+export function Button({ level, ...props }: ButtonProps) {
+	const className = buttonStyles({ level });
 	return <button className={className} {...props}></button>;
 }

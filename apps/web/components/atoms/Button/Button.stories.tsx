@@ -42,7 +42,6 @@ export const Ghost: Story = {
 export const Icon: Story = {
 	args: {
 		level: "secondary",
-		size: "icon",
 		children: <Globe size={18} />,
 	},
 };
