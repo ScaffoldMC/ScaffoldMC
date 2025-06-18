@@ -4,14 +4,14 @@ use sqlx::{types::Uuid, FromRow};
 use super::Database;
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
-pub struct DBUser {
+pub struct User {
 	pub id: Uuid,
 	pub fullname: String,
 	pub username: String,
 	pub password_hash: String,
 }
 
-impl std::fmt::Debug for DBUser {
+impl std::fmt::Debug for User {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		// Manually implement Debug to avoid printing password_hash
 		f.debug_struct("User")
@@ -23,9 +23,9 @@ impl std::fmt::Debug for DBUser {
 }
 
 impl Database {
-	pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<DBUser, sqlx::Error> {
+	pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
-			DBUser,
+			User,
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE id = ?"#,
 			user_id
 		)
@@ -35,9 +35,9 @@ impl Database {
 		return user;
 	}
 
-	pub async fn get_user_by_username(&self, username: &str) -> Result<DBUser, sqlx::Error> {
+	pub async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
-			DBUser, 
+			User, 
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE username = ?"#,
 			username
 		)

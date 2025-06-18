@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{types::time::OffsetDateTime, types::Uuid, FromRow};
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
-pub struct DBRefreshToken {
+pub struct RefreshToken {
 	pub id: String,
 	pub user_id: Uuid,
 	pub created_at: OffsetDateTime,
@@ -50,9 +50,9 @@ impl Database {
 	pub async fn get_refresh_token(
 		&self,
 		token_id: &str,
-	) -> Result<Option<DBRefreshToken>, sqlx::Error> {
+	) -> Result<Option<RefreshToken>, sqlx::Error> {
 		sqlx::query_as!(
-			DBRefreshToken,
+			RefreshToken,
 			r#"SELECT id, user_id as "user_id: uuid::Uuid", created_at as "created_at: OffsetDateTime" FROM refresh_tokens WHERE id = ?"#,
 			token_id
 		)
