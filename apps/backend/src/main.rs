@@ -3,6 +3,7 @@ mod db;
 mod logger;
 mod routes;
 mod secrets;
+mod server_instance;
 
 use db::Database;
 use log::{info, LevelFilter};
