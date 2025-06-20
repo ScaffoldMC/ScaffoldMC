@@ -1,7 +1,7 @@
 use tokio::process::Child;
 use uuid::Uuid;
 
-struct ServerInstance {
+pub struct ServerInstance {
 	id: Uuid,
 	name: String,
 	game_version: String,

@@ -8,8 +8,13 @@ mod server_instance;
 use db::Database;
 use log::{info, LevelFilter};
 use secrets::Secrets;
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
+use tokio::sync::RwLock;
+use uuid::Uuid;
+
+use crate::server_instance::ServerInstance;
 
 static LOGGER: logger::Logger = logger::Logger;
 
@@ -17,6 +22,7 @@ static LOGGER: logger::Logger = logger::Logger;
 struct AppState {
 	pub db: Database,
 	pub secrets: Secrets,
+	pub servers: Arc<RwLock<HashMap<Uuid, ServerInstance>>>,
 }
 
 impl AppState {
