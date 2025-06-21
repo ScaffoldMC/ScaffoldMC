@@ -1,9 +1,10 @@
 use tokio::process::Child;
 use uuid::Uuid;
 
+use crate::server::config::ServerConfig;
+
 pub struct ServerInstance {
 	id: Uuid,
-	name: String,
-	game_version: String,
+	config: ServerConfig,
 	process: Option<Child>,
 }

@@ -3,7 +3,7 @@ mod db;
 mod logger;
 mod routes;
 mod secrets;
-mod server_instance;
+mod server;
 
 use db::Database;
 use log::{info, LevelFilter};
@@ -14,15 +14,13 @@ use std::{env, net::SocketAddr};
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-use crate::server_instance::ServerInstance;
-
 static LOGGER: logger::Logger = logger::Logger;
 
 #[derive(Clone)]
 struct AppState {
 	pub db: Database,
 	pub secrets: Secrets,
-	pub servers: Arc<RwLock<HashMap<Uuid, ServerInstance>>>,
+	pub servers: Arc<RwLock<HashMap<Uuid, server::ServerInstance>>>,
 }
 
 impl AppState {
