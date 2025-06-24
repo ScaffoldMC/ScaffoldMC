@@ -9,6 +9,7 @@ mod server;
 use db::Database;
 use log::{info, LevelFilter};
 use secrets::Secrets;
+use server::instance::ServerInstance;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
@@ -21,7 +22,7 @@ static LOGGER: logger::Logger = logger::Logger;
 struct AppState {
 	pub db: Database,
 	pub secrets: Secrets,
-	pub servers: Arc<RwLock<HashMap<Uuid, server::ServerInstance>>>,
+	pub servers: Arc<RwLock<HashMap<Uuid, ServerInstance>>>,
 }
 
 impl AppState {
@@ -40,7 +41,11 @@ impl AppState {
 
 		let secrets = Secrets::new(&base_dir);
 
-		AppState { db, secrets }
+		AppState {
+			db,
+			secrets,
+			servers: Arc::new(RwLock::new(HashMap::new())),
+		}
 	}
 }
 
