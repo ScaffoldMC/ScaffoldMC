@@ -1,3 +1,4 @@
+mod api_types;
 mod auth;
 mod config;
 mod db;

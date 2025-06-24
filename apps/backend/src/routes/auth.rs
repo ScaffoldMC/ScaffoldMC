@@ -3,22 +3,14 @@ use std::sync::Arc;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use log::error;
 use password_auth::{verify_password, VerifyError};
-use serde::{Deserialize, Serialize};
 use tokio::task::spawn_blocking;
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
-use ts_rs::TS;
 
+use crate::api_types::auth::LoginRequest;
 use crate::auth;
 use crate::auth::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME, REFRESH_TOKEN_LENGTH};
 use crate::AppState;
-
-#[derive(TS, Debug, Clone, Serialize, Deserialize)]
-#[ts(export)]
-pub struct LoginRequest {
-	pub username: String,
-	pub password: String,
-}
 
 pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new()

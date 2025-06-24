@@ -1,18 +1,9 @@
 use crate::db::user::User;
 use crate::AppState;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Extension, Json, Router};
-use serde::Serialize;
 use std::sync::Arc;
-use ts_rs::TS;
-use uuid::Uuid;
 
-#[derive(TS, Serialize)]
-#[ts(export)]
-struct UserResponse {
-	id: Uuid,
-	fullname: String,
-	username: String,
-}
+use crate::api_types::user::UserResponse;
 
 impl From<User> for UserResponse {
 	fn from(db_user: User) -> Self {

@@ -7,7 +7,7 @@ use crate::{config::SERVER_CONFIG_FILE_NAME, server::config::ServerConfig};
 
 pub struct ServerInstance {
 	id: Uuid,
-	config: ServerConfig,
+	pub config: ServerConfig,
 	process: Option<Child>,
 }
 
