@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::{config::SERVER_CONFIG_FILE_NAME, server::config::ServerConfig};
 use thiserror::Error;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Error)]
 pub enum ServerError {
@@ -14,6 +15,10 @@ pub enum ServerError {
 	StartError(String),
 	#[error("Failed to stop server: {0}")]
 	StopError(String),
+	#[error("Failed to send command to server: {0}")]
+	CommandError(String),
+	#[error("Server is not running")]
+	NotRunning,
 }
 
 pub struct ServerInstance {
@@ -29,6 +34,23 @@ impl ServerInstance {
 			config,
 			process: None,
 		}
+	}
+
+	pub async fn send_command(&mut self, command: &str) -> Result<(), ServerError> {
+		let child = self.process.as_mut().ok_or(ServerError::NotRunning)?;
+		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
+
+		let command_with_newline = format!("{}\n", command);
+
+		if let Err(err) = stdin.write_all(command_with_newline.as_bytes()).await {
+			return Err(ServerError::CommandError(err.to_string()));
+		}
+
+		if let Err(err) = stdin.flush().await {
+			return Err(ServerError::CommandError(err.to_string()));
+		}
+
+		Ok(())
 	}
 
 	pub async fn start(&mut self) -> Result<(), ServerError> {
