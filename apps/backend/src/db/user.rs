@@ -69,4 +69,35 @@ impl Database {
 		
 		Ok(())
 	}
+
+	pub async fn create_user(
+		&self,
+		user_id: Uuid,
+		fullname: &str,
+		username: &str,
+		password_hash: &str,
+	) -> Result<(), sqlx::Error> {
+		sqlx::query!(
+			r#"INSERT INTO users (id, fullname, username, password_hash) VALUES (?, ?, ?, ?)"#,
+			user_id,
+			fullname,
+			username,
+			password_hash
+		)
+		.execute(&self.pool)
+		.await?;
+		
+		Ok(())
+	}
+
+	pub async fn delete_user(&self, user_id: Uuid) -> Result<(), sqlx::Error> {
+		sqlx::query!(
+			r#"DELETE FROM users WHERE id = ?"#,
+			user_id
+		)
+		.execute(&self.pool)
+		.await?;
+		
+		Ok(())
+	}
 }
