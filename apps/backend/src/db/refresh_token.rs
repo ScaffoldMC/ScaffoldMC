@@ -1,5 +1,5 @@
 use super::Database;
-use crate::auth::REFRESH_TOKEN_LENGTH;
+use crate::config::REFRESH_TOKEN_LENGTH;
 use serde::{Deserialize, Serialize};
 use sqlx::{types::time::OffsetDateTime, types::Uuid, FromRow};
 
