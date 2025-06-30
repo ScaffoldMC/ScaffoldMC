@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
-static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2/";
+static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(tag = "name", rename_all = "snake_case")]
@@ -22,24 +23,25 @@ pub enum Game {
 }
 
 impl Game {
-	async fn install_fabric(mc_version: &str, fabric_version: &str) -> Result<(), String> {
-		let url = format!(
-			"{}versions/loader/{}/{}/server/jar",
-			FABRIC_API_URL, mc_version, fabric_version
-		);
-
-		let response = reqwest::get(&url)
+	async fn download_file(url: &str, path: PathBuf) -> Result<(), String> {
+		let response = reqwest::get(url)
 			.await
 			.map_err(|e| format!("Failed to download: {}", e))?;
+
+		if !response.status().is_success() {
+			return Err(format!(
+				"Failed to download file from {}: {}",
+				url,
+				response.status()
+			));
+		}
 
 		let bytes = response
 			.bytes()
 			.await
 			.map_err(|e| format!("Failed to read response: {}", e))?;
 
-		// TODO: Centralize the path where the server jar is saved
-		std::fs::write("data/server.jar", bytes)
-			.map_err(|e| format!("Failed to save file: {}", e))?;
+		std::fs::write(path, bytes).map_err(|e| format!("Failed to save file: {}", e))?;
 
 		Ok(())
 	}
@@ -54,7 +56,17 @@ impl Game {
 					match loader {
 						Loader::Fabric {
 							version: loader_version,
-						} => Self::install_fabric(mc_version, loader_version).await?,
+						} => {
+							let url = format!(
+								"{FABRIC_API_URL}/versions/loader/{mc_version}/{loader_version}/server/jar"
+							);
+
+							let install_path = PathBuf::from(format!(
+								"games/mcje/{mc_version}/fabric/{loader_version}/server.jar"
+							));
+
+							Self::download_file(&url, install_path).await?;
+						}
 						Loader::Paper {
 							version: loader_version,
 						} => todo!(),
