@@ -7,7 +7,7 @@ use crate::AppState;
 use axum::{http, middleware, Router};
 use std::sync::Arc;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 pub fn create_router(state: Arc<AppState>) -> Router {
 	let cors = CorsLayer::new()

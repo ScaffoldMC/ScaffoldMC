@@ -34,7 +34,7 @@ impl AppState {
 		}
 
 		let db = Arc::new(
-			db::Database::new(&base_dir.join("db.sqlite"))
+			Database::new(&base_dir.join("db.sqlite"))
 				.await
 				.expect("Failed to start DB"),
 		);
