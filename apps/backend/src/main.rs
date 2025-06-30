@@ -5,16 +5,14 @@ mod db;
 mod logger;
 mod secrets;
 mod server;
+mod services;
 
 use db::Database;
 use log::{info, LevelFilter};
 use secrets::Secrets;
-use server::instance::ServerInstance;
-use std::collections::HashMap;
+use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
-use tokio::sync::RwLock;
-use uuid::Uuid;
 
 static LOGGER: logger::Logger = logger::Logger;
 
@@ -22,7 +20,7 @@ static LOGGER: logger::Logger = logger::Logger;
 struct AppState {
 	pub db: Database,
 	pub secrets: Secrets,
-	pub servers: Arc<RwLock<HashMap<Uuid, ServerInstance>>>,
+	pub server_service: Arc<ServerService>,
 }
 
 impl AppState {
@@ -44,7 +42,7 @@ impl AppState {
 		AppState {
 			db,
 			secrets,
-			servers: Arc::new(RwLock::new(HashMap::new())),
+			server_service: Arc::new(ServerService::new()),
 		}
 	}
 }
