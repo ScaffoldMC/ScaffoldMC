@@ -1,5 +1,4 @@
 mod api;
-mod auth;
 mod config;
 mod db;
 mod logger;
@@ -14,13 +13,14 @@ use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
 
+use crate::services::auth::AuthService;
+
 static LOGGER: logger::Logger = logger::Logger;
 
 #[derive(Clone)]
 struct AppState {
-	pub db: Database,
-	pub secrets: Secrets,
 	pub server_service: Arc<ServerService>,
+	pub auth_service: Arc<AuthService>,
 }
 
 impl AppState {
@@ -33,16 +33,17 @@ impl AppState {
 			std::fs::create_dir_all(&base_dir).expect("Read/write should be available");
 		}
 
-		let db = db::Database::new(&base_dir.join("db.sqlite"))
-			.await
-			.expect("Failed to start DB");
+		let db = Arc::new(
+			db::Database::new(&base_dir.join("db.sqlite"))
+				.await
+				.expect("Failed to start DB"),
+		);
 
 		let secrets = Secrets::new(&base_dir);
 
 		AppState {
-			db,
-			secrets,
 			server_service: Arc::new(ServerService::new()),
+			auth_service: Arc::new(AuthService::new(db, secrets)),
 		}
 	}
 }
