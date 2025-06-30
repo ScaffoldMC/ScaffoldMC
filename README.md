@@ -1,3 +1,6 @@
+> [!NOTE]  
+> This project is under heavy development, and is **not ready for use**.
+
 # mc-server-ui
 
 A self-hosted first-class Minecraft server panel.
