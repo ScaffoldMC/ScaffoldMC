@@ -9,7 +9,7 @@ use tower_cookies::Cookies;
 
 use crate::api::types::auth::LoginRequest;
 use crate::auth;
-use crate::auth::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME, REFRESH_TOKEN_LENGTH};
+use crate::config::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME, REFRESH_TOKEN_LENGTH};
 use crate::AppState;
 
 pub fn create_router() -> Router<Arc<AppState>> {

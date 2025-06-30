@@ -2,7 +2,7 @@ mod auth;
 mod me;
 mod servers;
 
-use crate::auth::require_auth;
+use crate::api::middleware::auth::require_auth;
 use crate::AppState;
 use axum::{http, middleware, Router};
 use std::sync::Arc;

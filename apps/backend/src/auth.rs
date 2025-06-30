@@ -1,26 +1,10 @@
-use crate::AppState;
-use axum::{
-	extract::{Request, State},
-	http::StatusCode,
-	middleware::Next,
-	response::Response,
-};
+use crate::{config::AUTH_TOKEN_LENGTH, AppState};
 use base64::engine::general_purpose;
 use base64::Engine;
-use jsonwebtoken::{Algorithm, Validation};
-use log::error;
+use jsonwebtoken::Algorithm;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use time::Duration;
-use tower_cookies::Cookies;
-use uuid::Uuid;
-
-pub static REFRESH_COOKIE_NAME: &str = "ref_token";
-pub static AUTH_COOKIE_NAME: &str = "auth_token";
-
-pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
-pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthTokenClaims {
@@ -55,46 +39,4 @@ pub fn create_refresh_token() -> String {
 	let mut bytes = [0u8; 32];
 	rand::rng().fill(&mut bytes);
 	general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
-}
-
-pub async fn require_auth(
-	cookies: Cookies,
-	State(state): State<Arc<AppState>>,
-	mut req: Request,
-	next: Next,
-) -> Result<Response, StatusCode> {
-	let token = cookies
-		.get(AUTH_COOKIE_NAME)
-		.map(|cookie| cookie.value().to_string());
-
-	if token.is_none() {
-		return Err(StatusCode::UNAUTHORIZED);
-	}
-
-	let token = token.unwrap();
-
-	let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
-		&token,
-		&state.secrets.jwt_dec,
-		&Validation::new(Algorithm::RS256),
-	) {
-		Ok(data) => data,
-		Err(_) => return Err(StatusCode::UNAUTHORIZED),
-	};
-
-	let user_uuid = match Uuid::parse_str(&token_data.claims.sub) {
-		Ok(uuid) => uuid,
-		Err(err) => {
-			error!("Unable to parse UUID: {}", err);
-			return Err(StatusCode::UNAUTHORIZED);
-		}
-	};
-
-	let user = match state.db.get_user_by_id(user_uuid).await {
-		Ok(user) => user,
-		Err(_) => return Err(StatusCode::UNAUTHORIZED),
-	};
-
-	req.extensions_mut().insert(user);
-	Ok(next.run(req).await)
 }
