@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use crate::server::mojang_api::get_version_info;
+
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -72,8 +74,14 @@ impl Game {
 						} => todo!(),
 					}
 				} else {
-					// TODO: Logic to install Java Minecraft
-					println!("Installing Minecraft Java {}", mc_version);
+					let version_info = get_version_info(mc_version)
+						.await
+						.map_err(|e| e.to_string())?;
+
+					let install_path =
+						PathBuf::from(format!("games/mcje/{mc_version}/vanilla/server.jar"));
+
+					Self::download_file(&version_info.url, install_path).await?;
 				}
 			}
 			Game::MinecraftBedrock { version } => {
