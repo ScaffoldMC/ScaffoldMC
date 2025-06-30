@@ -9,16 +9,5 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 pub async fn get_servers(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-	let servers = state
-		.servers
-		.read()
-		.await
-		.iter()
-		.map(|(&id, instance)| PartialServer {
-			id: id.clone(),
-			name: instance.config.name.clone(),
-		})
-		.collect::<Vec<PartialServer>>();
-
-	Json(servers).into_response()
+	todo!("Call server service")
 }
