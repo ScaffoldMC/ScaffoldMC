@@ -1,4 +1,4 @@
-use crate::api_types::server::PartialServer;
+use crate::api::types::server::PartialServer;
 use crate::AppState;
 use axum::{extract::State, response::IntoResponse};
 use axum::{routing::get, Json, Router};

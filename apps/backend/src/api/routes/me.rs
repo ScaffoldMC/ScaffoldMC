@@ -3,7 +3,7 @@ use crate::AppState;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Extension, Json, Router};
 use std::sync::Arc;
 
-use crate::api_types::user::UserResponse;
+use crate::api::types::user::UserResponse;
 
 impl From<User> for UserResponse {
 	fn from(db_user: User) -> Self {

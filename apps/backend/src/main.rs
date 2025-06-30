@@ -1,9 +1,8 @@
-mod api_types;
+mod api;
 mod auth;
 mod config;
 mod db;
 mod logger;
-mod routes;
 mod secrets;
 mod server;
 
@@ -57,7 +56,7 @@ async fn main() {
 		.expect("Failed to set logger");
 
 	let state = Arc::new(AppState::new().await);
-	let app = routes::create_router(state);
+	let app = api::routes::create_router(state);
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
 	info!("Starting server on {}", addr);
