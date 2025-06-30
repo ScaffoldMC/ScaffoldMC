@@ -2,5 +2,7 @@
 	"plugins": ["prettier-plugin-css-order"],
 	"useTabs": true,
 	"singleQuote": false,
-	"semi": true
+	"semi": true,
+	"printWidth": 80,
+	"proseWrap": "always"
 }
