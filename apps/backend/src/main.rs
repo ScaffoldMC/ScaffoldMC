@@ -42,7 +42,7 @@ impl AppState {
 		let secrets = Secrets::new(&base_dir);
 
 		AppState {
-			server_service: Arc::new(ServerService::new()),
+			server_service: Arc::new(ServerService::new("data/servers".into())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 		}
 	}
