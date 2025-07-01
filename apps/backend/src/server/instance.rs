@@ -28,9 +28,9 @@ pub struct ServerInstance {
 }
 
 impl ServerInstance {
-	pub fn new(config: ServerConfig) -> Self {
+	pub fn new(id: Uuid, config: ServerConfig) -> Self {
 		Self {
-			id: Uuid::new_v4(),
+			id,
 			config,
 			process: None,
 		}
@@ -87,11 +87,19 @@ impl ServerInstance {
 			return Err(format!("Path {:?} is not a directory", path));
 		}
 
+		let dir_name = path
+			.file_name()
+			.and_then(|name| name.to_str())
+			.ok_or_else(|| format!("Failed to get directory name from path {:?}", path))?;
+
+		let uuid = Uuid::try_parse(dir_name)
+			.map_err(|_| format!("Invalid UUID in directory name: {}", dir_name))?;
+
 		let config_path = path.join(SERVER_CONFIG_FILE_NAME);
 		let server_config = ServerConfig::load_from_file(config_path);
 
 		match server_config {
-			Ok(server_config) => Ok(Self::new(server_config)),
+			Ok(server_config) => Ok(Self::new(uuid, server_config)),
 			Err(e) => Err(format!("Failed to load server config: {}", e)),
 		}
 	}
