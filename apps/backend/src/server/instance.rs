@@ -22,7 +22,7 @@ pub enum ServerError {
 }
 
 pub struct ServerInstance {
-	id: Uuid,
+	pub id: Uuid,
 	pub config: ServerConfig,
 	process: Option<Child>,
 }
