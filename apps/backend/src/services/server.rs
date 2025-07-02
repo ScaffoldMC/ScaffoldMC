@@ -27,7 +27,14 @@ impl ServerService {
 		let dir_entries =
 			std::fs::read_dir(&path).expect("Failed to read server instances directory");
 
-		for entry in dir_entries.flatten() {
+		for entry in dir_entries {
+			if let Err(err) = entry {
+				error!("Failed to read directory entry: {}", err);
+				continue;
+			}
+
+			let entry = entry.unwrap();
+
 			ServerInstance::load_from_dir(entry.path())
 				.map(|instance| {
 					instances.insert(instance.id, instance);
