@@ -1,4 +1,5 @@
 mod auth;
+mod games;
 mod me;
 mod servers;
 

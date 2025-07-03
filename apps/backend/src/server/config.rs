@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-
+use crate::services::game::Game;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
@@ -14,7 +14,7 @@ pub enum ConfigError {
 #[serde(rename_all = "snake_case")]
 pub struct ServerConfig {
 	pub name: String,
-	pub version: super::game::Game,
+	pub version: Game,
 	pub jvm_args: Vec<String>,
 }
 

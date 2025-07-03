@@ -9,6 +9,7 @@ mod services;
 use db::Database;
 use log::{info, LevelFilter};
 use secrets::Secrets;
+use services::game::GameService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
@@ -21,6 +22,7 @@ static LOGGER: logger::Logger = logger::Logger;
 struct AppState {
 	pub server_service: Arc<ServerService>,
 	pub auth_service: Arc<AuthService>,
+	pub game_service: Arc<GameService>,
 }
 
 impl AppState {
@@ -44,6 +46,7 @@ impl AppState {
 		AppState {
 			server_service: Arc::new(ServerService::new("data/servers".into())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
+			game_service: Arc::new(GameService::new()),
 		}
 	}
 }
