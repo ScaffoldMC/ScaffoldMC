@@ -5,6 +5,7 @@ mod logger;
 mod secrets;
 mod server;
 mod services;
+mod util;
 
 use db::Database;
 use log::{info, LevelFilter};
