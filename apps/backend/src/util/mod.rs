@@ -1,1 +1,1 @@
-mod mojang_api;
+pub mod mojang_api;
