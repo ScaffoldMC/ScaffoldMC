@@ -1,3 +1,4 @@
+use crate::util::mojang_api::get_version_info;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -19,7 +20,7 @@ pub enum Game {
 
 impl Game {
 	/// Get the download URL for this game
-	pub fn get_download_url(&self) -> String {
+	pub async fn get_download_url(&self) -> String {
 		match self {
 			Game::MinecraftJava { version, loader } => match loader {
 				Some(MinecraftJavaLoader::Fabric {
@@ -30,7 +31,11 @@ impl Game {
 				Some(MinecraftJavaLoader::Paper {
 					version: loader_version,
 				}) => todo!(),
-				None => format!("{FABRIC_API_URL}/v2/versions/game/{version}"),
+				None => get_version_info(version)
+					.await
+					.expect("Failed to get version info") // TODO: Handle error properly
+					.url
+					.clone(),
 			},
 		}
 	}
@@ -68,7 +73,7 @@ impl GameService {
 	}
 
 	pub async fn install_game(&self, game: Game) -> Result<(), String> {
-		let download_url = game.get_download_url();
+		let download_url = game.get_download_url().await;
 		let binary_dir = PathBuf::from("data/games/").join(game.get_binary_dir());
 
 		// Ensure the binary directory exists
