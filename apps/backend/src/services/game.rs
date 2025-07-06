@@ -93,6 +93,18 @@ impl GameService {
 		Ok(())
 	}
 
+	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
+		let binary_path = PathBuf::from("data/games/").join(game.get_binary_path());
+
+		if !binary_path.exists() {
+			self.install_game(game.clone())
+				.await
+				.map_err(|e| format!("Failed to ensure binary: {}", e))?;
+		}
+
+		Ok(binary_path)
+	}
+
 	async fn download_file(url: &str, path: PathBuf) -> Result<(), String> {
 		let response = reqwest::get(url)
 			.await
