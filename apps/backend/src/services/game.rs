@@ -5,63 +5,63 @@ use std::path::PathBuf;
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum MinecraftJavaLoader {
-	Fabric { version: String },
-	Paper { version: String },
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Game {
-	MinecraftJava {
+	MCJava {
 		version: String,
-		loader: Option<MinecraftJavaLoader>,
+	},
+	MCJavaFabric {
+		mc_version: String,
+		fabric_version: String,
 	},
 }
 
 impl Game {
-	pub fn from_path(path: &PathBuf) -> Result<Self, String> {
-		let mut components = path.components();
-		todo!("Parse components to determine game type");
+	pub fn identifier(&self) -> &str {
+		match self {
+			Game::MCJava { version } => "minecraft-java",
+			Game::MCJavaFabric {
+				mc_version,
+				fabric_version,
+			} => "minecraft-java-fabric",
+		}
 	}
 
 	/// Get the download URL for this game
 	pub async fn get_download_url(&self) -> String {
 		match self {
-			Game::MinecraftJava { version, loader } => match loader {
-				Some(MinecraftJavaLoader::Fabric {
-					version: loader_version,
-				}) => format!(
-					"{FABRIC_API_URL}/versions/loader/{version}/{loader_version}/server/jar"
-				),
-				Some(MinecraftJavaLoader::Paper {
-					version: loader_version,
-				}) => todo!(),
-				None => get_version_info(version)
-					.await
-					.expect("Failed to get version info") // TODO: Handle error properly
-					.url
-					.clone(),
-			},
+			Game::MCJava { version } => get_version_info(version)
+				.await
+				.expect("Failed to get version info") // TODO: Handle error properly
+				.url
+				.clone(),
+			Game::MCJavaFabric {
+				mc_version,
+				fabric_version,
+			} => {
+				format!("{FABRIC_API_URL}/versions/loader/{mc_version}/{fabric_version}/server/jar")
+			}
 		}
 	}
 
-	pub fn get_binary_path(&self) -> PathBuf {
+	/// Get the name of the binary for this game
+	pub fn binary_name(&self) -> &str {
 		match self {
-			Game::MinecraftJava { version, loader } => self.get_binary_dir().join("server.jar"),
+			Game::MCJava { version } => "server.jar",
+			Game::MCJavaFabric {
+				mc_version,
+				fabric_version,
+			} => "server.jar",
 		}
 	}
 
-	pub fn get_binary_dir(&self) -> PathBuf {
+	/// Get the version of this game as a single string
+	pub fn version(&self) -> String {
 		match self {
-			Game::MinecraftJava { version, loader } => match loader {
-				Some(MinecraftJavaLoader::Fabric {
-					version: loader_version,
-				}) => PathBuf::from(format!("mcje/{}/fabric/{}/", version, loader_version)),
-				Some(MinecraftJavaLoader::Paper {
-					version: loader_version,
-				}) => PathBuf::from(format!("mcje/{}/paper/{}/", version, loader_version)),
-				None => PathBuf::from(format!("mcje/{}/vanilla/", version)),
-			},
+			Game::MCJava { version } => version.clone(),
+			Game::MCJavaFabric {
+				mc_version,
+				fabric_version,
+			} => format!("{mc_version}-{fabric_version}"),
 		}
 	}
 }
@@ -79,7 +79,7 @@ impl GameService {
 
 	pub async fn install_game(&self, game: Game) -> Result<(), String> {
 		let download_url = game.get_download_url().await;
-		let binary_dir = PathBuf::from("data/games/").join(game.get_binary_dir());
+		let binary_dir = Self::binary_dir(&game);
 
 		// Ensure the binary directory exists
 		if !binary_dir.exists() {
@@ -87,7 +87,7 @@ impl GameService {
 				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
 		}
 
-		let binary_path = PathBuf::from("data/games/").join(game.get_binary_path());
+		let binary_path = Self::binary_dir(&game).join(game.binary_name());
 
 		// TODO: Might want to spawn blocking?
 
@@ -99,7 +99,7 @@ impl GameService {
 	}
 
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
-		let binary_path = PathBuf::from("data/games/").join(game.get_binary_path());
+		let binary_path = Self::binary_dir(game).join(game.binary_name());
 
 		if !binary_path.exists() {
 			self.install_game(game.clone())
@@ -123,13 +123,20 @@ impl GameService {
 			let path = entry.path();
 
 			if path.is_dir() {
-				if let Ok(game) = Game::from_path(&path) {
-					games.push(game);
-				}
+				// TODO: Figure out how to load the game from the directory
+				// if let Ok(game) = Game::from_path(&path) {
+				// 	games.push(game);
+				// }
 			}
 		}
 
 		Ok(games)
+	}
+
+	fn binary_dir(game: &Game) -> PathBuf {
+		PathBuf::from("data/games/")
+			.join(game.identifier())
+			.join(game.version())
 	}
 
 	async fn download_file(url: &str, path: PathBuf) -> Result<(), String> {
