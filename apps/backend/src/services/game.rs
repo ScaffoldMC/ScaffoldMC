@@ -19,6 +19,11 @@ pub enum Game {
 }
 
 impl Game {
+	pub fn from_path(path: &PathBuf) -> Result<Self, String> {
+		let mut components = path.components();
+		todo!("Parse components to determine game type");
+	}
+
 	/// Get the download URL for this game
 	pub async fn get_download_url(&self) -> String {
 		match self {
@@ -103,6 +108,28 @@ impl GameService {
 		}
 
 		Ok(binary_path)
+	}
+
+	pub async fn get_installed(&self) -> Result<Vec<Game>, String> {
+		let games_dir = PathBuf::from("data/games/");
+		if !games_dir.exists() {
+			return Ok(vec![]);
+		}
+
+		let mut games = Vec::new();
+
+		for entry in std::fs::read_dir(games_dir).map_err(|e| e.to_string())? {
+			let entry = entry.map_err(|e| e.to_string())?;
+			let path = entry.path();
+
+			if path.is_dir() {
+				if let Ok(game) = Game::from_path(&path) {
+					games.push(game);
+				}
+			}
+		}
+
+		Ok(games)
 	}
 
 	async fn download_file(url: &str, path: PathBuf) -> Result<(), String> {
