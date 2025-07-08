@@ -68,7 +68,7 @@ impl GameService {
 		Ok(games)
 	}
 
-	fn binary_dir(game: &Game) -> PathBuf {
+	fn binary_dir(game: Game) -> PathBuf {
 		PathBuf::from("data/games/")
 			.join(game.identifier())
 			.join(game.version())
