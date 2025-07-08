@@ -15,11 +15,5 @@ pub trait BinaryProvider {
 
 	async fn list_all(&self) -> Result<Vec<Self::Listing>, String>;
 	async fn latest(&self) -> Result<Self::Listing, String>;
-	async fn get(&self, version: &str) -> Result<Self::Listing, String> {
-		let listings = self.list_all().await?;
-		listings
-			.into_iter()
-			.find(|l| l.version() == version)
-			.ok_or_else(|| format!("No binary found for version: {}", version))
-	}
+	async fn get(&self, version: &str) -> Result<Self::Listing, String>;
 }

@@ -8,9 +8,9 @@ struct FabricBinaryListing {
 }
 
 impl FabricBinaryListing {
-	pub fn new(version: String) -> Self {
+	pub fn new(version: String, download_url: String) -> Self {
 		Self {
-			download_url: format!("{FABRIC_API_URL}/versions/game/{version}"),
+			download_url,
 			version,
 		}
 	}
@@ -45,5 +45,12 @@ impl BinaryProvider for FabricBinaryProvider {
 
 	async fn latest(&self) -> Result<Self::Listing, String> {
 		todo!()
+	}
+
+	async fn get(&self, version: &str) -> Result<Self::Listing, String> {
+		Ok(FabricBinaryListing::new(
+			version.into(),
+			format!("{FABRIC_API_URL}/versions/game/{version}"),
+		))
 	}
 }

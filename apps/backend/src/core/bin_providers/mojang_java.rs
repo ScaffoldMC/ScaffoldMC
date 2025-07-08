@@ -64,18 +64,11 @@ pub struct MojangJavaBinaryListing {
 }
 
 impl MojangJavaBinaryListing {
-	pub async fn new(version: String) -> Result<Self, String> {
-		if let Ok(info) = get_version_info(&version).await {
-			Ok(Self {
-				version,
-				download_url: info.url.clone(),
-			})
-		} else {
-			Err(format!(
-				"Failed to create MojangJavaBinaryListing for version: {}",
-				version
-			))
-		}
+	pub async fn new(version: String, download_url: String) -> Result<Self, String> {
+		Ok(Self {
+			version,
+			download_url,
+		})
 	}
 }
 
@@ -110,7 +103,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		let mut listings = Vec::new();
 
 		for v in &manifest.versions {
-			match MojangJavaBinaryListing::new(v.id.clone()).await {
+			match self.get(&v.id).await {
 				Ok(listing) => listings.push(listing),
 				Err(e) => error!("Failed to create listing for version {}: {}", v.id, e),
 			}
@@ -123,6 +116,11 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		let manifest = get_manifest().await?;
 		let latest_version = manifest.latest.release;
 
-		MojangJavaBinaryListing::new(latest_version).await
+		self.get(&latest_version).await
+	}
+
+	async fn get(&self, version: &str) -> Result<Self::Listing, String> {
+		let version_info = get_version_info(version).await?;
+		MojangJavaBinaryListing::new(version.to_string(), version_info.url).await
 	}
 }
