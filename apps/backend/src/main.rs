@@ -8,7 +8,7 @@ use core::logger::Logger;
 use core::secrets::Secrets;
 use db::Database;
 use log::{info, LevelFilter};
-use services::game::GameService;
+use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
@@ -21,7 +21,7 @@ static LOGGER: Logger = Logger;
 struct AppState {
 	pub server_service: Arc<ServerService>,
 	pub auth_service: Arc<AuthService>,
-	pub game_service: Arc<GameService>,
+	pub game_service: Arc<BinaryService>,
 }
 
 impl AppState {
@@ -45,7 +45,7 @@ impl AppState {
 		AppState {
 			server_service: Arc::new(ServerService::new("data/servers".into())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
-			game_service: Arc::new(GameService::new()),
+			game_service: Arc::new(BinaryService::new()),
 		}
 	}
 }

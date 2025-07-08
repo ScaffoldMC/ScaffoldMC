@@ -1,9 +1,9 @@
 use crate::core::game::Game;
 use std::path::PathBuf;
 
-pub struct GameService {}
+pub struct BinaryService {}
 
-impl GameService {
+impl BinaryService {
 	pub fn new() -> Self {
 		Self {}
 	}
