@@ -39,6 +39,10 @@ impl BinaryProvider for FabricBinaryProvider {
 		Self {}
 	}
 
+	fn binary_name(&self) -> &str {
+		"server.jar"
+	}
+
 	async fn list_all(&self) -> Result<Vec<Self::Listing>, String> {
 		todo!()
 	}
