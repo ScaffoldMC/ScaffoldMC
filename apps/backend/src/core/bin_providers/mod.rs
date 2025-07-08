@@ -7,7 +7,10 @@ pub trait BinaryListing {
 	fn file_name(&self) -> &str;
 }
 
+// TODO: Implement caching
 pub trait BinaryProvider<T: BinaryListing> {
+	fn new() -> Self;
+
 	async fn list_all(&self) -> Result<Vec<T>, String>;
 	async fn latest(&self) -> Result<T, String>;
 }

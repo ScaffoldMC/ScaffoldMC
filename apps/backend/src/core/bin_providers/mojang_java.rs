@@ -98,6 +98,10 @@ impl BinaryListing for MojangJavaBinaryListing {
 pub struct MojangJavaBinaryProvider;
 
 impl BinaryProvider<MojangJavaBinaryListing> for MojangJavaBinaryProvider {
+	fn new() -> Self {
+		Self {}
+	}
+
 	async fn list_all(&self) -> Result<Vec<MojangJavaBinaryListing>, String> {
 		let manifest = get_manifest().await?;
 

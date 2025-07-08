@@ -33,6 +33,10 @@ impl BinaryListing for FabricBinaryListing {
 pub struct FabricBinaryProvider;
 
 impl BinaryProvider<FabricBinaryListing> for FabricBinaryProvider {
+	fn new() -> Self {
+		Self {}
+	}
+
 	async fn list_all(&self) -> Result<Vec<FabricBinaryListing>, String> {
 		todo!()
 	}
