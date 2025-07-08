@@ -8,9 +8,18 @@ pub trait BinaryListing {
 }
 
 // TODO: Implement caching
-pub trait BinaryProvider<T: BinaryListing> {
+pub trait BinaryProvider {
+	type Listing: BinaryListing;
+
 	fn new() -> Self;
 
-	async fn list_all(&self) -> Result<Vec<T>, String>;
-	async fn latest(&self) -> Result<T, String>;
+	async fn list_all(&self) -> Result<Vec<Self::Listing>, String>;
+	async fn latest(&self) -> Result<Self::Listing, String>;
+	async fn get(&self, version: &str) -> Result<Self::Listing, String> {
+		let listings = self.list_all().await?;
+		listings
+			.into_iter()
+			.find(|l| l.version() == version)
+			.ok_or_else(|| format!("No binary found for version: {}", version))
+	}
 }

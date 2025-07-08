@@ -32,16 +32,18 @@ impl BinaryListing for FabricBinaryListing {
 
 pub struct FabricBinaryProvider;
 
-impl BinaryProvider<FabricBinaryListing> for FabricBinaryProvider {
+impl BinaryProvider for FabricBinaryProvider {
+	type Listing = FabricBinaryListing;
+
 	fn new() -> Self {
 		Self {}
 	}
 
-	async fn list_all(&self) -> Result<Vec<FabricBinaryListing>, String> {
+	async fn list_all(&self) -> Result<Vec<Self::Listing>, String> {
 		todo!()
 	}
 
-	async fn latest(&self) -> Result<FabricBinaryListing, String> {
+	async fn latest(&self) -> Result<Self::Listing, String> {
 		todo!()
 	}
 }

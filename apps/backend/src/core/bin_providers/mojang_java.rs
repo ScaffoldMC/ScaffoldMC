@@ -97,12 +97,14 @@ impl BinaryListing for MojangJavaBinaryListing {
 
 pub struct MojangJavaBinaryProvider;
 
-impl BinaryProvider<MojangJavaBinaryListing> for MojangJavaBinaryProvider {
+impl BinaryProvider for MojangJavaBinaryProvider {
+	type Listing = MojangJavaBinaryListing;
+
 	fn new() -> Self {
 		Self {}
 	}
 
-	async fn list_all(&self) -> Result<Vec<MojangJavaBinaryListing>, String> {
+	async fn list_all(&self) -> Result<Vec<Self::Listing>, String> {
 		let manifest = get_manifest().await?;
 
 		let mut listings = Vec::new();
@@ -117,7 +119,7 @@ impl BinaryProvider<MojangJavaBinaryListing> for MojangJavaBinaryProvider {
 		Ok(listings)
 	}
 
-	async fn latest(&self) -> Result<MojangJavaBinaryListing, String> {
+	async fn latest(&self) -> Result<Self::Listing, String> {
 		let manifest = get_manifest().await?;
 		let latest_version = manifest.latest.release;
 
