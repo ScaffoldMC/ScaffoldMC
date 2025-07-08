@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use tokio::process::{Child, Command};
 use uuid::Uuid;
 
-use crate::{config::SERVER_CONFIG_FILE_NAME, server::config::ServerConfig};
+use super::config::ServerConfig;
+use crate::config::SERVER_CONFIG_FILE_NAME;
 use thiserror::Error;
 use tokio::io::AsyncWriteExt;
 

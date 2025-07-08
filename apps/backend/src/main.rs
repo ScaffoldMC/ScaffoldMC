@@ -1,15 +1,13 @@
 mod api;
 mod config;
+mod core;
 mod db;
-mod logger;
-mod secrets;
-mod server;
 mod services;
-mod util;
 
+use core::logger::Logger;
+use core::secrets::Secrets;
 use db::Database;
 use log::{info, LevelFilter};
-use secrets::Secrets;
 use services::game::GameService;
 use services::server::ServerService;
 use std::sync::Arc;
@@ -17,7 +15,7 @@ use std::{env, net::SocketAddr};
 
 use crate::services::auth::AuthService;
 
-static LOGGER: logger::Logger = logger::Logger;
+static LOGGER: Logger = Logger;
 
 #[derive(Clone)]
 struct AppState {

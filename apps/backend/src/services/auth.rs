@@ -1,7 +1,7 @@
 use crate::{
 	config::{AUTH_TOKEN_LENGTH, REFRESH_TOKEN_LENGTH},
+	core::secrets::Secrets,
 	db::{user::User, Database},
-	secrets::Secrets,
 };
 use base64::{engine::general_purpose, Engine};
 use jsonwebtoken::{Algorithm, Validation};

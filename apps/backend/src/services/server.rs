@@ -1,4 +1,4 @@
-use crate::server::instance::ServerInstance;
+use crate::core::server::instance::ServerInstance;
 use log::{error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;

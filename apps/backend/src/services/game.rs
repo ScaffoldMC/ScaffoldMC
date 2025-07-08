@@ -1,4 +1,4 @@
-use crate::util::mojang_api::get_version_info;
+use crate::core::util::mojang_api::get_version_info;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
