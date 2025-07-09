@@ -1,11 +1,23 @@
+use reqwest::Url;
+
+use crate::core::bin_providers::BinaryInfo;
+use crate::core::bin_providers::{
+	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
+};
 use crate::core::game::Game;
 use std::path::PathBuf;
 
-pub struct BinaryService {}
+pub struct BinaryService {
+	fabric: FabricBinaryProvider,
+	mcje: MojangJavaBinaryProvider,
+}
 
 impl BinaryService {
 	pub fn new() -> Self {
-		Self {}
+		Self {
+			fabric: FabricBinaryProvider::new(),
+			mcje: MojangJavaBinaryProvider::new(),
+		}
 	}
 
 	pub async fn get_games(&self) -> Result<Vec<Game>, String> {
@@ -13,7 +25,6 @@ impl BinaryService {
 	}
 
 	pub async fn install_game(&self, game: Game) -> Result<(), String> {
-		let download_url = game.get_download_url().await;
 		let binary_dir = Self::binary_dir(&game);
 
 		// Ensure the binary directory exists
@@ -22,19 +33,39 @@ impl BinaryService {
 				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
 		}
 
-		let binary_path = Self::binary_dir(&game).join(game.binary_name());
+		match game {
+			Game::MCJava { version } => {
+				let binary = self.mcje.get(version).await?;
+				let download_url = binary.download_url();
+				let binary_name = self.mcje.binary_name();
+				let binary_path = binary_dir.join(binary_name);
 
-		// TODO: Might want to spawn blocking?
+				Self::download_file(download_url, binary_path)
+					.await
+					.map_err(|e| format!("Failed to download game: {}", e))?;
+			}
+			Game::MCJavaFabric { version } => {
+				let binary = self.fabric.get(version).await?;
+				let download_url = binary.download_url();
+				let binary_name = self.fabric.binary_name();
+				let binary_path = binary_dir.join(binary_name);
 
-		Self::download_file(&download_url, binary_path)
-			.await
-			.map_err(|e| format!("Failed to download game: {}", e))?;
+				Self::download_file(download_url, binary_path)
+					.await
+					.map_err(|e| format!("Failed to download game: {}", e))?;
+			}
+		};
 
 		Ok(())
 	}
 
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
-		let binary_path = Self::binary_dir(game).join(game.binary_name());
+		let binary_name = match game {
+			Game::MCJava { .. } => self.mcje.binary_name(),
+			Game::MCJavaFabric { .. } => self.fabric.binary_name(),
+		};
+
+		let binary_path = Self::binary_dir(game).join(binary_name);
 
 		if !binary_path.exists() {
 			self.install_game(game.clone())
@@ -68,14 +99,14 @@ impl BinaryService {
 		Ok(games)
 	}
 
-	fn binary_dir(game: Game) -> PathBuf {
+	fn binary_dir(game: &Game) -> PathBuf {
 		PathBuf::from("data/games/")
 			.join(game.identifier())
-			.join(game.version())
+			.join(game.version().identifier())
 	}
 
-	async fn download_file(url: &str, path: PathBuf) -> Result<(), String> {
-		let response = reqwest::get(url)
+	async fn download_file(url: &Url, path: PathBuf) -> Result<(), String> {
+		let response = reqwest::get(url.clone())
 			.await
 			.map_err(|e| format!("Failed to download: {}", e))?;
 
