@@ -1,6 +1,6 @@
 use crate::core::bin_providers::VersionInfo;
 
-use super::{BinaryListing, BinaryProvider};
+use super::{BinaryInfo, BinaryProvider};
 use log::error;
 use reqwest::Url;
 use serde::Deserialize;
@@ -89,12 +89,12 @@ impl VersionInfo for MojangJavaVersionInfo {
 	}
 }
 
-pub struct MojangJavaBinaryListing {
+pub struct MojangJavaBinaryInfo {
 	download_url: Url,
 	version: MojangJavaVersionInfo,
 }
 
-impl MojangJavaBinaryListing {
+impl MojangJavaBinaryInfo {
 	pub async fn new(version: MojangJavaVersionInfo, download_url: Url) -> Result<Self, String> {
 		Ok(Self {
 			version,
@@ -103,7 +103,7 @@ impl MojangJavaBinaryListing {
 	}
 }
 
-impl BinaryListing for MojangJavaBinaryListing {
+impl BinaryInfo for MojangJavaBinaryInfo {
 	type Version = MojangJavaVersionInfo;
 
 	fn download_url(&self) -> &Url {
@@ -124,7 +124,7 @@ impl BinaryListing for MojangJavaBinaryListing {
 pub struct MojangJavaBinaryProvider;
 
 impl BinaryProvider for MojangJavaBinaryProvider {
-	type Listing = MojangJavaBinaryListing;
+	type Binary = MojangJavaBinaryInfo;
 
 	fn new() -> Self {
 		Self {}
@@ -134,7 +134,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_all(&self) -> Result<Vec<Self::Listing>, String> {
+	async fn list_all(&self) -> Result<Vec<Self::Binary>, String> {
 		let manifest = get_manifest().await?;
 
 		let mut listings = Vec::new();
@@ -152,7 +152,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		Ok(listings)
 	}
 
-	async fn latest(&self) -> Result<Self::Listing, String> {
+	async fn latest(&self) -> Result<Self::Binary, String> {
 		let manifest = get_manifest().await?;
 		let latest_version = manifest.latest.release;
 
@@ -161,11 +161,11 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		self.get(latest_version).await
 	}
 
-	async fn get(&self, version: MojangJavaVersionInfo) -> Result<Self::Listing, String> {
+	async fn get(&self, version: MojangJavaVersionInfo) -> Result<Self::Binary, String> {
 		let version_info = get_version_info(version.game_version()).await?;
 		let download_url =
 			Url::parse(&version_info.url).map_err(|e| format!("Failed to parse URL: {}", e))?;
 
-		MojangJavaBinaryListing::new(version, download_url).await
+		MojangJavaBinaryInfo::new(version, download_url).await
 	}
 }

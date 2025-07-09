@@ -1,4 +1,4 @@
-use crate::core::bin_providers::{BinaryListing, BinaryProvider, VersionInfo};
+use crate::core::bin_providers::{BinaryInfo, BinaryProvider, VersionInfo};
 use reqwest::Url;
 
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
@@ -51,12 +51,12 @@ impl VersionInfo for FabricVersionInfo {
 	}
 }
 
-struct FabricBinaryListing {
+struct FabricBinaryInfo {
 	download_url: Url,
 	version: FabricVersionInfo,
 }
 
-impl FabricBinaryListing {
+impl FabricBinaryInfo {
 	pub fn new(version: FabricVersionInfo, download_url: Url) -> Self {
 		Self {
 			download_url,
@@ -65,7 +65,7 @@ impl FabricBinaryListing {
 	}
 }
 
-impl BinaryListing for FabricBinaryListing {
+impl BinaryInfo for FabricBinaryInfo {
 	type Version = FabricVersionInfo;
 
 	fn download_url(&self) -> &Url {
@@ -84,7 +84,7 @@ impl BinaryListing for FabricBinaryListing {
 pub struct FabricBinaryProvider;
 
 impl BinaryProvider for FabricBinaryProvider {
-	type Listing = FabricBinaryListing;
+	type Binary = FabricBinaryInfo;
 
 	fn new() -> Self {
 		Self {}
@@ -94,15 +94,15 @@ impl BinaryProvider for FabricBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_all(&self) -> Result<Vec<Self::Listing>, String> {
+	async fn list_all(&self) -> Result<Vec<Self::Binary>, String> {
 		todo!()
 	}
 
-	async fn latest(&self) -> Result<Self::Listing, String> {
+	async fn latest(&self) -> Result<Self::Binary, String> {
 		todo!()
 	}
 
-	async fn get(&self, version: FabricVersionInfo) -> Result<Self::Listing, String> {
+	async fn get(&self, version: FabricVersionInfo) -> Result<Self::Binary, String> {
 		let url_str = format!(
 			"{}/versions/loader/{}/{}/{}/server/jar",
 			FABRIC_API_URL,
@@ -114,6 +114,6 @@ impl BinaryProvider for FabricBinaryProvider {
 		let download_url =
 			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {}", e))?;
 
-		Ok(FabricBinaryListing::new(version.into(), download_url))
+		Ok(FabricBinaryInfo::new(version.into(), download_url))
 	}
 }

@@ -9,7 +9,7 @@ pub trait VersionInfo {
 	fn identifier(&self) -> String;
 }
 
-pub trait BinaryListing {
+pub trait BinaryInfo {
 	type Version: VersionInfo;
 
 	fn download_url(&self) -> &Url;
@@ -19,15 +19,15 @@ pub trait BinaryListing {
 
 // TODO: Implement caching
 pub trait BinaryProvider {
-	type Listing: BinaryListing;
+	type Binary: BinaryInfo;
 
 	fn new() -> Self;
 	fn binary_name(&self) -> &str;
 
-	async fn list_all(&self) -> Result<Vec<Self::Listing>, String>;
-	async fn latest(&self) -> Result<Self::Listing, String>;
+	async fn list_all(&self) -> Result<Vec<Self::Binary>, String>;
+	async fn latest(&self) -> Result<Self::Binary, String>;
 	async fn get(
 		&self,
-		version: <Self::Listing as BinaryListing>::Version,
-	) -> Result<Self::Listing, String>;
+		version: <Self::Binary as BinaryInfo>::Version,
+	) -> Result<Self::Binary, String>;
 }
