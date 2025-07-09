@@ -3,7 +3,7 @@ use reqwest::Url;
 
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
-struct FabricVersionInfo {
+pub struct FabricVersionInfo {
 	game_version: String,
 	fabric_version: String,
 	launcher_version: String,
@@ -51,7 +51,7 @@ impl VersionInfo for FabricVersionInfo {
 	}
 }
 
-struct FabricBinaryInfo {
+pub struct FabricBinaryInfo {
 	download_url: Url,
 	version: FabricVersionInfo,
 }
