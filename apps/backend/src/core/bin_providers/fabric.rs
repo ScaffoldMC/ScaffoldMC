@@ -1,57 +1,10 @@
-use crate::core::bin_providers::{BinaryInfo, BinaryProvider, VersionInfo};
+use crate::core::{
+	bin_providers::{BinaryInfo, BinaryProvider},
+	version::{fabric::FabricVersionInfo, VersionInfo},
+};
 use reqwest::Url;
-use serde::{Deserialize, Serialize};
 
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct FabricVersionInfo {
-	game_version: String,
-	fabric_version: String,
-	launcher_version: String,
-	is_prerelease: bool,
-}
-
-impl FabricVersionInfo {
-	pub fn new(
-		game_version: String,
-		fabric_version: String,
-		launcher_version: String,
-		is_prerelease: bool,
-	) -> Self {
-		Self {
-			game_version,
-			fabric_version,
-			launcher_version,
-			is_prerelease,
-		}
-	}
-
-	fn fabric_version(&self) -> &str {
-		&self.fabric_version
-	}
-
-	fn launcher_version(&self) -> &str {
-		&self.launcher_version
-	}
-}
-
-impl VersionInfo for FabricVersionInfo {
-	fn game_version(&self) -> &str {
-		&self.game_version
-	}
-
-	fn is_prerelease(&self) -> bool {
-		self.is_prerelease
-	}
-
-	fn identifier(&self) -> String {
-		format!(
-			"{}-{}-{}",
-			self.game_version, self.fabric_version, self.launcher_version
-		)
-	}
-}
 
 pub struct FabricBinaryInfo {
 	download_url: Url,

@@ -1,8 +1,7 @@
-use crate::core::bin_providers::VersionInfo;
-
 use super::{BinaryInfo, BinaryProvider};
+use crate::core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo};
 use reqwest::Url;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
@@ -59,35 +58,6 @@ pub async fn get_version_info(version_id: &str) -> Result<APIVersionInfo, String
 }
 
 // Version Listing Implementation
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct MojangJavaVersionInfo {
-	game_version: String,
-	is_prerelease: bool,
-}
-
-impl MojangJavaVersionInfo {
-	fn new(game_version: String, is_prerelease: bool) -> Self {
-		Self {
-			game_version,
-			is_prerelease,
-		}
-	}
-}
-
-impl VersionInfo for MojangJavaVersionInfo {
-	fn game_version(&self) -> &str {
-		&self.game_version
-	}
-
-	fn is_prerelease(&self) -> bool {
-		self.is_prerelease
-	}
-
-	fn identifier(&self) -> String {
-		self.game_version.clone()
-	}
-}
 
 pub struct MojangJavaBinaryInfo {
 	download_url: Url,

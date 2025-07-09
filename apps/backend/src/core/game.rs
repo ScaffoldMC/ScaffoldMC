@@ -1,8 +1,5 @@
+use super::version::{fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo};
 use serde::{Deserialize, Serialize};
-
-use crate::core::bin_providers::{
-	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo,
-};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Game {
