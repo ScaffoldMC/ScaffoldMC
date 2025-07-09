@@ -93,12 +93,14 @@ impl BinaryInfo for MojangJavaBinaryInfo {
 
 pub struct MojangJavaBinaryProvider;
 
-impl BinaryProvider for MojangJavaBinaryProvider {
-	type Binary = MojangJavaBinaryInfo;
-
-	fn new() -> Self {
+impl MojangJavaBinaryProvider {
+	pub fn new() -> Self {
 		Self {}
 	}
+}
+
+impl BinaryProvider for MojangJavaBinaryProvider {
+	type Binary = MojangJavaBinaryInfo;
 
 	fn binary_name(&self) -> &str {
 		"server.jar"

@@ -17,7 +17,6 @@ pub trait BinaryInfo {
 pub trait BinaryProvider {
 	type Binary: BinaryInfo;
 
-	fn new() -> Self;
 	fn binary_name(&self) -> &str;
 
 	async fn list_versions(&self) -> Result<Vec<<Self::Binary as BinaryInfo>::Version>, String>;

@@ -38,12 +38,14 @@ impl BinaryInfo for FabricBinaryInfo {
 
 pub struct FabricBinaryProvider;
 
-impl BinaryProvider for FabricBinaryProvider {
-	type Binary = FabricBinaryInfo;
-
-	fn new() -> Self {
+impl FabricBinaryProvider {
+	pub fn new() -> Self {
 		Self {}
 	}
+}
+
+impl BinaryProvider for FabricBinaryProvider {
+	type Binary = FabricBinaryInfo;
 
 	fn binary_name(&self) -> &str {
 		"server.jar"
