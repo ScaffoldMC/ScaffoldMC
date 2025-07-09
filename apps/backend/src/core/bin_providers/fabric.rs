@@ -1,8 +1,10 @@
 use crate::core::bin_providers::{BinaryInfo, BinaryProvider, VersionInfo};
 use reqwest::Url;
+use serde::{Deserialize, Serialize};
 
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FabricVersionInfo {
 	game_version: String,
 	fabric_version: String,

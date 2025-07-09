@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
 
+use crate::core::bin_providers::{
+	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo,
+};
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Game {
-	MCJava {
-		version: String,
-	},
-	MCJavaFabric {
-		mc_version: String,
-		fabric_version: String,
-	},
+	MCJava { version: MojangJavaVersionInfo },
+	MCJavaFabric { version: FabricVersionInfo },
 }
 
 impl Game {
@@ -19,14 +18,10 @@ impl Game {
 		}
 	}
 
-	/// Get the version of this game as a single string
-	pub fn version(&self) -> String {
+	pub fn version(&self) -> &dyn VersionInfo {
 		match self {
-			Game::MCJava { version } => version.clone(),
-			Game::MCJavaFabric {
-				mc_version,
-				fabric_version,
-			} => format!("{mc_version}-{fabric_version}"),
+			Game::MCJava { version } => version,
+			Game::MCJavaFabric { version } => version,
 		}
 	}
 }
