@@ -1,7 +1,6 @@
 use crate::core::bin_providers::VersionInfo;
 
 use super::{BinaryInfo, BinaryProvider};
-use log::error;
 use reqwest::Url;
 use serde::Deserialize;
 
@@ -134,7 +133,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_all(&self) -> Result<Vec<Self::Binary>, String> {
+	async fn list_versions(&self) -> Result<Vec<MojangJavaVersionInfo>, String> {
 		let manifest = get_manifest().await?;
 
 		let mut listings = Vec::new();
@@ -143,20 +142,21 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 			let version_info =
 				MojangJavaVersionInfo::new(v.id.clone(), v.version_type == "snapshot");
 
-			match self.get(version_info).await {
-				Ok(listing) => listings.push(listing),
-				Err(e) => error!("Failed to create listing for version {}: {}", v.id, e),
-			}
+			listings.push(version_info);
 		}
 
 		Ok(listings)
 	}
 
-	async fn latest(&self) -> Result<Self::Binary, String> {
+	async fn get_latest(&self, pre_release: bool) -> Result<Self::Binary, String> {
 		let manifest = get_manifest().await?;
-		let latest_version = manifest.latest.release;
+		let latest_version = if pre_release {
+			manifest.latest.snapshot
+		} else {
+			manifest.latest.release
+		};
 
-		let latest_version = MojangJavaVersionInfo::new(latest_version.clone(), false);
+		let latest_version = MojangJavaVersionInfo::new(latest_version.clone(), pre_release);
 
 		self.get(latest_version).await
 	}

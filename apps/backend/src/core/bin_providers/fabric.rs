@@ -94,11 +94,11 @@ impl BinaryProvider for FabricBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_all(&self) -> Result<Vec<Self::Binary>, String> {
+	async fn list_versions(&self) -> Result<Vec<FabricVersionInfo>, String> {
 		todo!()
 	}
 
-	async fn latest(&self) -> Result<Self::Binary, String> {
+	async fn get_latest(&self, pre_release: bool) -> Result<Self::Binary, String> {
 		todo!()
 	}
 

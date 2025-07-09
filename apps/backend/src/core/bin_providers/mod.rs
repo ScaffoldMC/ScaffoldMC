@@ -24,8 +24,8 @@ pub trait BinaryProvider {
 	fn new() -> Self;
 	fn binary_name(&self) -> &str;
 
-	async fn list_all(&self) -> Result<Vec<Self::Binary>, String>;
-	async fn latest(&self) -> Result<Self::Binary, String>;
+	async fn list_versions(&self) -> Result<Vec<<Self::Binary as BinaryInfo>::Version>, String>;
+	async fn get_latest(&self, pre_release: bool) -> Result<Self::Binary, String>;
 	async fn get(
 		&self,
 		version: <Self::Binary as BinaryInfo>::Version,
