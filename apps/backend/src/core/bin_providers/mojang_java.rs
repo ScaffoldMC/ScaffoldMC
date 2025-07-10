@@ -27,7 +27,7 @@ struct APIVersionInfo {
 	pub url: String,
 }
 
-pub async fn get_manifest() -> Result<APIVersionManifest, String> {
+async fn get_manifest() -> Result<APIVersionManifest, String> {
 	let url = format!("{MOJANG_API_URL}/minecraft/version_manifest.json");
 	let response = reqwest::get(&url)
 		.await
@@ -45,7 +45,7 @@ pub async fn get_manifest() -> Result<APIVersionManifest, String> {
 	Ok(manifest)
 }
 
-pub async fn get_version_info(version_id: &str) -> Result<APIVersionInfo, String> {
+async fn get_version_info(version_id: &str) -> Result<APIVersionInfo, String> {
 	let manifest = get_manifest().await?;
 
 	let version_info = manifest
