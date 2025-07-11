@@ -49,4 +49,21 @@ impl VersionInfo for FabricVersionInfo {
 			self.game_version, self.fabric_version, self.launcher_version
 		)
 	}
+
+	fn from_identifier(identifier: &str) -> Result<Self, String>
+	where
+		Self: Sized,
+	{
+		let parts: Vec<&str> = identifier.split('-').collect();
+		if parts.len() != 3 {
+			return Err(format!("Invalid identifier format: {}", identifier));
+		}
+
+		Ok(Self::new(
+			parts[0].to_string(),
+			parts[1].to_string(),
+			parts[2].to_string(),
+			false, // FIXME: how to determine if it's a prerelease?
+		))
+	}
 }

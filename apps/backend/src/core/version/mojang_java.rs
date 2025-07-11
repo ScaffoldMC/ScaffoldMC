@@ -28,4 +28,17 @@ impl VersionInfo for MojangJavaVersionInfo {
 	fn identifier(&self) -> String {
 		self.game_version.clone()
 	}
+
+	fn from_identifier(identifier: &str) -> Result<Self, String>
+	where
+		Self: Sized,
+	{
+		if identifier.is_empty() {
+			return Err("Identifier cannot be empty".to_string());
+		}
+		Ok(Self {
+			game_version: identifier.to_string(),
+			is_prerelease: false, // FIXME: how to determine if it's a prerelease?
+		})
+	}
 }
