@@ -1,4 +1,5 @@
 use crate::core::server::instance::ServerInstance;
+use crate::services::binary::BinaryService;
 use log::{error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -8,10 +9,11 @@ use uuid::Uuid;
 
 pub struct ServerService {
 	instances: Arc<RwLock<HashMap<Uuid, ServerInstance>>>,
+	binary_service: Arc<BinaryService>,
 }
 
 impl ServerService {
-	pub fn new(path: PathBuf) -> Self {
+	pub fn new(path: PathBuf, binary_service: Arc<BinaryService>) -> Self {
 		let mut instances = HashMap::new();
 
 		info!("Loading server instances");
@@ -50,6 +52,7 @@ impl ServerService {
 
 		Self {
 			instances: Arc::new(RwLock::new(instances)),
+			binary_service,
 		}
 	}
 }

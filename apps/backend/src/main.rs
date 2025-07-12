@@ -21,7 +21,7 @@ static LOGGER: Logger = Logger;
 struct AppState {
 	pub server_service: Arc<ServerService>,
 	pub auth_service: Arc<AuthService>,
-	pub game_service: Arc<BinaryService>,
+	pub binary_service: Arc<BinaryService>,
 }
 
 impl AppState {
@@ -42,10 +42,15 @@ impl AppState {
 
 		let secrets = Secrets::new(&base_dir);
 
+		let binary_service = Arc::new(BinaryService::new());
+
 		AppState {
-			server_service: Arc::new(ServerService::new("data/servers".into())),
+			server_service: Arc::new(ServerService::new(
+				"data/servers".into(),
+				binary_service.clone(),
+			)),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
-			game_service: Arc::new(BinaryService::new()),
+			binary_service,
 		}
 	}
 }
