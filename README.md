@@ -33,4 +33,6 @@ You will need the following programs installed globally:
 - [nx](https://www.npmjs.com/package/nx)
 - [just](https://just.systems/) (Optional)
 
-<!-- TODO: Build instructions -->
+### Build
+
+Run `just build` or `nx build` to build both the frontend and backend.
