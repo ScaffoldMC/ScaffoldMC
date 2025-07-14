@@ -4,7 +4,7 @@ use crate::core::bin_providers::BinaryInfo;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
-use crate::core::game::Game;
+use crate::core::game::{self, Game};
 use std::path::PathBuf;
 
 pub struct BinaryService {
@@ -89,10 +89,32 @@ impl BinaryService {
 			let path = entry.path();
 
 			if path.is_dir() {
-				// TODO: Figure out how to load the game from the directory
-				// if let Ok(game) = Game::from_path(&path) {
-				// 	games.push(game);
-				// }
+				continue;
+			}
+
+			let game_name = path
+				.file_name()
+				.ok_or("Failed to get dir name from subentry")?
+				.to_str()
+				.ok_or("Failed to transform dir name to str")?;
+
+			for subentry in std::fs::read_dir(&path).map_err(|e| e.to_string())? {
+				let subentry = subentry.map_err(|e| e.to_string())?;
+				let subpath = subentry.path();
+
+				if !subpath.is_dir() {
+					continue;
+				}
+
+				let ver_name = subpath
+					.file_name()
+					.ok_or("Failed to get dir name from subentry")?
+					.to_str()
+					.ok_or("Failed to transform dir name to str")?;
+
+				let game = Game::from_path_parts(game_name, ver_name)?;
+
+				games.push(game);
 			}
 		}
 
