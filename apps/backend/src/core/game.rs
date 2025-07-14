@@ -21,4 +21,18 @@ impl Game {
 			Game::MCJavaFabric { version } => version,
 		}
 	}
+
+	pub fn from_path_parts(game_type: &str, version_str: &str) -> Result<Self, String> {
+		match game_type {
+			"minecraft-java" => {
+				let version = MojangJavaVersionInfo::from_identifier(version_str)?;
+				Ok(Game::MCJava { version })
+			}
+			"minecraft-java-fabric" => {
+				let version = FabricVersionInfo::from_identifier(version_str)?;
+				Ok(Game::MCJavaFabric { version })
+			}
+			_ => Err(format!("Unknown game type: {}", game_type)),
+		}
+	}
 }
