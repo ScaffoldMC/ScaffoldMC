@@ -15,7 +15,7 @@ pub enum ConfigError {
 pub struct ServerConfig {
 	pub name: String,
 	pub version: Game,
-	pub jvm_args: Vec<String>,
+	pub args: Vec<String>,
 }
 
 impl ServerConfig {
