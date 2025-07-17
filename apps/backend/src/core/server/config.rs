@@ -18,6 +18,7 @@ pub struct ServerConfig {
 	pub name: String,
 	pub game: Game,
 	pub args: Vec<String>,
+	pub stop_command: String,
 }
 
 impl ServerConfig {
