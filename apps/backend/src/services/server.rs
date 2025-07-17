@@ -1,6 +1,7 @@
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::server::config::ServerConfig;
 use crate::services::binary::BinaryService;
+use crate::services::Service;
 use log::{error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -32,6 +33,26 @@ pub struct ServerService {
 	configs: HashMap<Uuid, ServerConfig>,
 	processes: Arc<RwLock<HashMap<Uuid, Child>>>,
 	binary_service: Arc<BinaryService>,
+}
+
+impl Service for ServerService {
+	async fn shutdown(&mut self) -> Result<(), String> {
+		let server_ids: Vec<Uuid> = {
+			let processes_guard = self.processes.read().await;
+			processes_guard.keys().cloned().collect()
+		};
+
+		for server_id in server_ids {
+			self.stop(server_id)
+				.await
+				.map_err(|e| format!("Failed to stop server {}: {}", server_id, e))?;
+		}
+
+		let mut processes_guard = self.processes.write().await;
+		processes_guard.clear();
+
+		Ok(())
+	}
 }
 
 impl ServerService {
@@ -165,6 +186,17 @@ impl ServerService {
 			}
 			Err(e) => Err(ServerError::StartError(e.to_string())),
 		}
+	}
+
+	pub async fn stop(&mut self, server_id: Uuid) -> Result<(), ServerError> {
+		let stop_command = match self.configs.get(&server_id) {
+			Some(config) => config.stop_command.clone(),
+			None => return Err(ServerError::NoSuchServer(server_id)),
+		};
+
+		self.send_command(server_id, &stop_command).await?;
+
+		Ok(())
 	}
 
 	pub async fn is_running(&self, server_id: Uuid) -> bool {
