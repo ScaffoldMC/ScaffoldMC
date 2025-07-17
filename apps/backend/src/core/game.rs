@@ -2,23 +2,24 @@ use super::version::{fabric::FabricVersionInfo, mojang_java::MojangJavaVersionIn
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
 pub enum Game {
-	MCJava { version: MojangJavaVersionInfo },
-	MCJavaFabric { version: FabricVersionInfo },
+	MinecraftJava { version: MojangJavaVersionInfo },
+	MinecraftJavaFabric { version: FabricVersionInfo },
 }
 
 impl Game {
 	pub fn identifier(&self) -> &str {
 		match self {
-			Game::MCJava { .. } => "minecraft-java",
-			Game::MCJavaFabric { .. } => "minecraft-java-fabric",
+			Game::MinecraftJava { .. } => "minecraft-java",
+			Game::MinecraftJavaFabric { .. } => "minecraft-java-fabric",
 		}
 	}
 
 	pub fn version(&self) -> &dyn VersionInfo {
 		match self {
-			Game::MCJava { version } => version,
-			Game::MCJavaFabric { version } => version,
+			Game::MinecraftJava { version } => version,
+			Game::MinecraftJavaFabric { version } => version,
 		}
 	}
 
@@ -26,11 +27,11 @@ impl Game {
 		match game_type {
 			"minecraft-java" => {
 				let version = MojangJavaVersionInfo::from_identifier(version_str)?;
-				Ok(Game::MCJava { version })
+				Ok(Game::MinecraftJava { version })
 			}
 			"minecraft-java-fabric" => {
 				let version = FabricVersionInfo::from_identifier(version_str)?;
-				Ok(Game::MCJavaFabric { version })
+				Ok(Game::MinecraftJavaFabric { version })
 			}
 			_ => Err(format!("Unknown game type: {}", game_type)),
 		}

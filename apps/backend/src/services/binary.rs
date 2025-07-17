@@ -34,7 +34,7 @@ impl BinaryService {
 		}
 
 		match game {
-			Game::MCJava { version } => {
+			Game::MinecraftJava { version } => {
 				let binary = self.mcje.get(version).await?;
 				let download_url = binary.download_url();
 				let binary_name = self.mcje.binary_name();
@@ -44,7 +44,7 @@ impl BinaryService {
 					.await
 					.map_err(|e| format!("Failed to download game: {}", e))?;
 			}
-			Game::MCJavaFabric { version } => {
+			Game::MinecraftJavaFabric { version } => {
 				let binary = self.fabric.get(version).await?;
 				let download_url = binary.download_url();
 				let binary_name = self.fabric.binary_name();
@@ -61,8 +61,8 @@ impl BinaryService {
 
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
 		let binary_name = match game {
-			Game::MCJava { .. } => self.mcje.binary_name(),
-			Game::MCJavaFabric { .. } => self.fabric.binary_name(),
+			Game::MinecraftJava { .. } => self.mcje.binary_name(),
+			Game::MinecraftJavaFabric { .. } => self.fabric.binary_name(),
 		};
 
 		let binary_path = Self::binary_dir(game).join(binary_name);
