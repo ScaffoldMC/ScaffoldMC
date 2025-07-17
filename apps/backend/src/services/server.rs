@@ -145,11 +145,15 @@ impl ServerService {
 			return Err(ServerError::AlreadyRunning);
 		}
 
-		// TODO: Figure out command to run
-		let mut cmd = Command::new("java");
+		let binary_path = self
+			.binary_service
+			.ensure_binary(&server_config.game)
+			.await
+			.map_err(|e| ServerError::StartError(e.to_string()))?;
 
-		// TODO: Set current dir to server directory
-		//cmd.current_dir();
+		let mut cmd = Command::new(binary_path);
+
+		cmd.current_dir(format!("data/server/{server_id}/"));
 		cmd.stdin(std::process::Stdio::piped());
 		cmd.stdout(std::process::Stdio::piped());
 		cmd.stderr(std::process::Stdio::piped());
