@@ -1,5 +1,6 @@
 > [!NOTE]  
 > This project is under heavy development, and is **not ready for use**.
+> Features stated below may not be implemented yet, not functional, or untested.
 
 # mc-server-ui
 
@@ -20,6 +21,12 @@ mc-server-ui aims to be **the most integrated server panel for Minecraft**. It
 intends to go beyond generic server management, providing easy mod management,
 one-click loader installation, and more - bringing the seamless experience of
 third-party client launchers to the server.
+
+### Scope
+
+This project is intended to be a server manager for Minecraft Java Servers,
+Minecraft Bedrock Servers, and Minecraft Proxies. No other services are intended
+to be supported.
 
 ## Building
 
