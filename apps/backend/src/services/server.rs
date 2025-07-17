@@ -1,3 +1,4 @@
+use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::server::config::ServerConfig;
 use crate::services::binary::BinaryService;
@@ -30,6 +31,7 @@ pub enum ServerError {
 }
 
 pub struct ServerService {
+	servers_dir: String,
 	configs: HashMap<Uuid, ServerConfig>,
 	processes: Arc<RwLock<HashMap<Uuid, Child>>>,
 	binary_service: Arc<BinaryService>,
@@ -60,8 +62,11 @@ impl Service for ServerService {
 /// Service for managing server instances.
 impl ServerService {
 	/// Creates a new `ServerService` instance.
-	pub fn new(path: PathBuf, binary_service: Arc<BinaryService>) -> Self {
+	pub fn new(binary_service: Arc<BinaryService>) -> Self {
 		info!("Loading server instances");
+
+		let servers_dir = format!("{}/servers", config::DATA_FOLDER);
+		let path = PathBuf::from(&servers_dir);
 
 		if !path.exists() {
 			std::fs::create_dir_all(&path).expect("Failed to create server instances directory");
@@ -124,6 +129,7 @@ impl ServerService {
 		}
 
 		Self {
+			servers_dir,
 			configs,
 			processes: Arc::new(RwLock::new(HashMap::new())),
 			binary_service,
@@ -187,7 +193,7 @@ impl ServerService {
 
 		let mut cmd = Command::new(binary_path);
 
-		cmd.current_dir(format!("data/server/{server_id}/"));
+		cmd.current_dir(format!("{}/server/{}/", &self.servers_dir, server_id));
 		cmd.stdin(std::process::Stdio::piped());
 		cmd.stdout(std::process::Stdio::piped());
 		cmd.stderr(std::process::Stdio::piped());
@@ -222,7 +228,7 @@ impl ServerService {
 	/// Creates a new server instance with the given configuration.
 	pub async fn create(&mut self, server_config: ServerConfig) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
-		let server_dir = PathBuf::from(format!("data/servers/{}", server_id));
+		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));
 
 		if !server_dir.exists() {
 			std::fs::create_dir_all(&server_dir).map_err(|e| e.to_string())?;

@@ -28,7 +28,7 @@ impl AppState {
 	pub async fn new() -> Self {
 		let base_dir = env::current_dir()
 			.expect("Current dir should be accessible")
-			.join("data/");
+			.join(config::DATA_FOLDER);
 
 		if !base_dir.exists() {
 			std::fs::create_dir_all(&base_dir).expect("Read/write should be available");
@@ -45,10 +45,7 @@ impl AppState {
 		let binary_service = Arc::new(BinaryService::new());
 
 		AppState {
-			server_service: Arc::new(ServerService::new(
-				"data/servers".into(),
-				binary_service.clone(),
-			)),
+			server_service: Arc::new(ServerService::new(binary_service.clone())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
 		}

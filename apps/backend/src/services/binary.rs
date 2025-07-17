@@ -8,6 +8,7 @@ use crate::core::game::{self, Game};
 use std::path::PathBuf;
 
 pub struct BinaryService {
+	binaries_dir: String,
 	fabric: FabricBinaryProvider,
 	mcje: MojangJavaBinaryProvider,
 }
@@ -16,6 +17,7 @@ pub struct BinaryService {
 impl BinaryService {
 	pub fn new() -> Self {
 		Self {
+			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(),
 			mcje: MojangJavaBinaryProvider::new(),
 		}
@@ -28,7 +30,7 @@ impl BinaryService {
 
 	/// Installs a game with the specified configuration.
 	pub async fn install_game(&self, game: Game) -> Result<(), String> {
-		let binary_dir = Self::binary_dir(&game);
+		let binary_dir = self.binary_dir(&game);
 
 		// Ensure the binary directory exists
 		if !binary_dir.exists() {
@@ -70,7 +72,7 @@ impl BinaryService {
 			Game::MinecraftJavaFabric { .. } => self.fabric.binary_name(),
 		};
 
-		let binary_path = Self::binary_dir(game).join(binary_name);
+		let binary_path = self.binary_dir(game).join(binary_name);
 
 		if !binary_path.exists() {
 			self.install_game(game.clone())
@@ -83,7 +85,7 @@ impl BinaryService {
 
 	/// Returns a list of installed games.
 	pub async fn get_installed(&self) -> Result<Vec<Game>, String> {
-		let games_dir = PathBuf::from("data/games/");
+		let games_dir = PathBuf::from(&self.binaries_dir);
 		if !games_dir.exists() {
 			return Ok(vec![]);
 		}
@@ -128,8 +130,8 @@ impl BinaryService {
 	}
 
 	/// Internal: Get the binary directory for a given game.
-	fn binary_dir(game: &Game) -> PathBuf {
-		PathBuf::from("data/games/")
+	fn binary_dir(&self, game: &Game) -> PathBuf {
+		PathBuf::from(&self.binaries_dir)
 			.join(game.identifier())
 			.join(game.version().identifier())
 	}

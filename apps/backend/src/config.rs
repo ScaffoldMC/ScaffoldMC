@@ -2,6 +2,8 @@ use time::Duration;
 
 pub const SERVER_CONFIG_FILE_NAME: &str = "server_config.json";
 
+pub const DATA_FOLDER: &str = "data";
+
 // Authentication
 pub static REFRESH_COOKIE_NAME: &str = "ref_token";
 pub static AUTH_COOKIE_NAME: &str = "auth_token";
