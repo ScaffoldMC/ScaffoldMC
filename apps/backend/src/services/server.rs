@@ -167,4 +167,22 @@ impl ServerService {
 		let processes_guard = self.processes.read().await;
 		processes_guard.contains_key(&server_id)
 	}
+
+	pub async fn create(&mut self, server_config: ServerConfig) -> Result<Uuid, String> {
+		let server_id = Uuid::new_v4();
+		let server_dir = PathBuf::from(format!("data/servers/{}", server_id));
+
+		if !server_dir.exists() {
+			std::fs::create_dir_all(&server_dir).map_err(|e| e.to_string())?;
+		}
+
+		let config_path = server_dir.join(SERVER_CONFIG_FILE_NAME);
+
+		server_config
+			.save_to_file(config_path)
+			.map_err(|e| e.to_string())?;
+
+		self.configs.insert(server_id, server_config);
+		Ok(server_id)
+	}
 }
