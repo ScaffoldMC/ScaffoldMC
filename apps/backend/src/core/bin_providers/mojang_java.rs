@@ -138,7 +138,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 	}
 
 	async fn get(&self, version: MojangJavaVersionInfo) -> Result<Self::Binary, String> {
-		let version_info = get_version_info(version.game_version()).await?;
+		let version_info = get_version_info(version.game()).await?;
 		let download_url =
 			Url::parse(&version_info.url).map_err(|e| format!("Failed to parse URL: {}", e))?;
 

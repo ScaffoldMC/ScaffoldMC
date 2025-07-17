@@ -6,6 +6,6 @@ pub trait VersionInfo {
 	where
 		Self: Sized;
 
-	fn game_version(&self) -> &str;
+	fn game(&self) -> &str;
 	fn identifier(&self) -> String;
 }

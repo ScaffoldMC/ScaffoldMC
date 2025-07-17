@@ -169,9 +169,9 @@ impl BinaryProvider for FabricBinaryProvider {
 		let url_str = format!(
 			"{}/versions/loader/{}/{}/{}/server/jar",
 			FABRIC_API_URL,
-			version.game_version(),
-			version.fabric_version(),
-			version.launcher_version()
+			version.game(),
+			version.fabric(),
+			version.launcher()
 		);
 
 		let download_url =

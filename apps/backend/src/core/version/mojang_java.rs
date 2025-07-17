@@ -3,22 +3,22 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MojangJavaVersionInfo {
-	game_version: String,
+	game: String,
 }
 
 impl MojangJavaVersionInfo {
-	pub fn new(game_version: String) -> Self {
-		Self { game_version }
+	pub fn new(game: String) -> Self {
+		Self { game }
 	}
 }
 
 impl VersionInfo for MojangJavaVersionInfo {
-	fn game_version(&self) -> &str {
-		&self.game_version
+	fn game(&self) -> &str {
+		&self.game
 	}
 
 	fn identifier(&self) -> String {
-		self.game_version.clone()
+		self.game.clone()
 	}
 
 	fn from_identifier(identifier: &str) -> Result<Self, String>
@@ -29,7 +29,7 @@ impl VersionInfo for MojangJavaVersionInfo {
 			return Err("Identifier cannot be empty".to_string());
 		}
 		Ok(Self {
-			game_version: identifier.to_string(),
+			game: identifier.to_string(),
 		})
 	}
 }
