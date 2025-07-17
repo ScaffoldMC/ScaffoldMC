@@ -7,21 +7,14 @@ pub struct FabricVersionInfo {
 	game_version: String,
 	fabric_version: String,
 	launcher_version: String,
-	is_prerelease: bool,
 }
 
 impl FabricVersionInfo {
-	pub fn new(
-		game_version: String,
-		fabric_version: String,
-		launcher_version: String,
-		is_prerelease: bool,
-	) -> Self {
+	pub fn new(game_version: String, fabric_version: String, launcher_version: String) -> Self {
 		Self {
 			game_version,
 			fabric_version,
 			launcher_version,
-			is_prerelease,
 		}
 	}
 
@@ -37,10 +30,6 @@ impl FabricVersionInfo {
 impl VersionInfo for FabricVersionInfo {
 	fn game_version(&self) -> &str {
 		&self.game_version
-	}
-
-	fn is_prerelease(&self) -> bool {
-		self.is_prerelease
 	}
 
 	fn identifier(&self) -> String {
@@ -63,7 +52,6 @@ impl VersionInfo for FabricVersionInfo {
 			parts[0].to_string(),
 			parts[1].to_string(),
 			parts[2].to_string(),
-			false, // FIXME: how to determine if it's a prerelease?
 		))
 	}
 }

@@ -116,8 +116,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		let mut listings = Vec::new();
 
 		for v in &manifest.versions {
-			let version_info =
-				MojangJavaVersionInfo::new(v.id.clone(), v.version_type == "snapshot");
+			let version_info = MojangJavaVersionInfo::new(v.id.clone());
 
 			listings.push(version_info);
 		}
@@ -133,7 +132,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 			manifest.latest.release
 		};
 
-		let latest_version = MojangJavaVersionInfo::new(latest_version.clone(), pre_release);
+		let latest_version = MojangJavaVersionInfo::new(latest_version.clone());
 
 		self.get(latest_version).await
 	}

@@ -4,25 +4,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MojangJavaVersionInfo {
 	game_version: String,
-	is_prerelease: bool,
 }
 
 impl MojangJavaVersionInfo {
-	pub fn new(game_version: String, is_prerelease: bool) -> Self {
-		Self {
-			game_version,
-			is_prerelease,
-		}
+	pub fn new(game_version: String) -> Self {
+		Self { game_version }
 	}
 }
 
 impl VersionInfo for MojangJavaVersionInfo {
 	fn game_version(&self) -> &str {
 		&self.game_version
-	}
-
-	fn is_prerelease(&self) -> bool {
-		self.is_prerelease
 	}
 
 	fn identifier(&self) -> String {
@@ -38,7 +30,6 @@ impl VersionInfo for MojangJavaVersionInfo {
 		}
 		Ok(Self {
 			game_version: identifier.to_string(),
-			is_prerelease: false, // FIXME: how to determine if it's a prerelease?
 		})
 	}
 }

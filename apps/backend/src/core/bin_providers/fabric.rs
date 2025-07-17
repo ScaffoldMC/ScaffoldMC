@@ -119,7 +119,6 @@ impl BinaryProvider for FabricBinaryProvider {
 				game_version.version.clone(),
 				latest_loader.version.clone(),
 				latest_installer.version.clone(),
-				!game_version.stable,
 			);
 			versions.push(fabric_version);
 		}
@@ -159,7 +158,6 @@ impl BinaryProvider for FabricBinaryProvider {
 			latest_game.version.clone(),
 			latest_loader.version.clone(),
 			latest_installer.version.clone(),
-			pre_release,
 		);
 
 		let binary_info = self.get(fabric_version).await?;

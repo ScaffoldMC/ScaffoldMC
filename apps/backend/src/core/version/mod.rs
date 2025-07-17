@@ -7,6 +7,5 @@ pub trait VersionInfo {
 		Self: Sized;
 
 	fn game_version(&self) -> &str;
-	fn is_prerelease(&self) -> bool;
 	fn identifier(&self) -> String;
 }
