@@ -12,6 +12,7 @@ pub struct BinaryService {
 	mcje: MojangJavaBinaryProvider,
 }
 
+/// Service for managing game binaries.
 impl BinaryService {
 	pub fn new() -> Self {
 		Self {
@@ -20,10 +21,12 @@ impl BinaryService {
 		}
 	}
 
+	/// Retrieves a list of available games.
 	pub async fn get_games(&self) -> Result<Vec<Game>, String> {
 		todo!("Implement game retrieval logic");
 	}
 
+	/// Installs a game with the specified configuration.
 	pub async fn install_game(&self, game: Game) -> Result<(), String> {
 		let binary_dir = Self::binary_dir(&game);
 
@@ -59,6 +62,8 @@ impl BinaryService {
 		Ok(())
 	}
 
+	/// Returns the path to the binary directory for a given game, if not
+	/// available it will be downloaded.
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
 		let binary_name = match game {
 			Game::MinecraftJava { .. } => self.mcje.binary_name(),
@@ -76,6 +81,7 @@ impl BinaryService {
 		Ok(binary_path)
 	}
 
+	/// Returns a list of installed games.
 	pub async fn get_installed(&self) -> Result<Vec<Game>, String> {
 		let games_dir = PathBuf::from("data/games/");
 		if !games_dir.exists() {
@@ -121,12 +127,14 @@ impl BinaryService {
 		Ok(games)
 	}
 
+	/// Internal: Get the binary directory for a given game.
 	fn binary_dir(game: &Game) -> PathBuf {
 		PathBuf::from("data/games/")
 			.join(game.identifier())
 			.join(game.version().identifier())
 	}
 
+	/// Internal: Download a file from a URL.
 	async fn download_file(url: &Url, path: PathBuf) -> Result<(), String> {
 		let response = reqwest::get(url.clone())
 			.await

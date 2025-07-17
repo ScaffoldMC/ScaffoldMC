@@ -42,6 +42,8 @@ impl Service for ServerService {
 			processes_guard.keys().cloned().collect()
 		};
 
+		// Gracefully stop all running servers
+		// TODO: Stop servers in parallel
 		for server_id in server_ids {
 			self.stop(server_id)
 				.await
@@ -55,7 +57,9 @@ impl Service for ServerService {
 	}
 }
 
+/// Service for managing server instances.
 impl ServerService {
+	/// Creates a new `ServerService` instance.
 	pub fn new(path: PathBuf, binary_service: Arc<BinaryService>) -> Self {
 		info!("Loading server instances");
 
@@ -72,6 +76,7 @@ impl ServerService {
 
 		let mut configs = HashMap::<Uuid, ServerConfig>::new();
 
+		// Load the server configurations from the server instances directory.
 		for entry in dir_entries {
 			if let Err(err) = entry {
 				error!("Failed to read directory entry: {}", err);
@@ -125,6 +130,7 @@ impl ServerService {
 		}
 	}
 
+	/// Send a command to a running server instance.
 	pub async fn send_command(
 		&mut self,
 		server_id: Uuid,
@@ -142,7 +148,13 @@ impl ServerService {
 
 		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
 
-		let command_with_newline = format!("{}\n", command);
+		// Ensure the command ends with a newline so it is actually sent
+		// instead of being buffered and screwing up future commands.
+		let command_with_newline = if command.ends_with('\n') {
+			command.to_string()
+		} else {
+			format!("{command}\n")
+		};
 
 		if let Err(err) = stdin.write_all(command_with_newline.as_bytes()).await {
 			return Err(ServerError::CommandError(err.to_string()));
@@ -155,6 +167,7 @@ impl ServerService {
 		Ok(())
 	}
 
+	/// Starts a server instance its configuration
 	pub async fn start(&mut self, server_id: Uuid) -> Result<(), ServerError> {
 		let server_config = match self.configs.get(&server_id) {
 			Some(config) => config,
@@ -188,6 +201,7 @@ impl ServerService {
 		}
 	}
 
+	/// Stops a running server instance.
 	pub async fn stop(&mut self, server_id: Uuid) -> Result<(), ServerError> {
 		let stop_command = match self.configs.get(&server_id) {
 			Some(config) => config.stop_command.clone(),
@@ -199,11 +213,13 @@ impl ServerService {
 		Ok(())
 	}
 
+	/// Checks if a server instance is currently running.
 	pub async fn is_running(&self, server_id: Uuid) -> bool {
 		let processes_guard = self.processes.read().await;
 		processes_guard.contains_key(&server_id)
 	}
 
+	/// Creates a new server instance with the given configuration.
 	pub async fn create(&mut self, server_config: ServerConfig) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("data/servers/{}", server_id));
