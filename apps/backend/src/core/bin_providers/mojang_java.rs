@@ -7,27 +7,31 @@ static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
 // Internal Use
 
-#[derive(Debug, Deserialize)]
-struct APIVersionManifest {
-	pub latest: APILatestInfo,
-	pub versions: Vec<APIVersionInfo>,
+mod api_types {
+	use serde::Deserialize;
+
+	#[derive(Debug, Deserialize)]
+	pub struct VersionManifest {
+		pub latest: LatestInfo,
+		pub versions: Vec<VersionInfo>,
+	}
+
+	#[derive(Debug, Deserialize)]
+	pub struct LatestInfo {
+		pub release: String,
+		pub snapshot: String,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct VersionInfo {
+		pub id: String,
+		#[serde(rename = "type")]
+		pub version_type: String,
+		pub url: String,
+	}
 }
 
-#[derive(Debug, Deserialize)]
-struct APILatestInfo {
-	pub release: String,
-	pub snapshot: String,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-struct APIVersionInfo {
-	pub id: String,
-	#[serde(rename = "type")]
-	pub version_type: String,
-	pub url: String,
-}
-
-async fn get_manifest() -> Result<APIVersionManifest, String> {
+async fn get_manifest() -> Result<api_types::VersionManifest, String> {
 	let url = format!("{MOJANG_API_URL}/minecraft/version_manifest.json");
 	let response = reqwest::get(&url)
 		.await
@@ -37,7 +41,7 @@ async fn get_manifest() -> Result<APIVersionManifest, String> {
 		return Err(format!("Received HTTP {}", response.status()));
 	}
 
-	let manifest: APIVersionManifest = response
+	let manifest: api_types::VersionManifest = response
 		.json()
 		.await
 		.map_err(|e| format!("Failed to parse JSON: {}", e))?;
@@ -45,7 +49,7 @@ async fn get_manifest() -> Result<APIVersionManifest, String> {
 	Ok(manifest)
 }
 
-async fn get_version_info(version_id: &str) -> Result<APIVersionInfo, String> {
+async fn get_version_info(version_id: &str) -> Result<api_types::VersionInfo, String> {
 	let manifest = get_manifest().await?;
 
 	let version_info = manifest
