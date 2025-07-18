@@ -1,5 +1,4 @@
 pub mod game;
-pub mod java;
 
 use game::Game;
 use serde::{Deserialize, Serialize};
