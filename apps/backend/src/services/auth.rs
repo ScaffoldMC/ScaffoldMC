@@ -2,6 +2,7 @@ use crate::{
 	config::{AUTH_TOKEN_LENGTH, REFRESH_TOKEN_LENGTH},
 	core::secrets::Secrets,
 	db::{user::User, Database},
+	services::Service,
 };
 use base64::{engine::general_purpose, Engine};
 use jsonwebtoken::{Algorithm, Validation};
@@ -35,6 +36,8 @@ pub struct AuthService {
 	db: Arc<Database>,
 	secrets: Secrets,
 }
+
+impl Service for AuthService {}
 
 impl AuthService {
 	pub fn new(db: Arc<Database>, secrets: Secrets) -> Self {

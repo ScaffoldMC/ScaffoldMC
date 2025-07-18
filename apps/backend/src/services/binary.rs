@@ -5,6 +5,7 @@ use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
 use crate::core::game::{self, Game};
+use crate::services::Service;
 use std::path::PathBuf;
 
 pub struct BinaryService {
@@ -12,6 +13,8 @@ pub struct BinaryService {
 	fabric: FabricBinaryProvider,
 	mcje: MojangJavaBinaryProvider,
 }
+
+impl Service for BinaryService {}
 
 /// Service for managing game binaries.
 impl BinaryService {
