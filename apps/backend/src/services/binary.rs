@@ -4,7 +4,7 @@ use crate::core::bin_providers::BinaryInfo;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
-use crate::core::game::{self, Game};
+use crate::core::config::game::Game;
 use crate::services::Service;
 use std::path::PathBuf;
 

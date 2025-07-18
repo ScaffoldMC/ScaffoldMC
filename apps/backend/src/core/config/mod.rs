@@ -1,4 +1,7 @@
-use crate::core::game::Game;
+pub mod game;
+pub mod java;
+
+use game::Game;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 

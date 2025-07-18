@@ -1,4 +1,6 @@
-use super::version::{fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo};
+use crate::core::version::{
+	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

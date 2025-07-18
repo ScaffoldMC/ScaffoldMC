@@ -1,6 +1,6 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
-use crate::core::server::config::ServerConfig;
+use crate::core::config::ServerConfig;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use log::{error, info};
