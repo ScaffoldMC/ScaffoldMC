@@ -173,7 +173,7 @@ impl ServerService {
 		Ok(())
 	}
 
-	/// Starts a server instance its configuration
+	/// Starts a server instance by ID using its configuration.
 	pub async fn start(&mut self, server_id: Uuid) -> Result<(), ServerError> {
 		let server_config = match self.configs.get(&server_id) {
 			Some(config) => config,
