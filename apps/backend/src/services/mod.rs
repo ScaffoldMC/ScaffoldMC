@@ -1,6 +1,5 @@
 pub mod auth;
 pub mod binary;
-pub mod java;
 pub mod server;
 
 /// Trait for application services.
