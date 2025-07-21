@@ -1,6 +1,6 @@
 use crate::db::user::User;
 use crate::AppState;
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Extension, Json, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing, Extension, Json, Router};
 use std::sync::Arc;
 
 use crate::api::types::user::UserResponse;
@@ -16,9 +16,9 @@ impl From<User> for UserResponse {
 }
 
 pub fn create_router() -> Router<Arc<AppState>> {
-	Router::new().route("/", get(me))
+	Router::new().route("/", routing::get(get))
 }
 
-pub async fn me(Extension(user): Extension<User>) -> impl IntoResponse {
+pub async fn get(Extension(user): Extension<User>) -> impl IntoResponse {
 	(StatusCode::OK, Json(UserResponse::from(user))).into_response()
 }
