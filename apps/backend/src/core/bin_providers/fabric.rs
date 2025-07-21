@@ -1,9 +1,6 @@
-use crate::{
-	core::{
-		bin_providers::{BinaryInfo, BinaryProvider},
-		version::{fabric::FabricVersionInfo, VersionInfo},
-	},
-	services::binary,
+use crate::core::{
+	bin_providers::{BinaryInfo, BinaryProvider},
+	version::{fabric::FabricVersionInfo, VersionInfo},
 };
 use reqwest::Url;
 

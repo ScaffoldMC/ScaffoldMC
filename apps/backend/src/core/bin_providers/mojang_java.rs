@@ -1,7 +1,6 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo};
 use reqwest::Url;
-use serde::Deserialize;
 
 static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
