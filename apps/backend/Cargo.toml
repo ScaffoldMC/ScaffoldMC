@@ -7,6 +7,7 @@ edition = "2021"
 dead_code = "allow"
 
 [dependencies]
+async-trait = "0.1.83"
 axum = "0.8.3"
 axum-server = "0.7.2"
 base64 = "0.22.1"
