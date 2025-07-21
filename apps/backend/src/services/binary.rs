@@ -1,6 +1,5 @@
 use reqwest::Url;
 
-use crate::core::bin_providers::BinaryInfo;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
@@ -26,6 +25,14 @@ impl BinaryService {
 		}
 	}
 
+	/// Get the appropriate binary provider for a given game
+	pub fn get_provider(&self, game: &Game) -> &dyn BinaryProvider {
+		match game {
+			Game::MinecraftJava { .. } => &self.mcje,
+			Game::MinecraftJavaFabric { .. } => &self.fabric,
+		}
+	}
+
 	/// Retrieves a list of available games.
 	pub async fn get_games(&self) -> Result<Vec<Game>, String> {
 		todo!("Implement game retrieval logic");
@@ -41,28 +48,15 @@ impl BinaryService {
 				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
 		}
 
-		match game {
-			Game::MinecraftJava { version } => {
-				let binary = self.mcje.get(version).await?;
-				let download_url = binary.download_url();
-				let binary_name = self.mcje.binary_name();
-				let binary_path = binary_dir.join(binary_name);
+		let provider = self.get_provider(&game);
+		let binary = provider.get(game.version()).await?;
+		let download_url = binary.download_url();
+		let binary_name = provider.binary_name();
+		let binary_path = binary_dir.join(binary_name);
 
-				Self::download_file(download_url, binary_path)
-					.await
-					.map_err(|e| format!("Failed to download game: {}", e))?;
-			}
-			Game::MinecraftJavaFabric { version } => {
-				let binary = self.fabric.get(version).await?;
-				let download_url = binary.download_url();
-				let binary_name = self.fabric.binary_name();
-				let binary_path = binary_dir.join(binary_name);
-
-				Self::download_file(download_url, binary_path)
-					.await
-					.map_err(|e| format!("Failed to download game: {}", e))?;
-			}
-		};
+		Self::download_file(download_url, binary_path)
+			.await
+			.map_err(|e| format!("Failed to download game: {}", e))?;
 
 		Ok(())
 	}
@@ -70,11 +64,8 @@ impl BinaryService {
 	/// Returns the path to the binary directory for a given game, if not
 	/// available it will be downloaded.
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
-		let binary_name = match game {
-			Game::MinecraftJava { .. } => self.mcje.binary_name(),
-			Game::MinecraftJavaFabric { .. } => self.fabric.binary_name(),
-		};
-
+		let provider = self.get_provider(game);
+		let binary_name = provider.binary_name();
 		let binary_path = self.binary_dir(game).join(binary_name);
 
 		if !binary_path.exists() {

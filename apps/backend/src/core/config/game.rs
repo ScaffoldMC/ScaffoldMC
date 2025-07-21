@@ -1,7 +1,9 @@
 use crate::core::version::{
 	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo,
+	VersionInfoConstructor,
 };
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
@@ -18,10 +20,10 @@ impl Game {
 		}
 	}
 
-	pub fn version(&self) -> &dyn VersionInfo {
+	pub fn version(&self) -> Arc<dyn VersionInfo> {
 		match self {
-			Game::MinecraftJava { version } => version,
-			Game::MinecraftJavaFabric { version } => version,
+			Game::MinecraftJava { version } => Arc::new(version.clone()),
+			Game::MinecraftJavaFabric { version } => Arc::new(version.clone()),
 		}
 	}
 

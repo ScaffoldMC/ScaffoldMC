@@ -2,7 +2,9 @@ use crate::core::{
 	bin_providers::{BinaryInfo, BinaryProvider},
 	version::{fabric::FabricVersionInfo, VersionInfo},
 };
+use async_trait::async_trait;
 use reqwest::Url;
+use std::sync::Arc;
 
 static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
@@ -38,11 +40,11 @@ mod api_types {
 
 pub struct FabricBinaryInfo {
 	download_url: Url,
-	version: FabricVersionInfo,
+	version: Arc<dyn VersionInfo>,
 }
 
 impl FabricBinaryInfo {
-	pub fn new(version: FabricVersionInfo, download_url: Url) -> Self {
+	pub fn new(version: Arc<dyn VersionInfo>, download_url: Url) -> Self {
 		Self {
 			download_url,
 			version,
@@ -51,18 +53,16 @@ impl FabricBinaryInfo {
 }
 
 impl BinaryInfo for FabricBinaryInfo {
-	type Version = FabricVersionInfo;
-
 	fn download_url(&self) -> &Url {
 		&self.download_url
 	}
 
-	fn version(&self) -> &Self::Version {
-		&self.version
+	fn version(&self) -> Arc<dyn VersionInfo> {
+		Arc::clone(&self.version)
 	}
 
 	fn file_name(&self) -> &str {
-		todo!()
+		"server.jar"
 	}
 }
 
@@ -74,9 +74,8 @@ impl FabricBinaryProvider {
 	}
 }
 
+#[async_trait]
 impl BinaryProvider for FabricBinaryProvider {
-	type Binary = FabricBinaryInfo;
-
 	fn binary_name(&self) -> &str {
 		"server.jar"
 	}
@@ -86,7 +85,7 @@ impl BinaryProvider for FabricBinaryProvider {
 	// version. Perhaps a better system for storing these versions could be
 	// implemented to allow for more flexibility in the future.
 
-	async fn list_versions(&self) -> Result<Vec<FabricVersionInfo>, String> {
+	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
 
 		let manifest = reqwest::get(&url_str)
@@ -108,7 +107,7 @@ impl BinaryProvider for FabricBinaryProvider {
 			.find(|v| v.stable)
 			.ok_or("No stable installer versions found")?;
 
-		let mut versions = Vec::new();
+		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
 		// Create one version per game version using latest stable loader and installer
 		for game_version in &manifest.game {
@@ -117,13 +116,13 @@ impl BinaryProvider for FabricBinaryProvider {
 				latest_loader.version.clone(),
 				latest_installer.version.clone(),
 			);
-			versions.push(fabric_version);
+			versions.push(Arc::new(fabric_version));
 		}
 
 		Ok(versions)
 	}
 
-	async fn get_latest(&self, pre_release: bool) -> Result<FabricBinaryInfo, String> {
+	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
 
 		let manifest = reqwest::get(&url_str)
@@ -157,23 +156,28 @@ impl BinaryProvider for FabricBinaryProvider {
 			latest_installer.version.clone(),
 		);
 
-		let binary_info = self.get(fabric_version).await?;
-
-		Ok(binary_info)
+		self.get(Arc::new(fabric_version)).await
 	}
 
-	async fn get(&self, version: FabricVersionInfo) -> Result<Self::Binary, String> {
+	async fn get(&self, version: Arc<dyn VersionInfo>) -> Result<Box<dyn BinaryInfo>, String> {
+		// We need to downcast the version to FabricVersionInfo
+		let fabric_version = version
+			.as_any()
+			.downcast_ref::<FabricVersionInfo>()
+			.ok_or("Invalid version type for FabricBinaryProvider")?;
+
 		let url_str = format!(
 			"{}/versions/loader/{}/{}/{}/server/jar",
 			FABRIC_API_URL,
-			version.game(),
-			version.fabric(),
-			version.launcher()
+			fabric_version.game(),
+			fabric_version.fabric(),
+			fabric_version.launcher()
 		);
 
 		let download_url =
 			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {}", e))?;
 
-		Ok(FabricBinaryInfo::new(version.into(), download_url))
+		let binary_info = FabricBinaryInfo::new(version, download_url);
+		Ok(Box::new(binary_info))
 	}
 }

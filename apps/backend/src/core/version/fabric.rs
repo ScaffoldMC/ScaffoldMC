@@ -1,4 +1,4 @@
-use super::VersionInfo;
+use super::{VersionInfo, VersionInfoConstructor};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -36,10 +36,15 @@ impl VersionInfo for FabricVersionInfo {
 		format!("{}-{}-{}", self.game, self.fabric, self.launcher)
 	}
 
-	fn from_identifier(identifier: &str) -> Result<Self, String>
-	where
-		Self: Sized,
-	{
+	fn as_any(&self) -> &dyn std::any::Any {
+		self
+	}
+}
+
+impl VersionInfoConstructor for FabricVersionInfo {
+	type VersionType = FabricVersionInfo;
+	
+	fn from_identifier(identifier: &str) -> Result<Self::VersionType, String> {
 		let parts: Vec<&str> = identifier.split('-').collect();
 		if parts.len() != 3 {
 			return Err(format!("Invalid identifier format: {}", identifier));

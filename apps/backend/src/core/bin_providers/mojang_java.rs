@@ -1,6 +1,8 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo};
+use async_trait::async_trait;
 use reqwest::Url;
+use std::sync::Arc;
 
 static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
@@ -64,11 +66,11 @@ async fn get_version_info(version_id: &str) -> Result<api_types::VersionInfo, St
 
 pub struct MojangJavaBinaryInfo {
 	download_url: Url,
-	version: MojangJavaVersionInfo,
+	version: Arc<dyn VersionInfo>,
 }
 
 impl MojangJavaBinaryInfo {
-	pub async fn new(version: MojangJavaVersionInfo, download_url: Url) -> Result<Self, String> {
+	pub async fn new(version: Arc<dyn VersionInfo>, download_url: Url) -> Result<Self, String> {
 		Ok(Self {
 			version,
 			download_url,
@@ -77,14 +79,12 @@ impl MojangJavaBinaryInfo {
 }
 
 impl BinaryInfo for MojangJavaBinaryInfo {
-	type Version = MojangJavaVersionInfo;
-
 	fn download_url(&self) -> &Url {
 		&self.download_url
 	}
 
-	fn version(&self) -> &MojangJavaVersionInfo {
-		&self.version
+	fn version(&self) -> Arc<dyn VersionInfo> {
+		Arc::clone(&self.version)
 	}
 
 	fn file_name(&self) -> &str {
@@ -102,28 +102,26 @@ impl MojangJavaBinaryProvider {
 	}
 }
 
+#[async_trait]
 impl BinaryProvider for MojangJavaBinaryProvider {
-	type Binary = MojangJavaBinaryInfo;
-
 	fn binary_name(&self) -> &str {
 		"server.jar"
 	}
 
-	async fn list_versions(&self) -> Result<Vec<MojangJavaVersionInfo>, String> {
+	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let manifest = get_manifest().await?;
 
-		let mut listings = Vec::new();
+		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
 		for v in &manifest.versions {
 			let version_info = MojangJavaVersionInfo::new(v.id.clone());
-
-			listings.push(version_info);
+			listings.push(Arc::new(version_info));
 		}
 
 		Ok(listings)
 	}
 
-	async fn get_latest(&self, pre_release: bool) -> Result<Self::Binary, String> {
+	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let manifest = get_manifest().await?;
 		let latest_version = if pre_release {
 			manifest.latest.snapshot
@@ -133,14 +131,21 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 
 		let latest_version = MojangJavaVersionInfo::new(latest_version.clone());
 
-		self.get(latest_version).await
+		self.get(Arc::new(latest_version)).await
 	}
 
-	async fn get(&self, version: MojangJavaVersionInfo) -> Result<Self::Binary, String> {
-		let version_info = get_version_info(version.game()).await?;
+	async fn get(&self, version: Arc<dyn VersionInfo>) -> Result<Box<dyn BinaryInfo>, String> {
+		// We need to downcast the version to MojangJavaVersionInfo
+		let mojang_version = version
+			.as_any()
+			.downcast_ref::<MojangJavaVersionInfo>()
+			.ok_or("Invalid version type for MojangJavaBinaryProvider")?;
+
+		let version_info = get_version_info(mojang_version.game()).await?;
 		let download_url =
 			Url::parse(&version_info.url).map_err(|e| format!("Failed to parse URL: {}", e))?;
 
-		MojangJavaBinaryInfo::new(version, download_url).await
+		let binary_info = MojangJavaBinaryInfo::new(version, download_url).await?;
+		Ok(Box::new(binary_info))
 	}
 }

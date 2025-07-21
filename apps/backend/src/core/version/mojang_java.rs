@@ -1,4 +1,4 @@
-use crate::core::version::VersionInfo;
+use crate::core::version::{VersionInfo, VersionInfoConstructor};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -21,10 +21,15 @@ impl VersionInfo for MojangJavaVersionInfo {
 		self.game.clone()
 	}
 
-	fn from_identifier(identifier: &str) -> Result<Self, String>
-	where
-		Self: Sized,
-	{
+	fn as_any(&self) -> &dyn std::any::Any {
+		self
+	}
+}
+
+impl VersionInfoConstructor for MojangJavaVersionInfo {
+	type VersionType = MojangJavaVersionInfo;
+	
+	fn from_identifier(identifier: &str) -> Result<Self::VersionType, String> {
 		if identifier.is_empty() {
 			return Err("Identifier cannot be empty".to_string());
 		}
