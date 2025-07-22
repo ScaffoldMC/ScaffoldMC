@@ -10,7 +10,7 @@ use crate::config::{AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME};
 use crate::AppState;
 
 pub fn create_router() -> Router<Arc<AppState>> {
-	Router::new().route("/login", routing::post(post))
+	Router::new().route("/", routing::post(post))
 }
 
 async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {

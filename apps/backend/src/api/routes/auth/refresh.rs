@@ -11,7 +11,7 @@ use crate::services::auth::AuthServiceError;
 use crate::AppState;
 
 pub fn create_router() -> Router<Arc<AppState>> {
-	Router::new().route("/login", routing::post(post))
+	Router::new().route("/", routing::post(post))
 }
 
 // FIXME: Unused refresh tokens need to be cleared from the db occasionally (perhaps on program startup?)
