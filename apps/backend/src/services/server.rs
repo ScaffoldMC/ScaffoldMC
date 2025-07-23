@@ -27,7 +27,7 @@ pub enum ServerError {
 	#[error("Server is not running")]
 	NotRunning,
 	#[error("No such server: {0}")]
-	NoSuchServer(Uuid),
+	NoSuchServer(String),
 }
 
 pub struct ServerService {
@@ -143,7 +143,7 @@ impl ServerService {
 		command: &str,
 	) -> Result<(), ServerError> {
 		if !self.configs.contains_key(&server_id) {
-			return Err(ServerError::NoSuchServer(server_id));
+			return Err(ServerError::NoSuchServer(server_id.to_string()));
 		}
 
 		let mut processes_guard = self.processes.write().await;
@@ -177,7 +177,7 @@ impl ServerService {
 	pub async fn start(&mut self, server_id: Uuid) -> Result<(), ServerError> {
 		let server_config = match self.configs.get(&server_id) {
 			Some(config) => config,
-			None => return Err(ServerError::NoSuchServer(server_id)),
+			None => return Err(ServerError::NoSuchServer(server_id.to_string())),
 		};
 
 		let mut processes_guard = self.processes.write().await;
@@ -211,7 +211,7 @@ impl ServerService {
 	pub async fn stop(&mut self, server_id: Uuid) -> Result<(), ServerError> {
 		let stop_command = match self.configs.get(&server_id) {
 			Some(config) => config.stop_command.clone(),
-			None => return Err(ServerError::NoSuchServer(server_id)),
+			None => return Err(ServerError::NoSuchServer(server_id.to_string())),
 		};
 
 		self.send_command(server_id, &stop_command).await?;
