@@ -1,6 +1,7 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::config::ServerConfig;
+use crate::core::server::Server;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use log::{error, info};
@@ -32,16 +33,15 @@ pub enum ServerError {
 
 pub struct ServerService {
 	servers_dir: String,
-	configs: HashMap<Uuid, ServerConfig>,
-	processes: Arc<RwLock<HashMap<Uuid, Child>>>,
+	servers: Arc<RwLock<HashMap<Uuid, Server>>>,
 	binary_service: Arc<BinaryService>,
 }
 
 impl Service for ServerService {
 	async fn shutdown(&mut self) -> Result<(), String> {
 		let server_ids: Vec<Uuid> = {
-			let processes_guard = self.processes.read().await;
-			processes_guard.keys().cloned().collect()
+			let servers_guard = self.servers.read().await;
+			servers_guard.keys().cloned().collect()
 		};
 
 		// Gracefully stop all running servers
@@ -52,8 +52,8 @@ impl Service for ServerService {
 				.map_err(|e| format!("Failed to stop server {}: {}", server_id, e))?;
 		}
 
-		let mut processes_guard = self.processes.write().await;
-		processes_guard.clear();
+		let mut servers_guard = self.servers.write().await;
+		servers_guard.clear();
 
 		Ok(())
 	}
@@ -79,7 +79,7 @@ impl ServerService {
 		let dir_entries =
 			std::fs::read_dir(&path).expect("Failed to read server instances directory");
 
-		let mut configs = HashMap::<Uuid, ServerConfig>::new();
+		let mut servers = HashMap::<Uuid, Server>::new();
 
 		// Load the server configurations from the server instances directory.
 		for entry in dir_entries {
@@ -125,13 +125,17 @@ impl ServerService {
 				}
 			};
 
-			configs.insert(uuid, server_config);
+			let server = Server {
+				config: Arc::new(RwLock::new(server_config)),
+				process: Arc::new(RwLock::new(None)),
+			};
+
+			servers.insert(uuid, server);
 		}
 
 		Self {
 			servers_dir,
-			configs,
-			processes: Arc::new(RwLock::new(HashMap::new())),
+			servers: Arc::new(RwLock::new(servers)),
 			binary_service,
 		}
 	}
@@ -142,15 +146,13 @@ impl ServerService {
 		server_id: Uuid,
 		command: &str,
 	) -> Result<(), ServerError> {
-		if !self.configs.contains_key(&server_id) {
-			return Err(ServerError::NoSuchServer(server_id.to_string()));
-		}
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		let mut processes_guard = self.processes.write().await;
-
-		let child: &mut Child = processes_guard
-			.get_mut(&server_id)
-			.ok_or(ServerError::NotRunning)?;
+		let mut process_guard = server.process.write().await;
+		let child: &mut Child = process_guard.as_mut().ok_or(ServerError::NotRunning)?;
 
 		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
 
@@ -175,19 +177,20 @@ impl ServerService {
 
 	/// Starts a server instance by ID using its configuration.
 	pub async fn start(&mut self, server_id: Uuid) -> Result<(), ServerError> {
-		let server_config = match self.configs.get(&server_id) {
-			Some(config) => config,
-			None => return Err(ServerError::NoSuchServer(server_id.to_string())),
-		};
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		let mut processes_guard = self.processes.write().await;
-		if processes_guard.contains_key(&server_id) {
+		let mut process_guard = server.process.write().await;
+		if process_guard.is_some() {
 			return Err(ServerError::AlreadyRunning);
 		}
 
+		let config_guard = server.config.read().await;
 		let binary_path = self
 			.binary_service
-			.ensure_binary(&server_config.game)
+			.ensure_binary(&config_guard.game)
 			.await
 			.map_err(|e| ServerError::StartError(e.to_string()))?;
 
@@ -200,7 +203,7 @@ impl ServerService {
 
 		match cmd.spawn() {
 			Ok(child) => {
-				processes_guard.insert(server_id, child);
+				*process_guard = Some(child);
 				Ok(())
 			}
 			Err(e) => Err(ServerError::StartError(e.to_string())),
@@ -209,9 +212,13 @@ impl ServerService {
 
 	/// Stops a running server instance.
 	pub async fn stop(&mut self, server_id: Uuid) -> Result<(), ServerError> {
-		let stop_command = match self.configs.get(&server_id) {
-			Some(config) => config.stop_command.clone(),
-			None => return Err(ServerError::NoSuchServer(server_id.to_string())),
+		let stop_command = {
+			let servers_guard = self.servers.read().await;
+			let server = servers_guard
+				.get(&server_id)
+				.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+			let config_guard = server.config.read().await;
+			config_guard.stop_command.clone()
 		};
 
 		self.send_command(server_id, &stop_command).await?;
@@ -221,8 +228,13 @@ impl ServerService {
 
 	/// Checks if a server instance is currently running.
 	pub async fn is_running(&self, server_id: Uuid) -> bool {
-		let processes_guard = self.processes.read().await;
-		processes_guard.contains_key(&server_id)
+		let servers_guard = self.servers.read().await;
+		if let Some(server) = servers_guard.get(&server_id) {
+			let process_guard = server.process.read().await;
+			process_guard.is_some()
+		} else {
+			false
+		}
 	}
 
 	/// Creates a new server instance with the given configuration.
@@ -240,7 +252,13 @@ impl ServerService {
 			.save_to_file(config_path)
 			.map_err(|e| e.to_string())?;
 
-		self.configs.insert(server_id, server_config);
+		let server = Server {
+			config: Arc::new(RwLock::new(server_config)),
+			process: Arc::new(RwLock::new(None)),
+		};
+
+		let mut servers_guard = self.servers.write().await;
+		servers_guard.insert(server_id, server);
 		Ok(server_id)
 	}
 }
