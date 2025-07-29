@@ -9,6 +9,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BinaryLockfile {
@@ -28,6 +30,7 @@ pub struct BinaryService {
 	binaries_dir: String,
 	fabric: FabricBinaryProvider,
 	mcje: MojangJavaBinaryProvider,
+	lockfile_mutex: Arc<Mutex<()>>,
 }
 
 impl Service for BinaryService {}
@@ -39,6 +42,7 @@ impl BinaryService {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(),
 			mcje: MojangJavaBinaryProvider::new(),
+			lockfile_mutex: Arc::new(Mutex::new(())),
 		}
 	}
 
@@ -52,19 +56,12 @@ impl BinaryService {
 
 	/// Retrieves a list of available games.
 	pub async fn get_games(&self) -> Result<Vec<Game>, String> {
-		let lockfile = self.load_lockfile().await?;
-
-		let games = lockfile
-			.binaries
-			.values()
-			.map(|entry| entry.game.clone())
-			.collect();
-
-		Ok(games)
+		todo!("Retrieve available games from the provider");
 	}
 
 	/// Installs a game with the specified configuration.
 	pub async fn install_game(&self, game: Game) -> Result<PathBuf, String> {
+		let _lock = self.lockfile_mutex.lock().await;
 		let binary_dir = self.binary_dir(&game);
 
 		// Ensure the binary directory exists
@@ -108,6 +105,7 @@ impl BinaryService {
 	/// Returns the path to the binary directory for a given game, if not
 	/// available it will be downloaded.
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
+		let _lock = self.lockfile_mutex.lock().await; // Lock for entire operation
 		let lockfile = self.load_lockfile().await?;
 
 		if let Some(entry) = lockfile.binaries.get(game.identifier()) {
@@ -126,46 +124,14 @@ impl BinaryService {
 
 	/// Returns a list of installed games.
 	pub async fn get_installed(&self) -> Result<Vec<Game>, String> {
-		let games_dir = PathBuf::from(&self.binaries_dir);
-		if !games_dir.exists() {
-			return Ok(vec![]);
-		}
+		let _lock = self.lockfile_mutex.lock().await;
+		let lockfile = self.load_lockfile().await?;
 
-		let mut games = Vec::new();
-
-		for entry in std::fs::read_dir(games_dir).map_err(|e| e.to_string())? {
-			let entry = entry.map_err(|e| e.to_string())?;
-			let path = entry.path();
-
-			if path.is_dir() {
-				continue;
-			}
-
-			let game_name = path
-				.file_name()
-				.ok_or("Failed to get dir name from subentry")?
-				.to_str()
-				.ok_or("Failed to transform dir name to str")?;
-
-			for subentry in std::fs::read_dir(&path).map_err(|e| e.to_string())? {
-				let subentry = subentry.map_err(|e| e.to_string())?;
-				let subpath = subentry.path();
-
-				if !subpath.is_dir() {
-					continue;
-				}
-
-				let ver_name = subpath
-					.file_name()
-					.ok_or("Failed to get dir name from subentry")?
-					.to_str()
-					.ok_or("Failed to transform dir name to str")?;
-
-				let game = Game::from_path_parts(game_name, ver_name)?;
-
-				games.push(game);
-			}
-		}
+		let games = lockfile
+			.binaries
+			.values()
+			.map(|entry| entry.game.clone())
+			.collect();
 
 		Ok(games)
 	}
@@ -202,6 +168,7 @@ impl BinaryService {
 	}
 
 	async fn load_lockfile(&self) -> Result<BinaryLockfile, String> {
+		let _lock = self.lockfile_mutex.lock().await;
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
 		if !lockfile_path.exists() {
@@ -218,6 +185,7 @@ impl BinaryService {
 	}
 
 	async fn save_lockfile(&self, lockfile: &BinaryLockfile) -> Result<(), String> {
+		let _lock = self.lockfile_mutex.lock().await;
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
 		let file_content = toml::to_string(lockfile).map_err(|e| e.to_string())?;
