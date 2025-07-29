@@ -3,8 +3,8 @@ use crate::core::bin_providers::{
 };
 use crate::core::config::game::Game;
 use crate::services::Service;
+use crate::util::download::download_file;
 use crate::util::hash::{compute_file_hash, HashAlgorithm};
-use reqwest::Url;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -76,7 +76,7 @@ impl BinaryService {
 		let binary_name = provider.binary_name();
 		let binary_path = binary_dir.join(binary_name);
 
-		Self::download_file(download_url, binary_path.clone())
+		download_file(download_url, binary_path.clone())
 			.await
 			.map_err(|e| format!("Failed to download game: {}", e))?;
 
@@ -141,30 +141,6 @@ impl BinaryService {
 		PathBuf::from(&self.binaries_dir)
 			.join(game.identifier())
 			.join(game.version().identifier())
-	}
-
-	/// Internal: Download a file from a URL.
-	async fn download_file(url: &Url, path: PathBuf) -> Result<(), String> {
-		let response = reqwest::get(url.clone())
-			.await
-			.map_err(|e| format!("Failed to download: {}", e))?;
-
-		if !response.status().is_success() {
-			return Err(format!(
-				"Failed to download file from {}: {}",
-				url,
-				response.status()
-			));
-		}
-
-		let bytes = response
-			.bytes()
-			.await
-			.map_err(|e| format!("Failed to read response: {}", e))?;
-
-		std::fs::write(path, bytes).map_err(|e| format!("Failed to save file: {}", e))?;
-
-		Ok(())
 	}
 
 	async fn load_lockfile(&self) -> Result<BinaryLockfile, String> {
