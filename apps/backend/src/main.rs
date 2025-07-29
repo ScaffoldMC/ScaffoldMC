@@ -3,6 +3,7 @@ mod config;
 mod core;
 mod db;
 mod services;
+mod util;
 
 use core::logger::Logger;
 use core::secrets::Secrets;
