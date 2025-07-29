@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::{process::Child, sync::RwLock};
 
-use crate::core::config::ServerConfig;
+use crate::core::files::server_config::ServerConfig;
 
 /// Utility struct to represent a server instance.
 /// It contains the server configuration and the process handle.
