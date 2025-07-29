@@ -5,7 +5,6 @@ mod db;
 mod services;
 mod util;
 
-use core::logger::Logger;
 use core::secrets::Secrets;
 use db::Database;
 use log::{info, LevelFilter};
@@ -13,6 +12,7 @@ use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
+use util::logger::Logger;
 
 use crate::services::auth::AuthService;
 
