@@ -105,7 +105,7 @@ impl BinaryService {
 	/// Returns the path to the binary directory for a given game, if not
 	/// available it will be downloaded.
 	pub async fn ensure_binary(&self, game: &Game) -> Result<PathBuf, String> {
-		let _lock = self.lockfile_mutex.lock().await; // Lock for entire operation
+		let lock = self.lockfile_mutex.lock().await; // Lock for entire operation
 		let lockfile = self.load_lockfile().await?;
 
 		if let Some(entry) = lockfile.binaries.get(game.identifier()) {
@@ -113,6 +113,8 @@ impl BinaryService {
 				return Ok(entry.path.clone());
 			}
 		}
+
+		drop(lock);
 
 		let binary_path = self
 			.install_game(game.clone())
@@ -144,7 +146,6 @@ impl BinaryService {
 	}
 
 	async fn load_lockfile(&self) -> Result<BinaryLockfile, String> {
-		let _lock = self.lockfile_mutex.lock().await;
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
 		if !lockfile_path.exists() {
@@ -161,7 +162,6 @@ impl BinaryService {
 	}
 
 	async fn save_lockfile(&self, lockfile: &BinaryLockfile) -> Result<(), String> {
-		let _lock = self.lockfile_mutex.lock().await;
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
 		let file_content = toml::to_string(lockfile).map_err(|e| e.to_string())?;
