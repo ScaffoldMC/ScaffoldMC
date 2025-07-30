@@ -33,7 +33,7 @@ mod api_types {
 }
 
 async fn get_manifest() -> Result<api_types::VersionManifest, String> {
-	let url = format!("{MOJANG_API_URL}/minecraft/version_manifest.json");
+	let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
 	let response = reqwest::get(&url)
 		.await
 		.map_err(|e| format!("Failed to fetch manifest: {}", e))?;
