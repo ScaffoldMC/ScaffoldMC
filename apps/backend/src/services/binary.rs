@@ -1,35 +1,16 @@
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
+use crate::core::files::binaries_lockfile::{
+	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
+};
 use crate::core::game::Game;
 use crate::services::Service;
 use crate::util::download::download_file;
-use crate::util::hash::{compute_file_hash, HashAlgorithm};
-use serde::Deserialize;
-use serde::Serialize;
-use std::collections::HashMap;
+use crate::util::hash::compute_file_hash;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BinaryLockfile {
-	version: u8,
-	binaries: HashMap<String, BinaryLockfileEntry>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BinaryLockfileHash {
-	algorithm: HashAlgorithm,
-	hash: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BinaryLockfileEntry {
-	game: Game,
-	path: PathBuf,
-	hash: Option<BinaryLockfileHash>,
-}
 
 pub struct BinaryService {
 	binaries_dir: String,
