@@ -12,18 +12,23 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BinaryLockfile {
 	version: String,
 	binaries: HashMap<String, BinaryLockfileEntry>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BinaryLockfileHash {
+	algorithm: HashAlgorithm,
+	hash: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BinaryLockfileEntry {
 	game: Game,
 	path: PathBuf,
-	hash: String,
-	hash_algorithm: HashAlgorithm,
+	hash: Option<BinaryLockfileHash>,
 }
 
 pub struct BinaryService {
@@ -86,12 +91,18 @@ impl BinaryService {
 			.await
 			.map_err(|e| format!("Failed to load lockfile: {}", e))?;
 
-		let lockfile_entry = BinaryLockfileEntry {
+		let mut lockfile_entry = BinaryLockfileEntry {
 			game: game.clone(),
 			path: binary_path.clone(),
-			hash: String::new(), // TODO: Get hash
-			hash_algorithm: HashAlgorithm::Sha256,
+			hash: None,
 		};
+
+		if let Some((hash, hash_algorithm)) = binary.hash() {
+			lockfile_entry.hash = Some(BinaryLockfileHash {
+				algorithm: hash_algorithm,
+				hash: hash.to_string(),
+			});
+		}
 
 		lockfile
 			.binaries
@@ -181,19 +192,26 @@ impl BinaryService {
 			return Err(format!("Binary path does not exist: {:?}", entry.path));
 		}
 
-		let entry_path = entry.path.clone();
-		let algorithm = entry.hash_algorithm;
+		if entry.hash.is_none() {
+			return Ok(()); // No hash to validate against
+		}
 
-		let result = tokio::task::spawn_blocking(move || compute_file_hash(algorithm, &entry_path))
-			.await
-			.map_err(|e| e.to_string())?;
+		// Clone because async block requires ownership
+		let entry_path = entry.path.clone();
+		let hash_info = entry.hash.clone().unwrap();
+
+		let result = tokio::task::spawn_blocking(move || {
+			compute_file_hash(hash_info.algorithm, &entry_path)
+		})
+		.await
+		.map_err(|e| e.to_string())?;
 
 		let file_hash = result?;
 
-		if file_hash != entry.hash {
+		if file_hash != hash_info.hash {
 			return Err(format!(
 				"Binary hash mismatch for {:?}: expected {}, got {}",
-				entry.path, entry.hash, file_hash
+				entry.path, hash_info.hash, file_hash
 			));
 		}
 
