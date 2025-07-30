@@ -145,6 +145,7 @@ impl BinaryService {
 			.join(game.version().identifier())
 	}
 
+	/// Internal: Load the binary lockfile.
 	async fn load_lockfile(&self) -> Result<BinaryLockfile, String> {
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
@@ -161,6 +162,7 @@ impl BinaryService {
 		Ok(lockfile)
 	}
 
+	/// Internal: Save the binary lockfile.
 	async fn save_lockfile(&self, lockfile: &BinaryLockfile) -> Result<(), String> {
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
@@ -173,6 +175,7 @@ impl BinaryService {
 		Ok(())
 	}
 
+	/// Internal: Validate a binary entry against its expected hash.
 	async fn validate_binary(&self, entry: &BinaryLockfileEntry) -> Result<(), String> {
 		if !entry.path.exists() {
 			return Err(format!("Binary path does not exist: {:?}", entry.path));
