@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BinaryLockfile {
-	version: String,
+	version: u8,
 	binaries: HashMap<String, BinaryLockfileEntry>,
 }
 
