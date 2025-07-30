@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use reqwest::Url;
 use std::sync::Arc;
 
-use crate::core::version::VersionInfo;
+use crate::{core::version::VersionInfo, util::hash::HashAlgorithm};
 
 pub mod fabric;
 pub mod mojang_java;
@@ -11,6 +11,10 @@ pub trait BinaryInfo {
 	fn download_url(&self) -> &Url;
 	fn version(&self) -> Arc<dyn VersionInfo>;
 	fn file_name(&self) -> &str;
+	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
+		// Default to none in case the provider does not provide a hash
+		None
+	}
 }
 
 // TODO: Implement caching
