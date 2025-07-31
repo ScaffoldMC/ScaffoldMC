@@ -82,11 +82,13 @@ impl BinaryInfo for PaperBinaryInfo {
 	}
 }
 
-pub struct PaperBinaryProvider;
+pub struct PaperBinaryProvider {
+	reqwest_client: reqwest::Client,
+}
 
 impl PaperBinaryProvider {
-	pub fn new() -> Self {
-		Self {}
+	pub fn new(reqwest_client: reqwest::Client) -> Self {
+		Self { reqwest_client }
 	}
 }
 
@@ -99,7 +101,10 @@ impl BinaryProvider for PaperBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let url = format!("{}/versions", PAPER_API_URL);
 
-		let response = reqwest::get(&url)
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
 			.await
 			.map_err(|e| format!("Failed to fetch versions: {}", e))?
 			.json::<api_types::Versions>()
@@ -121,7 +126,10 @@ impl BinaryProvider for PaperBinaryProvider {
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url = format!("{}/versions", PAPER_API_URL);
 
-		let response = reqwest::get(&url)
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
 			.await
 			.map_err(|e| format!("Failed to fetch versions: {}", e))?
 			.json::<api_types::Versions>()
@@ -150,7 +158,10 @@ impl BinaryProvider for PaperBinaryProvider {
 			paper_version.paper_build()
 		);
 
-		let response = reqwest::get(&url)
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
 			.await
 			.map_err(|e| format!("Failed to fetch version info: {}", e))?
 			.json::<api_types::BuildInfo>()

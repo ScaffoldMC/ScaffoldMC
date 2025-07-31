@@ -19,19 +19,21 @@ pub struct BinaryService {
 	mcje: MojangJavaBinaryProvider,
 	paper: PaperBinaryProvider,
 	lockfile_mutex: Arc<Mutex<()>>,
+	reqwest_client: reqwest::Client,
 }
 
 impl Service for BinaryService {}
 
 /// Service for managing game binaries.
 impl BinaryService {
-	pub fn new() -> Self {
+	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		Self {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
-			fabric: FabricBinaryProvider::new(),
-			mcje: MojangJavaBinaryProvider::new(),
-			paper: PaperBinaryProvider::new(),
+			fabric: FabricBinaryProvider::new(reqwest_client.clone()),
+			mcje: MojangJavaBinaryProvider::new(reqwest_client.clone()),
+			paper: PaperBinaryProvider::new(reqwest_client.clone()),
 			lockfile_mutex: Arc::new(Mutex::new(())),
+			reqwest_client,
 		}
 	}
 
@@ -66,9 +68,13 @@ impl BinaryService {
 		let binary_name = provider.binary_name();
 		let binary_path = binary_dir.join(binary_name);
 
-		download_file(download_url, binary_path.clone())
-			.await
-			.map_err(|e| format!("Failed to download game: {}", e))?;
+		download_file(
+			self.reqwest_client.clone(),
+			download_url,
+			binary_path.clone(),
+		)
+		.await
+		.map_err(|e| format!("Failed to download game: {}", e))?;
 
 		// Add binary to the lockfile
 		let mut lockfile = self

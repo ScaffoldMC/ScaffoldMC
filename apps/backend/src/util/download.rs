@@ -3,8 +3,14 @@ use std::path::PathBuf;
 use reqwest::Url;
 
 /// Download a file from a URL.
-pub async fn download_file(url: &Url, path: PathBuf) -> Result<(), String> {
-	let response = reqwest::get(url.clone())
+pub async fn download_file(
+	reqwest_client: reqwest::Client,
+	url: &Url,
+	path: PathBuf,
+) -> Result<(), String> {
+	let response = reqwest_client
+		.get(url.clone())
+		.send()
 		.await
 		.map_err(|e| format!("Failed to download: {}", e))?;
 

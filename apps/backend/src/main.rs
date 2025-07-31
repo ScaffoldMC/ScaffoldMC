@@ -45,16 +45,18 @@ impl AppState {
 
 		let secrets = Secrets::new(&base_dir);
 
-		let binary_service = Arc::new(BinaryService::new());
+		let reqwest_client = reqwest::Client::builder()
+			.user_agent(CLIENT_USER_AGENT)
+			.build()
+			.expect("Failed to create reqwest client");
+
+		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
 
 		AppState {
 			server_service: Arc::new(ServerService::new(binary_service.clone())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
-			reqwest_client: reqwest::Client::builder()
-				.user_agent(CLIENT_USER_AGENT)
-				.build()
-				.expect("Failed to create HTTP client"),
+			reqwest_client,
 		}
 	}
 }

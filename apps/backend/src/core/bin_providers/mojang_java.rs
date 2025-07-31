@@ -36,36 +36,6 @@ mod api_types {
 	}
 }
 
-async fn get_manifest() -> Result<api_types::VersionManifest, String> {
-	let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
-	let response = reqwest::get(&url)
-		.await
-		.map_err(|e| format!("Failed to fetch manifest: {}", e))?;
-
-	if !response.status().is_success() {
-		return Err(format!("Received HTTP {}", response.status()));
-	}
-
-	let manifest: api_types::VersionManifest = response
-		.json()
-		.await
-		.map_err(|e| format!("Failed to parse JSON: {}", e))?;
-
-	Ok(manifest)
-}
-
-async fn get_version_info(version_id: &str) -> Result<api_types::VersionInfo, String> {
-	let manifest = get_manifest().await?;
-
-	let version_info = manifest
-		.versions
-		.iter()
-		.find(|v| v.id == version_id)
-		.ok_or_else(|| format!("Version not found: {}", version_id))?;
-
-	Ok(version_info.clone())
-}
-
 // Version Listing Implementation
 
 pub struct MojangJavaBinaryInfo {
@@ -108,11 +78,46 @@ impl BinaryInfo for MojangJavaBinaryInfo {
 
 // Provider Implementation
 
-pub struct MojangJavaBinaryProvider;
+pub struct MojangJavaBinaryProvider {
+	reqwest_client: reqwest::Client,
+}
 
 impl MojangJavaBinaryProvider {
-	pub fn new() -> Self {
-		Self {}
+	pub fn new(reqwest_client: reqwest::Client) -> Self {
+		Self { reqwest_client }
+	}
+
+	async fn get_manifest(&self) -> Result<api_types::VersionManifest, String> {
+		let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch manifest: {}", e))?;
+
+		if !response.status().is_success() {
+			return Err(format!("Received HTTP {}", response.status()));
+		}
+
+		let manifest: api_types::VersionManifest = response
+			.json()
+			.await
+			.map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
+		Ok(manifest)
+	}
+
+	async fn get_version_info(&self, version_id: &str) -> Result<api_types::VersionInfo, String> {
+		let manifest = self.get_manifest().await?;
+
+		let version_info = manifest
+			.versions
+			.iter()
+			.find(|v| v.id == version_id)
+			.ok_or_else(|| format!("Version not found: {}", version_id))?;
+
+		Ok(version_info.clone())
 	}
 }
 
@@ -123,7 +128,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 	}
 
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let manifest = get_manifest().await?;
+		let manifest = self.get_manifest().await?;
 
 		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
@@ -136,7 +141,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
-		let manifest = get_manifest().await?;
+		let manifest = self.get_manifest().await?;
 		let latest_version = if pre_release {
 			manifest.latest.snapshot
 		} else {
@@ -155,7 +160,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 			.downcast_ref::<MojangJavaVersionInfo>()
 			.ok_or("Invalid version type for MojangJavaBinaryProvider")?;
 
-		let version_info = get_version_info(mojang_version.game()).await?;
+		let version_info = self.get_version_info(mojang_version.game()).await?;
 		let download_url =
 			Url::parse(&version_info.url).map_err(|e| format!("Failed to parse URL: {}", e))?;
 		let hash = version_info.sha1.clone();

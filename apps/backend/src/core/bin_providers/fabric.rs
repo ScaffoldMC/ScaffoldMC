@@ -66,11 +66,13 @@ impl BinaryInfo for FabricBinaryInfo {
 	}
 }
 
-pub struct FabricBinaryProvider;
+pub struct FabricBinaryProvider {
+	reqwest_client: reqwest::Client,
+}
 
 impl FabricBinaryProvider {
-	pub fn new() -> Self {
-		Self {}
+	pub fn new(reqwest_client: reqwest::Client) -> Self {
+		Self { reqwest_client }
 	}
 }
 
@@ -88,7 +90,10 @@ impl BinaryProvider for FabricBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
 
-		let manifest = reqwest::get(&url_str)
+		let manifest = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
 			.await
 			.map_err(|e| format!("Failed to fetch versions: {}", e))?
 			.json::<api_types::Manifest>()
@@ -125,7 +130,10 @@ impl BinaryProvider for FabricBinaryProvider {
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
 
-		let manifest = reqwest::get(&url_str)
+		let manifest = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
 			.await
 			.map_err(|e| format!("Failed to fetch versions: {}", e))?
 			.json::<api_types::Manifest>()
