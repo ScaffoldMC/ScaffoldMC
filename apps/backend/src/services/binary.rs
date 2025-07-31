@@ -1,3 +1,4 @@
+use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
 };
@@ -16,6 +17,7 @@ pub struct BinaryService {
 	binaries_dir: String,
 	fabric: FabricBinaryProvider,
 	mcje: MojangJavaBinaryProvider,
+	paper: PaperBinaryProvider,
 	lockfile_mutex: Arc<Mutex<()>>,
 }
 
@@ -28,6 +30,7 @@ impl BinaryService {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(),
 			mcje: MojangJavaBinaryProvider::new(),
+			paper: PaperBinaryProvider::new(),
 			lockfile_mutex: Arc::new(Mutex::new(())),
 		}
 	}
@@ -37,6 +40,7 @@ impl BinaryService {
 		match game {
 			Game::MinecraftJava { .. } => &self.mcje,
 			Game::MinecraftJavaFabric { .. } => &self.fabric,
+			Game::MinecraftJavaPaper { .. } => &self.paper,
 		}
 	}
 

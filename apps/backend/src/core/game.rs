@@ -1,6 +1,6 @@
 use crate::core::version::{
-	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, VersionInfo,
-	VersionInfoConstructor,
+	fabric::FabricVersionInfo, mojang_java::MojangJavaVersionInfo, paper::PaperVersionInfo,
+	VersionInfo, VersionInfoConstructor,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -10,6 +10,7 @@ use std::sync::Arc;
 pub enum Game {
 	MinecraftJava { version: MojangJavaVersionInfo },
 	MinecraftJavaFabric { version: FabricVersionInfo },
+	MinecraftJavaPaper { version: PaperVersionInfo },
 }
 
 impl Game {
@@ -17,6 +18,7 @@ impl Game {
 		match self {
 			Game::MinecraftJava { .. } => "minecraft-java",
 			Game::MinecraftJavaFabric { .. } => "minecraft-java-fabric",
+			Game::MinecraftJavaPaper { .. } => "minecraft-java-paper",
 		}
 	}
 
@@ -24,6 +26,7 @@ impl Game {
 		match self {
 			Game::MinecraftJava { version } => Arc::new(version.clone()),
 			Game::MinecraftJavaFabric { version } => Arc::new(version.clone()),
+			Game::MinecraftJavaPaper { version } => Arc::new(version.clone()),
 		}
 	}
 
