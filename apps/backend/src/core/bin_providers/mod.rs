@@ -6,6 +6,7 @@ use crate::{core::version::VersionInfo, util::hash::HashAlgorithm};
 
 pub mod fabric;
 pub mod mojang_java;
+pub mod paper;
 
 pub trait BinaryInfo {
 	fn download_url(&self) -> &Url;
