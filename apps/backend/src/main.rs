@@ -5,6 +5,7 @@ mod db;
 mod services;
 mod util;
 
+use config::CLIENT_USER_AGENT;
 use core::secrets::Secrets;
 use db::Database;
 use log::{info, LevelFilter};
@@ -23,6 +24,7 @@ struct AppState {
 	pub server_service: Arc<ServerService>,
 	pub auth_service: Arc<AuthService>,
 	pub binary_service: Arc<BinaryService>,
+	pub reqwest_client: reqwest::Client,
 }
 
 impl AppState {
@@ -49,6 +51,10 @@ impl AppState {
 			server_service: Arc::new(ServerService::new(binary_service.clone())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
+			reqwest_client: reqwest::Client::builder()
+				.user_agent(CLIENT_USER_AGENT)
+				.build()
+				.expect("Failed to create HTTP client"),
 		}
 	}
 }
