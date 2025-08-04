@@ -1,6 +1,9 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::{
-	core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
+	core::{
+		bin_providers::JavaBinaryInfo,
+		version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
+	},
 	util::hash::HashAlgorithm,
 };
 use async_trait::async_trait;
@@ -34,6 +37,33 @@ mod api_types {
 		pub url: String,
 		pub sha1: String,
 	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct PackageInfo {
+		pub id: String,
+
+		#[serde(rename = "javaVersion")]
+		pub java_version: JavaVersion,
+
+		pub downloads: Downloads,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct JavaVersion {
+		#[serde(rename = "majorVersion")]
+		pub major_version: u8,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct Downloads {
+		pub server: DownloadInfo,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct DownloadInfo {
+		pub url: String,
+		pub sha1: String,
+	}
 }
 
 // Version Listing Implementation
@@ -42,6 +72,7 @@ pub struct MojangJavaBinaryInfo {
 	download_url: Url,
 	hash: String,
 	version: Arc<dyn VersionInfo>,
+	java_version: u8,
 }
 
 impl MojangJavaBinaryInfo {
@@ -49,11 +80,13 @@ impl MojangJavaBinaryInfo {
 		version: Arc<dyn VersionInfo>,
 		download_url: Url,
 		hash: String,
+		java_version: u8,
 	) -> Result<Self, String> {
 		Ok(Self {
 			version,
 			download_url,
 			hash,
+			java_version,
 		})
 	}
 }
@@ -73,6 +106,12 @@ impl BinaryInfo for MojangJavaBinaryInfo {
 
 	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
 		Some((&self.hash, HashAlgorithm::Sha1))
+	}
+}
+
+impl JavaBinaryInfo for MojangJavaBinaryInfo {
+	fn java_version(&self) -> u8 {
+		self.java_version
 	}
 }
 
@@ -108,7 +147,7 @@ impl MojangJavaBinaryProvider {
 		Ok(manifest)
 	}
 
-	async fn get_version_info(&self, version_id: &str) -> Result<api_types::VersionInfo, String> {
+	async fn get_version_info(&self, version_id: &str) -> Result<api_types::PackageInfo, String> {
 		let manifest = self.get_manifest().await?;
 
 		let version_info = manifest
@@ -117,7 +156,19 @@ impl MojangJavaBinaryProvider {
 			.find(|v| v.id == version_id)
 			.ok_or_else(|| format!("Version not found: {}", version_id))?;
 
-		Ok(version_info.clone())
+		let package_url = version_info.url.clone();
+
+		let package_info = self
+			.reqwest_client
+			.get(&package_url)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch package info: {}", e))?
+			.json::<api_types::PackageInfo>()
+			.await
+			.map_err(|e| format!("Failed to parse package info: {}", e))?;
+
+		Ok(package_info.clone())
 	}
 }
 
@@ -161,11 +212,14 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 			.ok_or("Invalid version type for MojangJavaBinaryProvider")?;
 
 		let version_info = self.get_version_info(mojang_version.game()).await?;
-		let download_url =
-			Url::parse(&version_info.url).map_err(|e| format!("Failed to parse URL: {}", e))?;
-		let hash = version_info.sha1.clone();
+		let download_url = Url::parse(&version_info.downloads.server.url)
+			.map_err(|e| format!("Failed to parse URL: {}", e))?;
+		let hash = version_info.downloads.server.sha1.clone();
 
-		let binary_info = MojangJavaBinaryInfo::new(version, download_url, hash).await?;
+		let java_version = version_info.java_version.major_version;
+
+		let binary_info =
+			MojangJavaBinaryInfo::new(version, download_url, hash, java_version).await?;
 		Ok(Box::new(binary_info))
 	}
 }
