@@ -52,6 +52,8 @@ impl FabricBinaryInfo {
 	}
 }
 
+// TODO: Implement JavaBinaryInfo
+
 impl BinaryInfo for FabricBinaryInfo {
 	fn download_url(&self) -> &Url {
 		&self.download_url
