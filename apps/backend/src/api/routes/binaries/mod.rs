@@ -6,8 +6,9 @@ pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new().route("/", routing::get(get))
 }
 
+/// Get the list of installed binaries.
 pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-	let games = state.binary_service.get_games().await.map_err(|e| {
+	let binaries = state.binary_service.get_installed().await.map_err(|e| {
 		(
 			axum::http::StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", e),
@@ -15,5 +16,5 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 			.into_response()
 	});
 
-	Json(games.unwrap()).into_response()
+	Json(binaries.unwrap()).into_response()
 }

@@ -1,5 +1,5 @@
 mod auth;
-mod games;
+mod binaries;
 mod me;
 mod servers;
 
@@ -28,6 +28,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 
 	Router::new()
 		.nest("/servers", servers::create_router())
+		.nest("/binaries", binaries::create_router())
 		.nest("/me", me::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
 		.nest("/auth", auth::create_router())
