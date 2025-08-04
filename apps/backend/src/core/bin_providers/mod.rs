@@ -18,6 +18,14 @@ pub trait BinaryInfo {
 	}
 }
 
+pub trait JavaBinaryInfo: BinaryInfo {
+	fn java_version(&self) -> u8;
+	fn recommended_args(&self) -> Vec<String> {
+		// Default to empty args in case the provider does not provide any
+		Vec::new()
+	}
+}
+
 // TODO: Implement caching
 #[async_trait]
 pub trait BinaryProvider: Send + Sync {

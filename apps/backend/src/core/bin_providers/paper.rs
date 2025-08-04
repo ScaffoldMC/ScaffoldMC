@@ -1,6 +1,6 @@
 use crate::{
 	core::{
-		bin_providers::{BinaryInfo, BinaryProvider},
+		bin_providers::{BinaryInfo, BinaryProvider, JavaBinaryInfo},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
 	util::hash::HashAlgorithm,
@@ -21,6 +21,23 @@ mod api_types {
 	pub struct Version {
 		pub id: String,
 		pub builds: Vec<u16>,
+		pub java: JavaInfo,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct JavaInfo {
+		pub version: JavaVersion,
+		pub flags: JavaFlags,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct JavaVersion {
+		pub minimum: u8,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct JavaFlags {
+		pub recommended: Vec<String>,
 	}
 
 	#[derive(Debug, Deserialize, Clone)]
@@ -52,14 +69,24 @@ pub struct PaperBinaryInfo {
 	download_url: Url,
 	hash: String,
 	version: Arc<dyn VersionInfo>,
+	java_version: u8,
+	java_args: Vec<String>,
 }
 
 impl PaperBinaryInfo {
-	pub fn new(version: Arc<dyn VersionInfo>, download_url: Url, hash: String) -> Self {
+	pub fn new(
+		version: Arc<dyn VersionInfo>,
+		download_url: Url,
+		hash: String,
+		java_version: u8,
+		java_args: Vec<String>,
+	) -> Self {
 		Self {
 			download_url,
 			version,
 			hash,
+			java_version,
+			java_args,
 		}
 	}
 }
@@ -79,6 +106,16 @@ impl BinaryInfo for PaperBinaryInfo {
 
 	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
 		Some((&self.hash, HashAlgorithm::Sha256))
+	}
+}
+
+impl JavaBinaryInfo for PaperBinaryInfo {
+	fn java_version(&self) -> u8 {
+		self.java_version
+	}
+
+	fn recommended_args(&self) -> Vec<String> {
+		self.java_args.clone()
 	}
 }
 
@@ -151,6 +188,21 @@ impl BinaryProvider for PaperBinaryProvider {
 			.downcast_ref::<PaperVersionInfo>()
 			.ok_or("Invalid version type for PaperBinaryProvider")?;
 
+		let url = format!("{}/versions/{}", PAPER_API_URL, paper_version.game(),);
+
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch version info: {}", e))?
+			.json::<api_types::Version>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let java_version = response.java.version.minimum;
+		let java_args = response.java.flags.recommended;
+
 		let url = format!(
 			"{}/versions/{}/builds/{}",
 			PAPER_API_URL,
@@ -173,7 +225,13 @@ impl BinaryProvider for PaperBinaryProvider {
 
 		let hash = response.downloads.server_default.checksums.sha256;
 
-		let binary_info = PaperBinaryInfo::new(Arc::clone(&version), download_url, hash);
+		let binary_info = PaperBinaryInfo::new(
+			Arc::clone(&version),
+			download_url,
+			hash,
+			java_version,
+			java_args,
+		);
 
 		Ok(Box::new(binary_info))
 	}
