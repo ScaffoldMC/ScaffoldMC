@@ -36,23 +36,34 @@ mod api_types {
 		pub version: String,
 		pub stable: bool,
 	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct LoaderVersionInfo {
+		#[serde(rename = "launcherMeta")]
+		pub launcher_meta: LauncherMeta,
+	}
+
+	#[derive(Debug, Deserialize, Clone)]
+	pub struct LauncherMeta {
+		pub min_java_version: u8,
+	}
 }
 
 pub struct FabricBinaryInfo {
 	download_url: Url,
 	version: Arc<dyn VersionInfo>,
+	java_version: u8,
 }
 
 impl FabricBinaryInfo {
-	pub fn new(version: Arc<dyn VersionInfo>, download_url: Url) -> Self {
+	pub fn new(version: Arc<dyn VersionInfo>, download_url: Url, java_version: u8) -> Self {
 		Self {
 			download_url,
 			version,
+			java_version,
 		}
 	}
 }
-
-// TODO: Implement JavaBinaryInfo
 
 impl BinaryInfo for FabricBinaryInfo {
 	fn download_url(&self) -> &Url {
@@ -65,6 +76,10 @@ impl BinaryInfo for FabricBinaryInfo {
 
 	fn file_name(&self) -> &str {
 		"server.jar"
+	}
+
+	fn java_version(&self) -> u8 {
+		self.java_version
 	}
 }
 
@@ -90,7 +105,7 @@ impl BinaryProvider for FabricBinaryProvider {
 	// implemented to allow for more flexibility in the future.
 
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
+		let url_str = format!("{}/versions", FABRIC_API_URL);
 
 		let manifest = self
 			.reqwest_client
@@ -130,7 +145,7 @@ impl BinaryProvider for FabricBinaryProvider {
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
-		let url_str = format!("{}/versions/loader/", FABRIC_API_URL);
+		let url_str = format!("{}/versions", FABRIC_API_URL);
 
 		let manifest = self
 			.reqwest_client
@@ -177,6 +192,25 @@ impl BinaryProvider for FabricBinaryProvider {
 			.ok_or("Invalid version type for FabricBinaryProvider")?;
 
 		let url_str = format!(
+			"{}/versions/loader/{}/{}/",
+			FABRIC_API_URL,
+			fabric_version.game(),
+			fabric_version.fabric()
+		);
+
+		let response = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch version info: {}", e))?
+			.json::<api_types::LoaderVersionInfo>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let java_version = response.launcher_meta.min_java_version;
+
+		let url_str = format!(
 			"{}/versions/loader/{}/{}/{}/server/jar",
 			FABRIC_API_URL,
 			fabric_version.game(),
@@ -187,7 +221,8 @@ impl BinaryProvider for FabricBinaryProvider {
 		let download_url =
 			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {}", e))?;
 
-		let binary_info = FabricBinaryInfo::new(version, download_url);
+		let binary_info = FabricBinaryInfo::new(version, download_url, java_version);
+
 		Ok(Box::new(binary_info))
 	}
 }
