@@ -34,12 +34,26 @@ pub trait BinaryInfo {
 	}
 }
 
-// TODO: Implement caching
 #[async_trait]
 pub trait BinaryProvider: Send + Sync {
 	fn binary_name(&self) -> &str;
 
-	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String>;
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String>;
 	async fn get(&self, version: Arc<dyn VersionInfo>) -> Result<Box<dyn BinaryInfo>, String>;
+}
+
+/// Version provider for vanilla-style versions with low version complexity
+/// (i.e. game version, build number)
+pub trait BasicVersionProvider {
+	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String>;
+}
+
+/// Version provider trait for binaries with more complex versioning schemes
+/// (i.e. game version, loader version, installer version, with cross-compatibility)
+pub trait AdvancedVersionProvider {
+	async fn list_game_versions(&self) -> Result<Vec<String>, String>;
+	async fn list_loader_versions(
+		&self,
+		game_version: &str,
+	) -> Result<Vec<Arc<dyn VersionInfo>>, String>;
 }

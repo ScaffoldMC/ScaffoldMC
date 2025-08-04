@@ -1,6 +1,6 @@
 use crate::{
 	core::{
-		bin_providers::{BinaryInfo, BinaryProvider},
+		bin_providers::{BasicVersionProvider, BinaryInfo, BinaryProvider},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
 	util::hash::HashAlgorithm,
@@ -133,31 +133,6 @@ impl BinaryProvider for PaperBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let url = format!("{}/versions", PAPER_API_URL);
-
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Versions>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
-
-		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
-
-		for version in response.versions {
-			for build in version.builds {
-				let version_info = PaperVersionInfo::new(version.id.clone(), build);
-				versions.push(Arc::new(version_info));
-			}
-		}
-
-		Ok(versions)
-	}
-
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url = format!("{}/versions", PAPER_API_URL);
 
@@ -232,5 +207,32 @@ impl BinaryProvider for PaperBinaryProvider {
 		);
 
 		Ok(Box::new(binary_info))
+	}
+}
+
+impl BasicVersionProvider for PaperBinaryProvider {
+	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
+		let url = format!("{}/versions", PAPER_API_URL);
+
+		let response = self
+			.reqwest_client
+			.get(&url)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch versions: {}", e))?
+			.json::<api_types::Versions>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
+
+		for version in response.versions {
+			for build in version.builds {
+				let version_info = PaperVersionInfo::new(version.id.clone(), build);
+				versions.push(Arc::new(version_info));
+			}
+		}
+
+		Ok(versions)
 	}
 }

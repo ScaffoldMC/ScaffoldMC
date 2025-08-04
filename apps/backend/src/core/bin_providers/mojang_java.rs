@@ -1,6 +1,9 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::{
-	core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
+	core::{
+		bin_providers::BasicVersionProvider,
+		version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
+	},
 	util::hash::HashAlgorithm,
 };
 use async_trait::async_trait;
@@ -173,19 +176,6 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		"server.jar"
 	}
 
-	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let manifest = self.get_manifest().await?;
-
-		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
-
-		for v in &manifest.versions {
-			let version_info = MojangJavaVersionInfo::new(v.id.clone());
-			listings.push(Arc::new(version_info));
-		}
-
-		Ok(listings)
-	}
-
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let manifest = self.get_manifest().await?;
 		let latest_version = if pre_release {
@@ -216,5 +206,20 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		let binary_info =
 			MojangJavaBinaryInfo::new(version, download_url, hash, java_version).await?;
 		Ok(Box::new(binary_info))
+	}
+}
+
+impl BasicVersionProvider for MojangJavaBinaryProvider {
+	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
+		let manifest = self.get_manifest().await?;
+
+		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
+
+		for v in &manifest.versions {
+			let version_info = MojangJavaVersionInfo::new(v.id.clone());
+			listings.push(Arc::new(version_info));
+		}
+
+		Ok(listings)
 	}
 }

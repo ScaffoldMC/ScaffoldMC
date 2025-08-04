@@ -1,5 +1,5 @@
 use crate::core::{
-	bin_providers::{BinaryInfo, BinaryProvider},
+	bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
 	version::{fabric::FabricVersionInfo, VersionInfo},
 };
 use async_trait::async_trait;
@@ -41,6 +41,7 @@ mod api_types {
 	pub struct LoaderVersionInfo {
 		#[serde(rename = "launcherMeta")]
 		pub launcher_meta: LauncherMeta,
+		pub loader: LoaderVersion,
 	}
 
 	#[derive(Debug, Deserialize, Clone)]
@@ -97,51 +98,6 @@ impl FabricBinaryProvider {
 impl BinaryProvider for FabricBinaryProvider {
 	fn binary_name(&self) -> &str {
 		"server.jar"
-	}
-
-	// Note: the latest loader and installer versions are used or else the
-	// vector will be massive due to the number of versions for each game
-	// version. Perhaps a better system for storing these versions could be
-	// implemented to allow for more flexibility in the future.
-
-	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let url_str = format!("{}/versions", FABRIC_API_URL);
-
-		let manifest = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Manifest>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
-
-		let latest_loader = manifest
-			.loader
-			.iter()
-			.find(|v| v.stable)
-			.ok_or("No stable loader versions found")?;
-
-		let latest_installer = manifest
-			.installer
-			.iter()
-			.find(|v| v.stable)
-			.ok_or("No stable installer versions found")?;
-
-		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
-
-		// Create one version per game version using latest stable loader and installer
-		for game_version in &manifest.game {
-			let fabric_version = FabricVersionInfo::new(
-				game_version.version.clone(),
-				latest_loader.version.clone(),
-				latest_installer.version.clone(),
-			);
-			versions.push(Arc::new(fabric_version));
-		}
-
-		Ok(versions)
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
@@ -224,5 +180,77 @@ impl BinaryProvider for FabricBinaryProvider {
 		let binary_info = FabricBinaryInfo::new(version, download_url, java_version);
 
 		Ok(Box::new(binary_info))
+	}
+}
+
+impl AdvancedVersionProvider for FabricBinaryProvider {
+	async fn list_game_versions(&self) -> Result<Vec<String>, String> {
+		let url_str = format!("{}/versions", FABRIC_API_URL);
+
+		let manifest = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch versions: {}", e))?
+			.json::<api_types::Manifest>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
+
+		Ok(versions)
+	}
+
+	async fn list_loader_versions(
+		&self,
+		game_version: &str,
+	) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
+		let url_str = format!("{}/versions/", FABRIC_API_URL);
+
+		let manifest = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch versions: {}", e))?
+			.json::<api_types::Manifest>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let latest_installer: String = manifest
+			.installer
+			.iter()
+			.filter(|v| v.stable)
+			.nth(0)
+			.ok_or("No stable installer versions found")?
+			.version
+			.clone();
+
+		let url_str = format!("{}/versions/loader/{}/", FABRIC_API_URL, game_version);
+
+		let loaders = self
+			.reqwest_client
+			.get(&url_str)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to fetch loader versions: {}", e))?
+			.json::<Vec<api_types::LoaderVersionInfo>>()
+			.await
+			.map_err(|e| format!("Failed to parse response: {}", e))?;
+
+		let versions: Vec<Arc<dyn VersionInfo>> = loaders
+			.iter()
+			.map(|loader| {
+				let fabric_version = Arc::new(FabricVersionInfo::new(
+					game_version.to_string(),
+					loader.loader.version.clone(),
+					latest_installer.clone(),
+				));
+				fabric_version as Arc<dyn VersionInfo>
+			})
+			.collect();
+
+		Ok(versions)
 	}
 }
