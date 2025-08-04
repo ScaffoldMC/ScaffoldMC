@@ -46,11 +46,6 @@ impl BinaryService {
 		}
 	}
 
-	/// Retrieves a list of available games.
-	pub async fn get_games(&self) -> Result<Vec<Game>, String> {
-		todo!("Retrieve available games from the provider");
-	}
-
 	/// Installs a game with the specified configuration.
 	pub async fn install_game(&self, game: Game) -> Result<PathBuf, String> {
 		let _lock = self.lockfile_mutex.lock().await;
