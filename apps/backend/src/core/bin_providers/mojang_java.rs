@@ -4,7 +4,7 @@ use crate::{
 		bin_providers::BasicVersionProvider,
 		version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
 	},
-	util::hash::HashAlgorithm,
+	util::{hash::HashAlgorithm, request::get_and_format},
 };
 use async_trait::async_trait;
 use reqwest::Url;
@@ -126,21 +126,9 @@ impl MojangJavaBinaryProvider {
 
 	async fn get_manifest(&self) -> Result<api_types::VersionManifest, String> {
 		let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch manifest: {}", e))?;
 
-		if !response.status().is_success() {
-			return Err(format!("Received HTTP {}", response.status()));
-		}
-
-		let manifest: api_types::VersionManifest = response
-			.json()
-			.await
-			.map_err(|e| format!("Failed to parse JSON: {}", e))?;
+		let manifest: api_types::VersionManifest =
+			get_and_format(&self.reqwest_client, &url).await?;
 
 		Ok(manifest)
 	}
@@ -156,15 +144,8 @@ impl MojangJavaBinaryProvider {
 
 		let package_url = version_info.url.clone();
 
-		let package_info = self
-			.reqwest_client
-			.get(&package_url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch package info: {}", e))?
-			.json::<api_types::PackageInfo>()
-			.await
-			.map_err(|e| format!("Failed to parse package info: {}", e))?;
+		let package_info: api_types::PackageInfo =
+			get_and_format(&self.reqwest_client, &package_url).await?;
 
 		Ok(package_info.clone())
 	}

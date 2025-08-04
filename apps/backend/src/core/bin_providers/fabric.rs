@@ -1,6 +1,9 @@
-use crate::core::{
-	bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
-	version::{fabric::FabricVersionInfo, VersionInfo},
+use crate::{
+	core::{
+		bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
+		version::{fabric::FabricVersionInfo, VersionInfo},
+	},
+	util::request::get_and_format,
 };
 use async_trait::async_trait;
 use reqwest::Url;
@@ -103,15 +106,7 @@ impl BinaryProvider for FabricBinaryProvider {
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url_str = format!("{}/versions", FABRIC_API_URL);
 
-		let manifest = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Manifest>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
 
 		let latest_loader = manifest
 			.loader
@@ -154,15 +149,8 @@ impl BinaryProvider for FabricBinaryProvider {
 			fabric_version.fabric()
 		);
 
-		let response = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch version info: {}", e))?
-			.json::<api_types::LoaderVersionInfo>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let response: api_types::LoaderVersionInfo =
+			get_and_format(&self.reqwest_client, &url_str).await?;
 
 		let java_version = response.launcher_meta.min_java_version;
 
@@ -186,17 +174,7 @@ impl BinaryProvider for FabricBinaryProvider {
 impl AdvancedVersionProvider for FabricBinaryProvider {
 	async fn list_game_versions(&self) -> Result<Vec<String>, String> {
 		let url_str = format!("{}/versions", FABRIC_API_URL);
-
-		let manifest = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Manifest>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
-
+		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
 		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
 
 		Ok(versions)
@@ -208,15 +186,7 @@ impl AdvancedVersionProvider for FabricBinaryProvider {
 	) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let url_str = format!("{}/versions/", FABRIC_API_URL);
 
-		let manifest = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Manifest>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
 
 		let latest_installer: String = manifest
 			.installer
@@ -229,15 +199,8 @@ impl AdvancedVersionProvider for FabricBinaryProvider {
 
 		let url_str = format!("{}/versions/loader/{}/", FABRIC_API_URL, game_version);
 
-		let loaders = self
-			.reqwest_client
-			.get(&url_str)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch loader versions: {}", e))?
-			.json::<Vec<api_types::LoaderVersionInfo>>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let loaders: Vec<api_types::LoaderVersionInfo> =
+			get_and_format(&self.reqwest_client, &url_str).await?;
 
 		let versions: Vec<Arc<dyn VersionInfo>> = loaders
 			.iter()

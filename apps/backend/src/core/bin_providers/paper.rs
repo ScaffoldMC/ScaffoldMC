@@ -3,7 +3,7 @@ use crate::{
 		bin_providers::{BasicVersionProvider, BinaryInfo, BinaryProvider},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
-	util::hash::HashAlgorithm,
+	util::{hash::HashAlgorithm, request::get_and_format},
 };
 use async_trait::async_trait;
 use reqwest::Url;
@@ -135,16 +135,7 @@ impl BinaryProvider for PaperBinaryProvider {
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
 		let url = format!("{}/versions", PAPER_API_URL);
-
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Versions>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let response: api_types::Versions = get_and_format(&self.reqwest_client, &url).await?;
 
 		// TODO: Handle pre-release logic
 		let latest_version = response.versions.first().ok_or("No versions found")?;
@@ -162,16 +153,7 @@ impl BinaryProvider for PaperBinaryProvider {
 			.ok_or("Invalid version type for PaperBinaryProvider")?;
 
 		let url = format!("{}/versions/{}", PAPER_API_URL, paper_version.game(),);
-
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch version info: {}", e))?
-			.json::<api_types::Version>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let response: api_types::Version = get_and_format(&self.reqwest_client, &url).await?;
 
 		let java_version = response.java.version.minimum;
 		let java_args = response.java.flags.recommended;
@@ -183,15 +165,7 @@ impl BinaryProvider for PaperBinaryProvider {
 			paper_version.paper_build()
 		);
 
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch version info: {}", e))?
-			.json::<api_types::BuildInfo>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let response: api_types::BuildInfo = get_and_format(&self.reqwest_client, &url).await?;
 
 		let download_url = Url::parse(&response.downloads.server_default.url)
 			.map_err(|e| format!("Failed to parse download URL: {}", e))?;
@@ -213,16 +187,7 @@ impl BinaryProvider for PaperBinaryProvider {
 impl BasicVersionProvider for PaperBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let url = format!("{}/versions", PAPER_API_URL);
-
-		let response = self
-			.reqwest_client
-			.get(&url)
-			.send()
-			.await
-			.map_err(|e| format!("Failed to fetch versions: {}", e))?
-			.json::<api_types::Versions>()
-			.await
-			.map_err(|e| format!("Failed to parse response: {}", e))?;
+		let response: api_types::Versions = get_and_format(&self.reqwest_client, &url).await?;
 
 		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
