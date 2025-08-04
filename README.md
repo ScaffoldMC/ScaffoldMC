@@ -24,9 +24,8 @@ third-party client launchers to the server.
 
 ### Scope
 
-This project is intended to be a server manager for Minecraft Java Servers,
-Minecraft Bedrock Servers, and Minecraft Proxies. No other services are intended
-to be supported.
+This project is intended to be a server manager for Minecraft Java Servers and 
+Proxies. No other services are intended to be supported.
 
 ## Building
 
