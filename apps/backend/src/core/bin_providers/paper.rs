@@ -1,6 +1,6 @@
 use crate::{
 	core::{
-		bin_providers::{BinaryInfo, BinaryProvider, JavaBinaryInfo},
+		bin_providers::{BinaryInfo, BinaryProvider},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
 	util::hash::HashAlgorithm,
@@ -107,14 +107,12 @@ impl BinaryInfo for PaperBinaryInfo {
 	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
 		Some((&self.hash, HashAlgorithm::Sha256))
 	}
-}
 
-impl JavaBinaryInfo for PaperBinaryInfo {
 	fn java_version(&self) -> u8 {
 		self.java_version
 	}
 
-	fn recommended_args(&self) -> Vec<String> {
+	fn java_rec_args(&self) -> Vec<String> {
 		self.java_args.clone()
 	}
 }

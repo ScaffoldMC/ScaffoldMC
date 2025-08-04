@@ -1,9 +1,6 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::{
-	core::{
-		bin_providers::JavaBinaryInfo,
-		version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
-	},
+	core::version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
 	util::hash::HashAlgorithm,
 };
 use async_trait::async_trait;
@@ -107,9 +104,7 @@ impl BinaryInfo for MojangJavaBinaryInfo {
 	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
 		Some((&self.hash, HashAlgorithm::Sha1))
 	}
-}
 
-impl JavaBinaryInfo for MojangJavaBinaryInfo {
 	fn java_version(&self) -> u8 {
 		self.java_version
 	}

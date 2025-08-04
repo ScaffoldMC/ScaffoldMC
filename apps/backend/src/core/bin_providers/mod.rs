@@ -9,18 +9,26 @@ pub mod mojang_java;
 pub mod paper;
 
 pub trait BinaryInfo {
+	/// Get the download URL for this binary
 	fn download_url(&self) -> &Url;
+
+	/// Get the version information of this binary
 	fn version(&self) -> Arc<dyn VersionInfo>;
+
+	/// Get the file name of the binary, e.g. "server.jar"
 	fn file_name(&self) -> &str;
+
+	/// Get the hash of the binary, if available
 	fn hash(&self) -> Option<(&str, HashAlgorithm)> {
 		// Default to none in case the provider does not provide a hash
 		None
 	}
-}
 
-pub trait JavaBinaryInfo: BinaryInfo {
+	/// Get the Java version required by this binary
 	fn java_version(&self) -> u8;
-	fn recommended_args(&self) -> Vec<String> {
+
+	/// Get the Java arguments required by this binary
+	fn java_rec_args(&self) -> Vec<String> {
 		// Default to empty args in case the provider does not provide any
 		Vec::new()
 	}
