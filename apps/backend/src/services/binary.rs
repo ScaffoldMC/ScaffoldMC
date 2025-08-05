@@ -1,5 +1,6 @@
 use crate::core::api_clients::fabric::FabricMetaAPIClient;
 use crate::core::api_clients::paper::PaperMetaAPIClient;
+use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider, BinaryProvider,
@@ -31,11 +32,12 @@ impl BinaryService {
 	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		let fabric_api = FabricMetaAPIClient::new(reqwest_client.clone());
 		let paper_api = PaperMetaAPIClient::new(reqwest_client.clone());
+		let piston_meta_api = PistonMetaAPIClient::new(reqwest_client.clone());
 
 		Self {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(fabric_api),
-			mcje: VanillaBinaryProvider::new(reqwest_client.clone()),
+			mcje: VanillaBinaryProvider::new(piston_meta_api),
 			paper: PaperBinaryProvider::new(paper_api),
 			lockfile_mutex: Arc::new(Mutex::new(())),
 			reqwest_client,

@@ -1,70 +1,15 @@
 use super::{BinaryInfo, BinaryProvider};
 use crate::{
 	core::{
+		api_clients::piston_meta::PistonMetaAPIClient,
 		bin_providers::BasicVersionProvider,
 		version::{vanilla::VanillaVersionInfo, VersionInfo},
 	},
-	util::{hash::HashAlgorithm, request::get_and_format},
+	util::hash::HashAlgorithm,
 };
 use async_trait::async_trait;
 use reqwest::Url;
 use std::sync::Arc;
-
-static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
-
-// Internal Use
-
-mod api_types {
-	use serde::Deserialize;
-
-	#[derive(Debug, Deserialize)]
-	pub struct VersionManifest {
-		pub latest: LatestInfo,
-		pub versions: Vec<VersionInfo>,
-	}
-
-	#[derive(Debug, Deserialize)]
-	pub struct LatestInfo {
-		pub release: String,
-		pub snapshot: String,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct VersionInfo {
-		pub id: String,
-		#[serde(rename = "type")]
-		pub version_type: String,
-		pub url: String,
-		pub sha1: String,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct PackageInfo {
-		pub id: String,
-
-		#[serde(rename = "javaVersion")]
-		pub java_version: JavaVersion,
-
-		pub downloads: Downloads,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct JavaVersion {
-		#[serde(rename = "majorVersion")]
-		pub major_version: u8,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Downloads {
-		pub server: DownloadInfo,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct DownloadInfo {
-		pub url: String,
-		pub sha1: String,
-	}
-}
 
 // Version Listing Implementation
 
@@ -116,38 +61,12 @@ impl BinaryInfo for VanillaBinaryInfo {
 // Provider Implementation
 
 pub struct VanillaBinaryProvider {
-	reqwest_client: reqwest::Client,
+	api_client: PistonMetaAPIClient,
 }
 
 impl VanillaBinaryProvider {
-	pub fn new(reqwest_client: reqwest::Client) -> Self {
-		Self { reqwest_client }
-	}
-
-	async fn get_manifest(&self) -> Result<api_types::VersionManifest, String> {
-		let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
-
-		let manifest: api_types::VersionManifest =
-			get_and_format(&self.reqwest_client, &url).await?;
-
-		Ok(manifest)
-	}
-
-	async fn get_version_info(&self, version_id: &str) -> Result<api_types::PackageInfo, String> {
-		let manifest = self.get_manifest().await?;
-
-		let version_info = manifest
-			.versions
-			.iter()
-			.find(|v| v.id == version_id)
-			.ok_or_else(|| format!("Version not found: {}", version_id))?;
-
-		let package_url = version_info.url.clone();
-
-		let package_info: api_types::PackageInfo =
-			get_and_format(&self.reqwest_client, &package_url).await?;
-
-		Ok(package_info.clone())
+	pub fn new(api_client: PistonMetaAPIClient) -> Self {
+		Self { api_client }
 	}
 }
 
@@ -158,7 +77,8 @@ impl BinaryProvider for VanillaBinaryProvider {
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
-		let manifest = self.get_manifest().await?;
+		let manifest = self.api_client.get_manifest().await?;
+
 		let latest_version = if pre_release {
 			manifest.latest.snapshot
 		} else {
@@ -177,7 +97,8 @@ impl BinaryProvider for VanillaBinaryProvider {
 			.downcast_ref::<VanillaVersionInfo>()
 			.ok_or("Invalid version type for MojangJavaBinaryProvider")?;
 
-		let version_info = self.get_version_info(mojang_version.game()).await?;
+		let version_info = self.api_client.get_version(&mojang_version.game()).await?;
+
 		let download_url = Url::parse(&version_info.downloads.server.url)
 			.map_err(|e| format!("Failed to parse URL: {}", e))?;
 		let hash = version_info.downloads.server.sha1.clone();
@@ -191,7 +112,7 @@ impl BinaryProvider for VanillaBinaryProvider {
 
 impl BasicVersionProvider for VanillaBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let manifest = self.get_manifest().await?;
+		let manifest = self.api_client.get_manifest().await?;
 
 		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
