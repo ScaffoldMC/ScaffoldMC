@@ -1,25 +1,22 @@
-static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
-
-// Internal Use
-
+use crate::util::request::get_and_format;
 use serde::Deserialize;
 
-use crate::util::request::get_and_format;
+static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
 #[derive(Debug, Deserialize)]
-pub struct VersionManifest {
-	pub latest: LatestInfo,
-	pub versions: Vec<VersionInfo>,
+pub struct MojangManifest {
+	pub latest: MojangLatestInfo,
+	pub versions: Vec<MojangVersionInfo>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct LatestInfo {
+pub struct MojangLatestInfo {
 	pub release: String,
 	pub snapshot: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct VersionInfo {
+pub struct MojangVersionInfo {
 	pub id: String,
 	#[serde(rename = "type")]
 	pub version_type: String,
@@ -28,28 +25,28 @@ pub struct VersionInfo {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct PackageInfo {
+pub struct MojangPackageInfo {
 	pub id: String,
 
 	#[serde(rename = "javaVersion")]
-	pub java_version: JavaVersion,
+	pub java_version: MojangJavaVersion,
 
-	pub downloads: Downloads,
+	pub downloads: MojangDownloads,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct JavaVersion {
+pub struct MojangJavaVersion {
 	#[serde(rename = "majorVersion")]
 	pub major_version: u8,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct Downloads {
-	pub server: DownloadInfo,
+pub struct MojangDownloads {
+	pub server: MojangDownloadInfo,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct DownloadInfo {
+pub struct MojangDownloadInfo {
 	pub url: String,
 	pub sha1: String,
 }
@@ -63,13 +60,13 @@ impl PistonMetaAPIClient {
 		Self { reqwest_client }
 	}
 
-	pub async fn get_manifest(&self) -> Result<VersionManifest, String> {
+	pub async fn get_manifest(&self) -> Result<MojangManifest, String> {
 		let url = format!("{MOJANG_API_URL}/mc/game/version_manifest_v2.json");
-		let manifest: VersionManifest = get_and_format(&self.reqwest_client, &url).await?;
+		let manifest: MojangManifest = get_and_format(&self.reqwest_client, &url).await?;
 		Ok(manifest)
 	}
 
-	pub async fn get_version(&self, version_id: &str) -> Result<PackageInfo, String> {
+	pub async fn get_version(&self, version_id: &str) -> Result<MojangPackageInfo, String> {
 		let manifest = self.get_manifest().await?;
 		let version_info = manifest
 			.versions
@@ -77,7 +74,7 @@ impl PistonMetaAPIClient {
 			.find(|v| v.id == version_id)
 			.ok_or_else(|| format!("Version not found: {}", version_id))?;
 
-		let package_info: PackageInfo =
+		let package_info: MojangPackageInfo =
 			get_and_format(&self.reqwest_client, &version_info.url).await?;
 
 		Ok(package_info)
