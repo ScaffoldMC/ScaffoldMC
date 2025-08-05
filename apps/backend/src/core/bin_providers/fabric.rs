@@ -1,5 +1,6 @@
 use crate::{
 	core::{
+		api_clients::fabric::FabricMetaAPIClient,
 		bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
 		version::{fabric::FabricVersionInfo, VersionInfo},
 	},
@@ -8,50 +9,6 @@ use crate::{
 use async_trait::async_trait;
 use reqwest::Url;
 use std::sync::Arc;
-
-static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
-
-mod api_types {
-	use serde::Deserialize;
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Manifest {
-		pub game: Vec<GameVersion>,
-		pub loader: Vec<LoaderVersion>,
-		pub installer: Vec<InstallerVersion>,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct GameVersion {
-		pub version: String,
-		pub stable: bool,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct LoaderVersion {
-		pub build: i32,
-		pub version: String,
-		pub stable: bool,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct InstallerVersion {
-		pub version: String,
-		pub stable: bool,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct LoaderVersionInfo {
-		#[serde(rename = "launcherMeta")]
-		pub launcher_meta: LauncherMeta,
-		pub loader: LoaderVersion,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct LauncherMeta {
-		pub min_java_version: u8,
-	}
-}
 
 pub struct FabricBinaryInfo {
 	download_url: Url,
@@ -88,12 +45,12 @@ impl BinaryInfo for FabricBinaryInfo {
 }
 
 pub struct FabricBinaryProvider {
-	reqwest_client: reqwest::Client,
+	api_client: FabricMetaAPIClient,
 }
 
 impl FabricBinaryProvider {
-	pub fn new(reqwest_client: reqwest::Client) -> Self {
-		Self { reqwest_client }
+	pub fn new(api_client: FabricMetaAPIClient) -> Self {
+		Self { api_client }
 	}
 }
 
@@ -104,9 +61,7 @@ impl BinaryProvider for FabricBinaryProvider {
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
-		let url_str = format!("{}/versions", FABRIC_API_URL);
-
-		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
+		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_loader = manifest
 			.loader
@@ -142,28 +97,21 @@ impl BinaryProvider for FabricBinaryProvider {
 			.downcast_ref::<FabricVersionInfo>()
 			.ok_or("Invalid version type for FabricBinaryProvider")?;
 
-		let url_str = format!(
-			"{}/versions/loader/{}/{}/",
-			FABRIC_API_URL,
-			fabric_version.game(),
-			fabric_version.fabric()
-		);
+		let version_info = self
+			.api_client
+			.get_version(fabric_version.game(), fabric_version.fabric())
+			.await?;
 
-		let response: api_types::LoaderVersionInfo =
-			get_and_format(&self.reqwest_client, &url_str).await?;
+		let java_version = version_info.launcher_meta.min_java_version;
 
-		let java_version = response.launcher_meta.min_java_version;
-
-		let url_str = format!(
-			"{}/versions/loader/{}/{}/{}/server/jar",
-			FABRIC_API_URL,
-			fabric_version.game(),
-			fabric_version.fabric(),
-			fabric_version.launcher()
-		);
-
-		let download_url =
-			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {}", e))?;
+		let download_url = self
+			.api_client
+			.get_download_url(
+				fabric_version.game(),
+				fabric_version.fabric(),
+				fabric_version.launcher(),
+			)
+			.await?;
 
 		let binary_info = FabricBinaryInfo::new(version, download_url, java_version);
 
@@ -173,8 +121,7 @@ impl BinaryProvider for FabricBinaryProvider {
 
 impl AdvancedVersionProvider for FabricBinaryProvider {
 	async fn list_game_versions(&self) -> Result<Vec<String>, String> {
-		let url_str = format!("{}/versions", FABRIC_API_URL);
-		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
+		let manifest = self.api_client.get_manifest().await?;
 		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
 
 		Ok(versions)
@@ -184,9 +131,7 @@ impl AdvancedVersionProvider for FabricBinaryProvider {
 		&self,
 		game_version: &str,
 	) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let url_str = format!("{}/versions/", FABRIC_API_URL);
-
-		let manifest: api_types::Manifest = get_and_format(&self.reqwest_client, &url_str).await?;
+		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_installer: String = manifest
 			.installer
@@ -197,10 +142,11 @@ impl AdvancedVersionProvider for FabricBinaryProvider {
 			.version
 			.clone();
 
-		let url_str = format!("{}/versions/loader/{}/", FABRIC_API_URL, game_version);
-
-		let loaders: Vec<api_types::LoaderVersionInfo> =
-			get_and_format(&self.reqwest_client, &url_str).await?;
+		let loaders = self
+			.api_client
+			.get_versions(game_version)
+			.await
+			.map_err(|e| format!("Failed to get loader versions: {}", e))?;
 
 		let versions: Vec<Arc<dyn VersionInfo>> = loaders
 			.iter()
