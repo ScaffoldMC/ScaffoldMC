@@ -1,4 +1,4 @@
-use crate::{core::game, util::request::get_and_format};
+use crate::util::request::get_and_format;
 use reqwest::Url;
 use serde::Deserialize;
 
