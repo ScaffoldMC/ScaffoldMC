@@ -1,69 +1,14 @@
 use crate::{
 	core::{
+		api_clients::paper::PaperMetaAPIClient,
 		bin_providers::{BasicVersionProvider, BinaryInfo, BinaryProvider},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
-	util::{hash::HashAlgorithm, request::get_and_format},
+	util::hash::HashAlgorithm,
 };
 use async_trait::async_trait;
 use reqwest::Url;
 use std::sync::Arc;
-
-mod api_types {
-	use serde::Deserialize;
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Versions {
-		pub versions: Vec<Version>,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Version {
-		pub id: String,
-		pub builds: Vec<u16>,
-		pub java: JavaInfo,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct JavaInfo {
-		pub version: JavaVersion,
-		pub flags: JavaFlags,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct JavaVersion {
-		pub minimum: u8,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct JavaFlags {
-		pub recommended: Vec<String>,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct BuildInfo {
-		pub id: u16,
-		pub downloads: Downloads,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Downloads {
-		pub server_default: Download,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Download {
-		pub checksums: Checksums,
-		pub url: String,
-	}
-
-	#[derive(Debug, Deserialize, Clone)]
-	pub struct Checksums {
-		pub sha256: String,
-	}
-}
-
-static PAPER_API_URL: &str = "https://fill.papermc.io/v3/projects/paper";
 
 pub struct PaperBinaryInfo {
 	download_url: Url,
@@ -118,12 +63,12 @@ impl BinaryInfo for PaperBinaryInfo {
 }
 
 pub struct PaperBinaryProvider {
-	reqwest_client: reqwest::Client,
+	api_client: PaperMetaAPIClient,
 }
 
 impl PaperBinaryProvider {
-	pub fn new(reqwest_client: reqwest::Client) -> Self {
-		Self { reqwest_client }
+	pub fn new(api_client: PaperMetaAPIClient) -> Self {
+		Self { api_client }
 	}
 }
 
@@ -134,11 +79,10 @@ impl BinaryProvider for PaperBinaryProvider {
 	}
 
 	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
-		let url = format!("{}/versions", PAPER_API_URL);
-		let response: api_types::Versions = get_and_format(&self.reqwest_client, &url).await?;
+		let versions = self.api_client.get_versions().await?;
 
 		// TODO: Handle pre-release logic
-		let latest_version = response.versions.first().ok_or("No versions found")?;
+		let latest_version = versions.versions.first().ok_or("No versions found")?;
 
 		let version_info =
 			PaperVersionInfo::new(latest_version.id.clone(), latest_version.builds[0]);
@@ -152,25 +96,20 @@ impl BinaryProvider for PaperBinaryProvider {
 			.downcast_ref::<PaperVersionInfo>()
 			.ok_or("Invalid version type for PaperBinaryProvider")?;
 
-		let url = format!("{}/versions/{}", PAPER_API_URL, paper_version.game(),);
-		let response: api_types::Version = get_and_format(&self.reqwest_client, &url).await?;
+		let response = self.api_client.get_version(&paper_version.game()).await?;
 
 		let java_version = response.java.version.minimum;
 		let java_args = response.java.flags.recommended;
 
-		let url = format!(
-			"{}/versions/{}/builds/{}",
-			PAPER_API_URL,
-			paper_version.game(),
-			paper_version.paper_build()
-		);
+		let build = self
+			.api_client
+			.get_build(&paper_version.game(), paper_version.paper_build())
+			.await?;
 
-		let response: api_types::BuildInfo = get_and_format(&self.reqwest_client, &url).await?;
-
-		let download_url = Url::parse(&response.downloads.server_default.url)
+		let download_url = Url::parse(&build.downloads.server_default.url)
 			.map_err(|e| format!("Failed to parse download URL: {}", e))?;
 
-		let hash = response.downloads.server_default.checksums.sha256;
+		let hash = build.downloads.server_default.checksums.sha256;
 
 		let binary_info = PaperBinaryInfo::new(
 			Arc::clone(&version),
@@ -186,9 +125,7 @@ impl BinaryProvider for PaperBinaryProvider {
 
 impl BasicVersionProvider for PaperBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let url = format!("{}/versions", PAPER_API_URL);
-		let response: api_types::Versions = get_and_format(&self.reqwest_client, &url).await?;
-
+		let response = self.api_client.get_versions().await?;
 		let mut versions: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
 		for version in response.versions {

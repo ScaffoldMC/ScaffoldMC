@@ -1,4 +1,5 @@
 use crate::core::api_clients::fabric::FabricMetaAPIClient;
+use crate::core::api_clients::paper::PaperMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
@@ -29,12 +30,13 @@ impl Service for BinaryService {}
 impl BinaryService {
 	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		let fabric_api = FabricMetaAPIClient::new(reqwest_client.clone());
+		let paper_api = PaperMetaAPIClient::new(reqwest_client.clone());
 
 		Self {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(fabric_api),
 			mcje: MojangJavaBinaryProvider::new(reqwest_client.clone()),
-			paper: PaperBinaryProvider::new(reqwest_client.clone()),
+			paper: PaperBinaryProvider::new(paper_api),
 			lockfile_mutex: Arc::new(Mutex::new(())),
 			reqwest_client,
 		}
