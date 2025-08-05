@@ -1,10 +1,7 @@
-use crate::{
-	core::{
-		api_clients::fabric::FabricMetaAPIClient,
-		bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
-		version::{fabric::FabricVersionInfo, VersionInfo},
-	},
-	util::request::get_and_format,
+use crate::core::{
+	api_clients::fabric::FabricMetaAPIClient,
+	bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
+	version::{fabric::FabricVersionInfo, VersionInfo},
 };
 use async_trait::async_trait;
 use reqwest::Url;

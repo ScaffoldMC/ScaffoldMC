@@ -7,40 +7,40 @@ static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 // API Types
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct FabricManifest {
-	pub game: Vec<GameVersion>,
-	pub loader: Vec<LoaderVersion>,
-	pub installer: Vec<InstallerVersion>,
+pub struct FabricVersionsManifest {
+	pub game: Vec<FabricGameVersion>,
+	pub loader: Vec<FabricLoaderVersion>,
+	pub installer: Vec<FabricInstallerVersion>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct GameVersion {
+pub struct FabricGameVersion {
 	pub version: String,
 	pub stable: bool,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LoaderVersion {
+pub struct FabricLoaderVersion {
 	pub build: i32,
 	pub version: String,
 	pub stable: bool,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct InstallerVersion {
+pub struct FabricInstallerVersion {
 	pub version: String,
 	pub stable: bool,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LoaderVersionInfo {
+pub struct FabricLoaderInfo {
 	#[serde(rename = "launcherMeta")]
-	pub launcher_meta: LauncherMeta,
-	pub loader: LoaderVersion,
+	pub launcher_meta: FabricLauncherMeta,
+	pub loader: FabricLoaderVersion,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LauncherMeta {
+pub struct FabricLauncherMeta {
 	pub min_java_version: u8,
 }
 
@@ -55,16 +55,17 @@ impl FabricMetaAPIClient {
 		Self { reqwest_client }
 	}
 
-	pub async fn get_manifest(&self) -> Result<FabricManifest, String> {
+	pub async fn get_manifest(&self) -> Result<FabricVersionsManifest, String> {
 		let url_str = format!("{}/versions", FABRIC_API_URL);
-		let manifest: FabricManifest = get_and_format(&self.reqwest_client, &url_str).await?;
+		let manifest: FabricVersionsManifest =
+			get_and_format(&self.reqwest_client, &url_str).await?;
 
 		Ok(manifest)
 	}
 
-	pub async fn get_versions(&self, game_version: &str) -> Result<Vec<LoaderVersionInfo>, String> {
+	pub async fn get_versions(&self, game_version: &str) -> Result<Vec<FabricLoaderInfo>, String> {
 		let url_str = format!("{}/versions/loader/{}/", FABRIC_API_URL, game_version);
-		let versions: Vec<LoaderVersionInfo> =
+		let versions: Vec<FabricLoaderInfo> =
 			get_and_format(&self.reqwest_client, &url_str).await?;
 
 		Ok(versions)
@@ -74,13 +75,13 @@ impl FabricMetaAPIClient {
 		&self,
 		game_version: &str,
 		fabric_version: &str,
-	) -> Result<LoaderVersionInfo, String> {
+	) -> Result<FabricLoaderInfo, String> {
 		let url_str = format!(
 			"{}/versions/loader/{}/{}/",
 			FABRIC_API_URL, game_version, fabric_version
 		);
 
-		let response: LoaderVersionInfo = get_and_format(&self.reqwest_client, &url_str).await?;
+		let response: FabricLoaderInfo = get_and_format(&self.reqwest_client, &url_str).await?;
 
 		Ok(response)
 	}
