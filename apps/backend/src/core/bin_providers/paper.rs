@@ -1,6 +1,6 @@
 use crate::{
 	core::{
-		api_clients::paper::PaperMetaAPIClient,
+		api_clients::paper::PaperDownloadsAPIClient,
 		bin_providers::{BasicVersionProvider, BinaryInfo, BinaryProvider},
 		version::{paper::PaperVersionInfo, VersionInfo},
 	},
@@ -63,11 +63,11 @@ impl BinaryInfo for PaperBinaryInfo {
 }
 
 pub struct PaperBinaryProvider {
-	api_client: PaperMetaAPIClient,
+	api_client: PaperDownloadsAPIClient,
 }
 
 impl PaperBinaryProvider {
-	pub fn new(api_client: PaperMetaAPIClient) -> Self {
+	pub fn new(api_client: PaperDownloadsAPIClient) -> Self {
 		Self { api_client }
 	}
 }

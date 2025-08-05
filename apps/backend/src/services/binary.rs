@@ -1,5 +1,5 @@
 use crate::core::api_clients::fabric::FabricMetaAPIClient;
-use crate::core::api_clients::paper::PaperMetaAPIClient;
+use crate::core::api_clients::paper::PaperDownloadsAPIClient;
 use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::{
@@ -31,7 +31,7 @@ impl Service for BinaryService {}
 impl BinaryService {
 	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		let fabric_api = FabricMetaAPIClient::new(reqwest_client.clone());
-		let paper_api = PaperMetaAPIClient::new(reqwest_client.clone());
+		let paper_api = PaperDownloadsAPIClient::new(reqwest_client.clone());
 		let piston_meta_api = PistonMetaAPIClient::new(reqwest_client.clone());
 
 		Self {

@@ -58,11 +58,11 @@ pub struct PaperChecksums {
 
 // API Client
 
-pub struct PaperMetaAPIClient {
+pub struct PaperDownloadsAPIClient {
 	reqwest_client: reqwest::Client,
 }
 
-impl PaperMetaAPIClient {
+impl PaperDownloadsAPIClient {
 	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		Self { reqwest_client }
 	}
