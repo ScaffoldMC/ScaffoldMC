@@ -2,7 +2,7 @@ use crate::core::api_clients::fabric::FabricMetaAPIClient;
 use crate::core::api_clients::paper::PaperMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::{
-	fabric::FabricBinaryProvider, mojang_java::MojangJavaBinaryProvider, BinaryProvider,
+	fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider, BinaryProvider,
 };
 use crate::core::files::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
@@ -18,7 +18,7 @@ use tokio::sync::Mutex;
 pub struct BinaryService {
 	binaries_dir: String,
 	fabric: FabricBinaryProvider,
-	mcje: MojangJavaBinaryProvider,
+	mcje: VanillaBinaryProvider,
 	paper: PaperBinaryProvider,
 	lockfile_mutex: Arc<Mutex<()>>,
 	reqwest_client: reqwest::Client,
@@ -35,7 +35,7 @@ impl BinaryService {
 		Self {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
 			fabric: FabricBinaryProvider::new(fabric_api),
-			mcje: MojangJavaBinaryProvider::new(reqwest_client.clone()),
+			mcje: VanillaBinaryProvider::new(reqwest_client.clone()),
 			paper: PaperBinaryProvider::new(paper_api),
 			lockfile_mutex: Arc::new(Mutex::new(())),
 			reqwest_client,

@@ -1,6 +1,6 @@
 pub mod fabric;
-pub mod mojang_java;
 pub mod paper;
+pub mod vanilla;
 
 pub trait VersionInfo: Send + Sync {
 	fn game(&self) -> &str;

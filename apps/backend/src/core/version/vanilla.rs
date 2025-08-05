@@ -2,17 +2,17 @@ use crate::core::version::{VersionInfo, VersionInfoConstructor};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct MojangJavaVersionInfo {
+pub struct VanillaVersionInfo {
 	game: String,
 }
 
-impl MojangJavaVersionInfo {
+impl VanillaVersionInfo {
 	pub fn new(game: String) -> Self {
 		Self { game }
 	}
 }
 
-impl VersionInfo for MojangJavaVersionInfo {
+impl VersionInfo for VanillaVersionInfo {
 	fn game(&self) -> &str {
 		&self.game
 	}
@@ -26,9 +26,9 @@ impl VersionInfo for MojangJavaVersionInfo {
 	}
 }
 
-impl VersionInfoConstructor for MojangJavaVersionInfo {
-	type VersionType = MojangJavaVersionInfo;
-	
+impl VersionInfoConstructor for VanillaVersionInfo {
+	type VersionType = VanillaVersionInfo;
+
 	fn from_identifier(identifier: &str) -> Result<Self::VersionType, String> {
 		if identifier.is_empty() {
 			return Err("Identifier cannot be empty".to_string());

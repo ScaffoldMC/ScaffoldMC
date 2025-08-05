@@ -5,8 +5,8 @@ use std::sync::Arc;
 use crate::{core::version::VersionInfo, util::hash::HashAlgorithm};
 
 pub mod fabric;
-pub mod mojang_java;
 pub mod paper;
+pub mod vanilla;
 
 pub trait BinaryInfo {
 	/// Get the download URL for this binary

@@ -2,7 +2,7 @@ use super::{BinaryInfo, BinaryProvider};
 use crate::{
 	core::{
 		bin_providers::BasicVersionProvider,
-		version::{mojang_java::MojangJavaVersionInfo, VersionInfo},
+		version::{vanilla::VanillaVersionInfo, VersionInfo},
 	},
 	util::{hash::HashAlgorithm, request::get_and_format},
 };
@@ -68,14 +68,14 @@ mod api_types {
 
 // Version Listing Implementation
 
-pub struct MojangJavaBinaryInfo {
+pub struct VanillaBinaryInfo {
 	download_url: Url,
 	hash: String,
 	version: Arc<dyn VersionInfo>,
 	java_version: u8,
 }
 
-impl MojangJavaBinaryInfo {
+impl VanillaBinaryInfo {
 	pub async fn new(
 		version: Arc<dyn VersionInfo>,
 		download_url: Url,
@@ -91,7 +91,7 @@ impl MojangJavaBinaryInfo {
 	}
 }
 
-impl BinaryInfo for MojangJavaBinaryInfo {
+impl BinaryInfo for VanillaBinaryInfo {
 	fn download_url(&self) -> &Url {
 		&self.download_url
 	}
@@ -115,11 +115,11 @@ impl BinaryInfo for MojangJavaBinaryInfo {
 
 // Provider Implementation
 
-pub struct MojangJavaBinaryProvider {
+pub struct VanillaBinaryProvider {
 	reqwest_client: reqwest::Client,
 }
 
-impl MojangJavaBinaryProvider {
+impl VanillaBinaryProvider {
 	pub fn new(reqwest_client: reqwest::Client) -> Self {
 		Self { reqwest_client }
 	}
@@ -152,7 +152,7 @@ impl MojangJavaBinaryProvider {
 }
 
 #[async_trait]
-impl BinaryProvider for MojangJavaBinaryProvider {
+impl BinaryProvider for VanillaBinaryProvider {
 	fn binary_name(&self) -> &str {
 		"server.jar"
 	}
@@ -165,7 +165,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 			manifest.latest.release
 		};
 
-		let latest_version = MojangJavaVersionInfo::new(latest_version.clone());
+		let latest_version = VanillaVersionInfo::new(latest_version.clone());
 
 		self.get(Arc::new(latest_version)).await
 	}
@@ -174,7 +174,7 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 		// We need to downcast the version to MojangJavaVersionInfo
 		let mojang_version = version
 			.as_any()
-			.downcast_ref::<MojangJavaVersionInfo>()
+			.downcast_ref::<VanillaVersionInfo>()
 			.ok_or("Invalid version type for MojangJavaBinaryProvider")?;
 
 		let version_info = self.get_version_info(mojang_version.game()).await?;
@@ -184,20 +184,19 @@ impl BinaryProvider for MojangJavaBinaryProvider {
 
 		let java_version = version_info.java_version.major_version;
 
-		let binary_info =
-			MojangJavaBinaryInfo::new(version, download_url, hash, java_version).await?;
+		let binary_info = VanillaBinaryInfo::new(version, download_url, hash, java_version).await?;
 		Ok(Box::new(binary_info))
 	}
 }
 
-impl BasicVersionProvider for MojangJavaBinaryProvider {
+impl BasicVersionProvider for VanillaBinaryProvider {
 	async fn list_versions(&self) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
 		let manifest = self.get_manifest().await?;
 
 		let mut listings: Vec<Arc<dyn VersionInfo>> = Vec::new();
 
 		for v in &manifest.versions {
-			let version_info = MojangJavaVersionInfo::new(v.id.clone());
+			let version_info = VanillaVersionInfo::new(v.id.clone());
 			listings.push(Arc::new(version_info));
 		}
 
