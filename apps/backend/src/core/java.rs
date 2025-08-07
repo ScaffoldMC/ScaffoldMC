@@ -1,5 +1,5 @@
 use log::warn;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use thiserror::Error;
 use tokio::process::Command;
@@ -12,7 +12,7 @@ pub enum JavaError {
 	FileSystem(String),
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct JavaVersion {
 	pub major_version: u8,
 	pub version_string: String,
