@@ -10,7 +10,9 @@
 				"cwd": "lib/java_probe",
 				"commands": [
 					"javac --release 8 -d build JavaProbe.java",
-					"jar cfm build/JavaProbe.jar manifest.txt -C build ."
+					"jar cfm build/JavaProbe.jar manifest.txt -C build .",
+					"mkdir -p ../../apps/backend/assets",
+					"cp build/JavaProbe.jar ../../apps/backend/assets/JavaProbe.jar"
 				],
 				"parallel": false
 			}
