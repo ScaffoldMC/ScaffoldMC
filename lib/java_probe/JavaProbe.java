@@ -10,8 +10,8 @@ public class JavaProbe {
 		}
 
 		System.out.print("{");
-		System.out.print("\"javaMajorVersion\": " + majorVersion + ",");
-		System.out.print("\"architecture\": \"" + arch + "\",");
+		System.out.print("\"major_version\": " + majorVersion + ",");
+		System.out.print("\"arch\": \"" + arch + "\",");
 		System.out.print("\"vendor\": \"" + vendor + "\"");
 		System.out.print("}");
 	}
