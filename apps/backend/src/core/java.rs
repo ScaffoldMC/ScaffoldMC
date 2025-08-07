@@ -1,5 +1,8 @@
+use log::warn;
+use serde::Deserialize;
 use std::path::PathBuf;
 use thiserror::Error;
+use tokio::process::Command;
 
 #[derive(Error, Debug)]
 pub enum JavaError {
@@ -9,17 +12,18 @@ pub enum JavaError {
 	FileSystem(String),
 }
 
+#[derive(Deserialize, Debug, Clone)]
 pub struct JavaVersion {
 	pub major_version: u8,
 	pub version_string: String,
-	pub identifier: String,
-	pub path: String,
+	pub vendor: String,
+	pub arch: String,
 }
 
 /// Retrieves a suitable Java version for the specified major version.
 /// Returns the first matching version found.
-pub fn get_suitable_for(major_version: u8) -> Result<JavaVersion, JavaError> {
-	let javas = get_versions()?;
+pub async fn get_suitable_for(major_version: u8) -> Result<JavaVersion, JavaError> {
+	let javas = get_versions().await?;
 	let suitable = javas
 		.into_iter()
 		.find(|java| java.major_version == major_version);
@@ -31,7 +35,7 @@ pub fn get_suitable_for(major_version: u8) -> Result<JavaVersion, JavaError> {
 }
 
 /// Retrieves all available Java versions installed on the system.
-pub fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
+pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 	let jvm_paths: Vec<PathBuf> = {
 		let mut dirs = Vec::new();
 
@@ -94,10 +98,39 @@ pub fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 		dirs
 	};
 
-	let javas: Vec<JavaVersion> = Vec::new();
+	let mut javas: Vec<JavaVersion> = Vec::new();
 
 	for jvm in jvm_paths {
-		// TODO: Run Java probe to get java info
+		let probe_output = Command::new(&jvm)
+			.arg("-jar")
+			.arg("assets/JavaProbe.jar")
+			.output()
+			.await;
+
+		if probe_output.is_err() {
+			warn!(
+				"Failed to run Java probe on JVM: {}",
+				probe_output.unwrap_err()
+			);
+			continue;
+		}
+
+		let probe_output = probe_output.unwrap();
+		let stdout = String::from_utf8_lossy(&probe_output.stdout);
+
+		match serde_json::from_str::<JavaVersion>(&stdout) {
+			Ok(java_version) => {
+				javas.push(java_version);
+			}
+			Err(e) => {
+				warn!(
+					"Failed to deserialize JavaVersion from probe output for JVM {}: {}",
+					jvm.display(),
+					e
+				);
+				continue;
+			}
+		}
 	}
 
 	Ok(javas)
