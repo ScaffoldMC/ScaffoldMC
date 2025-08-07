@@ -9,11 +9,11 @@ public class JavaProbe {
 			majorVersion = version.split("\\.")[1];
 		}
 
-		System.out.println("{");
-		System.out.println("	\"javaMajorVersion\": \"" + majorVersion + "\",");
-		System.out.println("	\"architecture\": \"" + arch + "\",");
-		System.out.println("	\"vendor\": \"" + vendor + "\"");
-		System.out.println("}");
+		System.out.print("{");
+		System.out.print("\"javaMajorVersion\": " + majorVersion + ",");
+		System.out.print("\"architecture\": \"" + arch + "\",");
+		System.out.print("\"vendor\": \"" + vendor + "\"");
+		System.out.print("}");
 	}
 
 }
