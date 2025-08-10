@@ -45,11 +45,32 @@ impl Service for ServerService {
 		};
 
 		// Gracefully stop all running servers
-		// TODO: Stop servers in parallel
-		for server_id in server_ids {
+		for server_id in server_ids.clone() {
 			self.stop(server_id)
 				.await
 				.map_err(|e| format!("Failed to stop server {}: {}", server_id, e))?;
+		}
+
+		// Wait up to 30 seconds for all servers to shut down
+		let timeout = std::time::Duration::from_secs(60);
+		let start = std::time::Instant::now();
+
+		for server_id in server_ids.clone() {
+			while self.is_running(server_id).await {
+				if start.elapsed() > timeout {
+					break;
+				}
+				tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+			}
+		}
+
+		// If any servers are still running after the timeout, force kill them
+		for server_id in server_ids {
+			if self.is_running(server_id).await {
+				if let Err(e) = self.kill(server_id).await {
+					error!("Failed to force kill server {}: {}", server_id, e);
+				}
+			}
 		}
 
 		let mut servers_guard = self.servers.write().await;
@@ -222,6 +243,24 @@ impl ServerService {
 		};
 
 		self.send_command(server_id, &stop_command).await?;
+
+		Ok(())
+	}
+
+	pub async fn kill(&mut self, server_id: Uuid) -> Result<(), ServerError> {
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let mut process_guard = server.process.write().await;
+		if let Some(mut child) = process_guard.take() {
+			if let Err(e) = child.kill().await {
+				return Err(ServerError::StopError(e.to_string()));
+			}
+		} else {
+			return Err(ServerError::NotRunning);
+		}
 
 		Ok(())
 	}
