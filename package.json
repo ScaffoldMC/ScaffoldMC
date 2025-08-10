@@ -1,5 +1,5 @@
 {
-	"name": "mc-server-ui",
+	"name": "scaffoldhost",
 	"private": true,
 	"devDependencies": {
 		"@monodon/rust": "^2.3.0",

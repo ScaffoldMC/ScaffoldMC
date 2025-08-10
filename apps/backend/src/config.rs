@@ -12,4 +12,4 @@ pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 // Reqwest
 pub static CLIENT_USER_AGENT: &str =
-	"MCServerUI/1.0.0 (https://github.com/unwieldycat/mc-server-ui)";
+	"ScaffoldHost/0.0.0 (https://github.com/ScaffoldHost/ScaffoldHost)";
