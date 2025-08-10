@@ -41,4 +41,4 @@ You will need the following programs installed globally:
 
 ### Build
 
-Run `just build` or `nx build` to build both the frontend and backend.
+Run `nx build` to build both the frontend and backend.
