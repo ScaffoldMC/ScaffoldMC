@@ -13,6 +13,7 @@ use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
+use tokio::sync::Mutex;
 use util::logger::Logger;
 
 use crate::services::auth::AuthService;
@@ -21,7 +22,7 @@ static LOGGER: Logger = Logger;
 
 #[derive(Clone)]
 struct AppState {
-	pub server_service: Arc<ServerService>,
+	pub server_service: Arc<Mutex<ServerService>>,
 	pub auth_service: Arc<AuthService>,
 	pub binary_service: Arc<BinaryService>,
 	pub reqwest_client: reqwest::Client,
@@ -53,7 +54,7 @@ impl AppState {
 		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
 
 		AppState {
-			server_service: Arc::new(ServerService::new(binary_service.clone())),
+			server_service: Arc::new(Mutex::new(ServerService::new(binary_service.clone()))),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
 			reqwest_client,
