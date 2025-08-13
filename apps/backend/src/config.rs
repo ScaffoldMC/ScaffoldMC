@@ -11,5 +11,4 @@ pub static REFRESH_TOKEN_LENGTH: Duration = Duration::hours(6);
 pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 // Reqwest
-pub static CLIENT_USER_AGENT: &str =
-	"ScaffoldHost/0.0.0 (https://github.com/ScaffoldHost/ScaffoldHost)";
+pub static CLIENT_USER_AGENT: &str = "ScaffoldMC/0.0.0 (https://github.com/ScaffoldMC/ScaffoldMC)";

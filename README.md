@@ -2,7 +2,7 @@
 > This project is under heavy development, and is **not ready for use**.
 > Features stated below may not be implemented yet, not functional, or untested.
 
-# ScaffoldHost
+# ScaffoldMC
 
 A self-hosted Minecraft server panel for Minecraft: Java Edition.
 
@@ -17,7 +17,7 @@ an easy way to deploy and manage their own servers. Panels that do promise ease
 of use often have unappealing user interfaces, are platform dependent, and/or
 are paid.
 
-ScaffoldHost aims to be **the most integrated server panel for Minecraft**. It
+ScaffoldMC aims to be **the most integrated server panel for Minecraft**. It
 intends to go beyond generic server management, providing easy mod management,
 one-click loader installation, and more - bringing the seamless experience of
 third-party client launchers to the server.

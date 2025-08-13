@@ -1,5 +1,5 @@
 {
-	"name": "scaffoldhost",
+	"name": "scaffoldmc",
 	"private": true,
 	"devDependencies": {
 		"@monodon/rust": "^2.3.0",
