@@ -2,6 +2,7 @@ use crate::core::api_clients::fabric::FabricMetaAPIClient;
 use crate::core::api_clients::paper::PaperDownloadsAPIClient;
 use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
+use crate::core::bin_providers::BinaryInfo;
 use crate::core::bin_providers::{
 	fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider, BinaryProvider,
 };
@@ -53,10 +54,16 @@ impl BinaryService {
 		}
 	}
 
+	/// Get information about a specific game version.
+	pub async fn get_bin_info(&self, game: &Game) -> Result<Box<dyn BinaryInfo>, String> {
+		let provider = self.get_provider(game);
+		provider.get(game.version()).await
+	}
+
 	/// Installs a game with the specified configuration.
-	pub async fn install_game(&self, game: Game) -> Result<PathBuf, String> {
+	pub async fn install_game(&self, game: &Game) -> Result<PathBuf, String> {
 		let _lock = self.lockfile_mutex.lock().await;
-		let binary_dir = self.binary_dir(&game);
+		let binary_dir = self.binary_dir(game);
 
 		// Ensure the binary directory exists
 		if !binary_dir.exists() {
@@ -64,7 +71,7 @@ impl BinaryService {
 				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
 		}
 
-		let provider = self.get_provider(&game);
+		let provider = self.get_provider(game);
 		let binary = provider.get(game.version()).await?;
 		let download_url = binary.download_url();
 		let binary_name = provider.binary_name();
@@ -121,7 +128,7 @@ impl BinaryService {
 		drop(lock);
 
 		let binary_path = self
-			.install_game(game.clone())
+			.install_game(game)
 			.await
 			.map_err(|e| format!("Failed to ensure binary: {}", e))?;
 
