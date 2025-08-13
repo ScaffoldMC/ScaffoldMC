@@ -1,6 +1,7 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::files::server_config::ServerConfig;
+use crate::core::game::Game;
 use crate::core::server::Server;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
@@ -277,7 +278,7 @@ impl ServerService {
 	}
 
 	/// Creates a new server instance with the given configuration.
-	pub async fn create(&mut self, server_config: ServerConfig) -> Result<Uuid, String> {
+	pub async fn create(&mut self, name: String, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));
 
@@ -286,6 +287,21 @@ impl ServerService {
 		}
 
 		let config_path = server_dir.join(SERVER_CONFIG_FILE_NAME);
+
+		let install_result = self.binary_service.install_game(&server_type).await;
+
+		if let Err(err) = install_result {
+			return Err(format!("Failed to install game: {}", err));
+		}
+
+		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
+
+		let server_config = ServerConfig {
+			name,
+			game: server_type,
+			args: bin_info.java_rec_args(),
+			stop_command: "stop".into(), // TODO: Velocity uses "shutdown"
+		};
 
 		server_config
 			.save_to_file(config_path)
