@@ -1,10 +1,12 @@
+<p align="center">
+	<img src="./logo.svg" height="256">
+</p>
+
+<p align="center">A self-hosted Minecraft server platform for Minecraft.</p>
+
 > [!NOTE]  
 > This project is under heavy development, and is **not ready for use**.
 > Features stated below may not be implemented yet, not functional, or untested.
-
-# ScaffoldMC
-
-A self-hosted Minecraft server panel for Minecraft: Java Edition.
 
 ## Mission
 
