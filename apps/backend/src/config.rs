@@ -2,7 +2,7 @@ use time::Duration;
 
 // File system
 pub const DATA_FOLDER: &str = "data";
-pub const SERVER_CONFIG_FILE_NAME: &str = "server_config.json";
+pub const SERVER_CONFIG_FILE_NAME: &str = "server_config.toml";
 
 // Authentication
 pub static REFRESH_COOKIE_NAME: &str = "ref_token";
