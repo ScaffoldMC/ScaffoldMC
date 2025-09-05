@@ -22,3 +22,12 @@ pub struct BinaryLockfileEntry {
 	pub path: PathBuf,
 	pub hash: Option<BinaryLockfileHash>,
 }
+
+impl Default for BinaryLockfile {
+	fn default() -> Self {
+		Self {
+			version: 1,
+			binaries: HashMap::new(),
+		}
+	}
+}
