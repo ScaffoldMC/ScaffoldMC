@@ -161,7 +161,7 @@ impl BinaryService {
 		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
 
 		if !lockfile_path.exists() {
-			return Err("Binary lockfile does not exist".to_string());
+			return Ok(BinaryLockfile::default());
 		}
 
 		let file_content = tokio::fs::read_to_string(lockfile_path)
