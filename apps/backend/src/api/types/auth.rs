@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
-use ts_rs::TS;
+use utoipa::ToSchema;
 
-#[derive(TS, Debug, Clone, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(ToSchema, Debug, Clone, Serialize, Deserialize)]
 pub struct LoginRequest {
 	pub username: String,
 	pub password: String,

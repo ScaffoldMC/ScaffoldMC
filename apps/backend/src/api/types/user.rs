@@ -1,11 +1,10 @@
-use serde::Serialize;
-use ts_rs::TS;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::db::user::User;
 
-#[derive(TS, Serialize)]
-#[ts(export)]
+#[derive(ToSchema, Serialize, Deserialize, Debug, Clone)]
 pub struct UserResponse {
 	pub id: Uuid,
 	pub fullname: String,
