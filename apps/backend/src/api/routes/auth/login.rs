@@ -14,6 +14,16 @@ pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new().route("/", routing::post(post))
 }
 
+#[utoipa::path(
+	post,
+	path = "/auth/login",
+	request_body = LoginRequest,
+	responses(
+		(status = 200, description = "User logged in successfully"),
+		(status = 401, description = "Invalid credentials"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
 async fn post(
 	cookies: Cookies,
 	State(state): State<Arc<AppState>>,

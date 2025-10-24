@@ -1,8 +1,7 @@
-use std::sync::Arc;
-
 use axum::{extract::State, http::StatusCode, response::IntoResponse};
 use axum::{routing, Router};
 use log::error;
+use std::sync::Arc;
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
 
@@ -13,6 +12,14 @@ pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new().route("/", routing::post(post))
 }
 
+#[utoipa::path(
+	post,
+	path = "/auth/logout",
+	responses(
+		(status = 200, description = "User logged out successfully"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
 async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let refresh_token = cookies
 		.get(REFRESH_COOKIE_NAME)

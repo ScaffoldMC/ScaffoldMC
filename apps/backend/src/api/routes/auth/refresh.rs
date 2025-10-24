@@ -16,6 +16,15 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 // FIXME: Unused refresh tokens need to be cleared from the db occasionally (perhaps on program startup?)
 
+#[utoipa::path(
+	post,
+	path = "/auth/refresh",
+	responses(
+		(status = 200, description = "User session refreshed successfully"),
+		(status = 401, description = "User not signed in"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
 async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let ref_token = cookies
 		.get(REFRESH_COOKIE_NAME)
