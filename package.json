@@ -4,6 +4,7 @@
 	"devDependencies": {
 		"@monodon/rust": "^2.3.0",
 		"@nx/js": "21.2.0",
+		"@nx/next": "^22.0.2",
 		"@nx/storybook": "21.2.0",
 		"@nx/web": "21.2.0",
 		"@storybook/nextjs": "9.0.9",
