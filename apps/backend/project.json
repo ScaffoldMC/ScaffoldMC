@@ -8,6 +8,7 @@
 			"cache": true,
 			"executor": "@monodon/rust:build",
 			"outputs": ["{options.target-dir}"],
+			"dependsOn": ["test"],
 			"options": {
 				"target-dir": "dist/target/backend"
 			},
