@@ -10,8 +10,8 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 pub async fn post(
 	Extension(user): Extension<User>,
-	Json(req): Json<UsernameChangeRequest>,
 	State(state): State<Arc<AppState>>,
+	Json(req): Json<UsernameChangeRequest>,
 ) -> impl IntoResponse {
 	let db_res = state
 		.user_service
