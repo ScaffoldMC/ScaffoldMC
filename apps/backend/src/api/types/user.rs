@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use uuid::Uuid;
 
@@ -10,6 +10,12 @@ pub struct UserResponse {
 	pub id: Uuid,
 	pub fullname: String,
 	pub username: String,
+}
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct UsernameChangeRequest {
+	pub new_username: String,
 }
 
 impl From<User> for UserResponse {

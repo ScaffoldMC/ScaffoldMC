@@ -30,7 +30,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 	Router::new()
 		.nest("/servers", servers::create_router())
 		.nest("/binaries", binaries::create_router())
-		.nest("/me", me::create_router())
+		.nest("/me", me::create_router(state.clone()))
 		.nest("/jvms", jvms::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
 		.nest("/auth", auth::create_router(state.clone()))
