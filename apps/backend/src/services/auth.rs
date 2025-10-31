@@ -21,6 +21,8 @@ pub enum AuthServiceError {
 	InvalidCredentials,
 	#[error("Unauthorized access")]
 	Unauthorized,
+	#[error("Forbidden access")]
+	Forbidden,
 	#[error("Internal server error: {0}")]
 	ServerError(String),
 }
@@ -30,6 +32,7 @@ pub struct AuthTokenClaims {
 	pub iat: i64,
 	pub exp: i64,
 	pub sub: String,
+	pub sudo: bool,
 }
 
 pub struct AuthService {
@@ -44,7 +47,7 @@ impl AuthService {
 		Self { db, secrets }
 	}
 
-	fn create_auth_token(&self, user_id: String) -> String {
+	fn create_auth_token(&self, user_id: String, sudo: bool) -> String {
 		let time_now = time::UtcDateTime::now();
 		let issued_at_secs = time_now.unix_timestamp();
 		let expiration_secs = time_now
@@ -56,6 +59,7 @@ impl AuthService {
 			iat: issued_at_secs,
 			exp: expiration_secs,
 			sub: user_id,
+			sudo,
 		};
 
 		jsonwebtoken::encode(
@@ -99,7 +103,7 @@ impl AuthService {
 			};
 		}
 
-		let auth_token = self.create_auth_token(user.id.to_string());
+		let auth_token = self.create_auth_token(user.id.to_string(), false);
 		let ref_token = Self::create_refresh_token();
 
 		self.db
@@ -108,6 +112,26 @@ impl AuthService {
 			.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
 
 		Ok((auth_token, ref_token))
+	}
+
+	pub async fn sudo_user(&self, user: User, password: &str) -> Result<String, AuthServiceError> {
+		let password_owned = password.to_owned();
+		let password_hash_owned = user.password_hash.clone();
+		let verify_result =
+			spawn_blocking(move || verify_password(&password_owned, &password_hash_owned))
+				.await
+				.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
+
+		if let Err(err) = verify_result {
+			return match err {
+				VerifyError::PasswordInvalid => Err(AuthServiceError::InvalidCredentials),
+				VerifyError::Parse(e) => Err(AuthServiceError::ServerError(e.to_string())),
+			};
+		}
+
+		let sudo_token = self.create_auth_token(user.id.to_string(), true);
+
+		Ok(sudo_token)
 	}
 
 	pub async fn refresh_tokens(
@@ -143,7 +167,7 @@ impl AuthService {
 			return Err(AuthServiceError::ServerError(err.to_string()));
 		}
 
-		let auth_token = self.create_auth_token(db_entry.user_id.to_string());
+		let auth_token = self.create_auth_token(db_entry.user_id.to_string(), false);
 		let new_ref_token = Self::create_refresh_token();
 
 		if let Err(err) = self
@@ -167,7 +191,11 @@ impl AuthService {
 		Ok(())
 	}
 
-	pub async fn get_user_from_token(&self, token: &str) -> Result<User, AuthServiceError> {
+	pub async fn get_user_from_token(
+		&self,
+		token: &str,
+		sudo: bool,
+	) -> Result<User, AuthServiceError> {
 		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
 			&token,
 			&self.secrets.jwt_dec,
@@ -176,6 +204,10 @@ impl AuthService {
 			Ok(data) => data,
 			Err(_) => return Err(AuthServiceError::Unauthorized),
 		};
+
+		if sudo && !token_data.claims.sudo {
+			return Err(AuthServiceError::Forbidden);
+		}
 
 		let user_uuid = match Uuid::parse_str(&token_data.claims.sub) {
 			Ok(uuid) => uuid,

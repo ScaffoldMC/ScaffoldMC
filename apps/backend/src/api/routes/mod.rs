@@ -33,7 +33,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 		.nest("/me", me::create_router())
 		.nest("/jvms", jvms::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
-		.nest("/auth", auth::create_router())
+		.nest("/auth", auth::create_router(state.clone()))
 		.layer(CookieManagerLayer::new())
 		.layer(cors)
 		.with_state(state)
