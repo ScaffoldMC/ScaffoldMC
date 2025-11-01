@@ -5,7 +5,7 @@ use axum::middleware;
 use axum::{http::StatusCode, response::IntoResponse, routing, Extension, Json, Router};
 use std::sync::Arc;
 
-use crate::api::types::user::{UserPatchRequest, UserResponse};
+use crate::api::types::user::{self, UserPatchRequest, UserResponse};
 
 pub fn create_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
@@ -69,5 +69,19 @@ pub async fn patch(
 		}
 	}
 
-	(StatusCode::OK, "User updated successfully").into_response()
+	let user_updated = state.user_service.get_user_by_id(user.id).await;
+
+	if let Err(_) = user_updated {
+		return (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			"Internal server error fetching updated user",
+		)
+			.into_response();
+	}
+
+	(
+		StatusCode::OK,
+		Json(UserResponse::from(user_updated.unwrap())),
+	)
+		.into_response()
 }
