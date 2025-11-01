@@ -4,18 +4,20 @@ use uuid::Uuid;
 
 use crate::db::user::User;
 
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct UserPatchRequest {
+	pub fullname: Option<String>,
+	pub username: Option<String>,
+	pub password: Option<String>,
+}
+
 #[derive(TS, Serialize)]
 #[ts(export)]
 pub struct UserResponse {
 	pub id: Uuid,
 	pub fullname: String,
 	pub username: String,
-}
-
-#[derive(TS, Debug, Clone, Serialize, Deserialize)]
-#[ts(export)]
-pub struct UsernameChangeRequest {
-	pub new_username: String,
 }
 
 impl From<User> for UserResponse {
