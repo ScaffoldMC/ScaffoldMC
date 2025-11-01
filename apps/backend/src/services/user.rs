@@ -27,6 +27,14 @@ impl UserService {
 		Self { db }
 	}
 
+	/// Retrieve a user by their ID.
+	pub async fn get_user_by_id(&self, user_id: uuid::Uuid) -> Result<User, UserServiceError> {
+		match self.db.get_user_by_id(user_id).await {
+			Ok(user) => Ok(user),
+			Err(err) => Err(UserServiceError::ServerError(err.to_string())),
+		}
+	}
+
 	/// Change a user's username.
 	pub async fn change_username(
 		&self,
