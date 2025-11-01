@@ -6,6 +6,7 @@ use crate::{
 };
 
 use thiserror::Error;
+use tokio::task::spawn_blocking;
 
 #[derive(Error, Debug)]
 pub enum UserServiceError {
@@ -37,6 +38,46 @@ impl UserService {
 		}
 
 		if let Err(err) = self.db.update_user_username(user.id, new_username).await {
+			return Err(UserServiceError::ServerError(err.to_string()));
+		}
+
+		Ok(())
+	}
+
+	/// Change a user's full name.
+	pub async fn change_full_name(
+		&self,
+		user: &User,
+		new_full_name: &str,
+	) -> Result<(), UserServiceError> {
+		if let Err(err) = self.db.update_user_fullname(user.id, new_full_name).await {
+			return Err(UserServiceError::ServerError(err.to_string()));
+		}
+
+		Ok(())
+	}
+
+	/// Change a user's password.
+	pub async fn change_password(
+		&self,
+		user: &User,
+		new_password: &str,
+	) -> Result<(), UserServiceError> {
+		let password_owned = new_password.to_owned();
+		let new_password_hash =
+			spawn_blocking(move || password_auth::generate_hash(&password_owned)).await;
+
+		if let Err(e) = new_password_hash {
+			return Err(UserServiceError::ServerError(e.to_string()));
+		}
+
+		let new_password_hash = new_password_hash.unwrap();
+
+		if let Err(err) = self
+			.db
+			.update_user_password_hash(user.id, &new_password_hash)
+			.await
+		{
 			return Err(UserServiceError::ServerError(err.to_string()));
 		}
 
