@@ -70,6 +70,18 @@ impl Database {
 		Ok(())
 	}
 
+	pub async fn update_user_password_hash(&self, user_id: Uuid, password_hash: &str) -> Result<(), sqlx::Error> {
+		sqlx::query!(
+			r#"UPDATE users SET password_hash = ? WHERE id = ?"#,
+			password_hash,
+			user_id
+		)
+		.execute(&self.pool)
+		.await?;
+
+		Ok(())
+	}
+
 	pub async fn create_user(
 		&self,
 		user_id: Uuid,
