@@ -5,7 +5,7 @@ use axum::{Extension, Router};
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
 
-use crate::api::types::auth::LoginRequest;
+use crate::api::types::auth::{LoginRequest, SudoRequest};
 use crate::config::AUTH_COOKIE_NAME;
 use crate::db::user::User;
 use crate::services::auth::AuthServiceError;
@@ -19,7 +19,7 @@ async fn post(
 	cookies: Cookies,
 	Extension(user): Extension<User>,
 	State(state): State<Arc<AppState>>,
-	Json(creds): Json<LoginRequest>,
+	Json(creds): Json<SudoRequest>,
 ) -> impl IntoResponse {
 	let sudo_token = match state.auth_service.sudo_user(user, &creds.password).await {
 		Ok(tokens) => tokens,

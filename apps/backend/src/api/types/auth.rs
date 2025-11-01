@@ -7,3 +7,9 @@ pub struct LoginRequest {
 	pub username: String,
 	pub password: String,
 }
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct SudoRequest {
+	pub password: String,
+}
