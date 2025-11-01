@@ -5,7 +5,7 @@ use axum::{Extension, Router};
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
 
-use crate::api::types::auth::{LoginRequest, SudoRequest};
+use crate::api::types::auth::SudoRequest;
 use crate::config::AUTH_COOKIE_NAME;
 use crate::db::user::User;
 use crate::services::auth::AuthServiceError;
