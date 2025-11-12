@@ -1,10 +1,30 @@
 "use client";
 
 import api from "@/lib/axios";
-import { LoginRequest, UserResponse } from "@/lib/servertypes";
+import { LoginRequest, SudoRequest, UserResponse } from "@/lib/servertypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+export function useSudo() {
+	const queryClient = useQueryClient();
+
+	const sudo = useQuery({
+		queryKey: ["sudo"],
+		queryFn: () => api.get("/auth/sudo").then((res) => res.data?.sudo),
+		retry: false,
+	});
+
+	let mutateAsync = useMutation({
+		mutationFn: async (sudoRequest: SudoRequest) =>
+			await api.post("/auth/sudo", sudoRequest),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["sudo"] });
+		},
+	});
+
+	return { sudo, mutateAsync };
+}
 
 export function useLogin() {
 	const queryClient = useQueryClient();
