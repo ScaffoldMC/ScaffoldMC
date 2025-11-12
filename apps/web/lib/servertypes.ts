@@ -5,3 +5,4 @@ export * from "../../backend/bindings/UserResponse";
 export * from "../../backend/bindings/PartialServer";
 export * from "../../backend/bindings/SudoRequest";
 export * from "../../backend/bindings/UserPatchRequest";
+export * from "../../backend/bindings/SudoCheckResponse";

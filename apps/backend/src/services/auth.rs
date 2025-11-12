@@ -224,4 +224,17 @@ impl AuthService {
 
 		Ok(user)
 	}
+
+	pub async fn token_is_sudo(&self, token: &str) -> Result<bool, AuthServiceError> {
+		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
+			&token,
+			&self.secrets.jwt_dec,
+			&Validation::new(Algorithm::RS256),
+		) {
+			Ok(data) => data,
+			Err(_) => return Err(AuthServiceError::Unauthorized),
+		};
+
+		Ok(token_data.claims.sudo)
+	}
 }
