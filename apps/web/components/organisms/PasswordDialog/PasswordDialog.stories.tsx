@@ -12,7 +12,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		open: true,
 		onPassword: async (password: string) => {
 			alert(`Password entered: ${password}`);
 			return Promise.reject();
