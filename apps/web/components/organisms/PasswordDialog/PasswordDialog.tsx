@@ -5,11 +5,16 @@ import { useState } from "react";
 import styles from "./PasswordDialog.module.css";
 
 interface PasswordDialogProps {
+	open: boolean;
 	onPassword?: (password: string) => Promise<void>;
 	onCancel?: () => void;
 }
 
-export function PasswordDialog({ onPassword, onCancel }: PasswordDialogProps) {
+export function PasswordDialog({
+	open,
+	onPassword,
+	onCancel,
+}: PasswordDialogProps) {
 	const [isError, setIsError] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -23,7 +28,7 @@ export function PasswordDialog({ onPassword, onCancel }: PasswordDialogProps) {
 	};
 
 	return (
-		<dialog className={styles.dialog}>
+		<dialog className={styles.dialog} open={open}>
 			<h3>Authenticate to continue</h3>
 			<form className={styles.form} onSubmit={handleSubmit}>
 				<div className={styles.field}>
