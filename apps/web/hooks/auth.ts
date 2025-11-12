@@ -11,11 +11,12 @@ export function useSudo() {
 
 	const sudo = useQuery({
 		queryKey: ["sudo"],
-		queryFn: () => api.get("/auth/sudo").then((res) => res.data?.sudo),
+		queryFn: (): Promise<boolean> =>
+			api.get("/auth/sudo").then((res) => res.data.sudo),
 		retry: false,
 	});
 
-	let mutateAsync = useMutation({
+	let mutateSudo = useMutation({
 		mutationFn: async (sudoRequest: SudoRequest) =>
 			await api.post("/auth/sudo", sudoRequest),
 		onSuccess: () => {
@@ -23,7 +24,7 @@ export function useSudo() {
 		},
 	});
 
-	return { sudo, mutateAsync };
+	return { sudo, mutateSudo };
 }
 
 export function useLogin() {

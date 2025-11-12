@@ -12,7 +12,7 @@ export function useCurrentUser() {
 		retry: false,
 	});
 
-	const mutationHook = useMutation({
+	const mutateUser = useMutation({
 		mutationFn: async (updates: Partial<UserPatchRequest>) => {
 			const { data } = await api.patch("/me", updates);
 			return data;
@@ -22,5 +22,5 @@ export function useCurrentUser() {
 		},
 	}).mutateAsync;
 
-	return { user, mutationHook };
+	return { user, mutateUser };
 }
