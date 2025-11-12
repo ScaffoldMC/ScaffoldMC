@@ -22,7 +22,7 @@ export function useSudo() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["sudo"] });
 		},
-	});
+	}).mutateAsync;
 
 	return { sudo, mutateSudo };
 }
