@@ -21,7 +21,11 @@ export default function Settings() {
 			<h1>Settings</h1>
 			<h2>Account Settings</h2>
 			{user.isLoading && <p>Loading user data...</p>}
-			<DialogRoot modal={true}>
+			<DialogRoot
+				open={open}
+				modal={true}
+				onOpenChange={(open) => setOpen(open)}
+			>
 				<DialogTrigger>
 					<Button onClick={() => setOpen(true)}>
 						Enter Sudo Mode
