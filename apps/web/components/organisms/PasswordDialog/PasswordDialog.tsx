@@ -1,15 +1,37 @@
+"use client";
+
 import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Button } from "@/components/atoms/Button/Button";
 import { useState } from "react";
 import styles from "./PasswordDialog.module.css";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-interface PasswordDialogProps {
+export interface PasswordDialogPortalProps
+	extends DialogPrimitive.DialogPortalProps {
 	onPassword?: (password: string) => Promise<void>;
-	onCancel?: () => void;
 }
 
-export function PasswordDialog({ onPassword, onCancel }: PasswordDialogProps) {
+export function PasswordDialog({
+	children,
+	...props
+}: DialogPrimitive.DialogProps) {
+	return <DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root>;
+}
+
+export function PasswordDialogTrigger({
+	children,
+}: {
+	children?: React.ReactNode;
+}) {
+	return (
+		<DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
+	);
+}
+
+export function PasswordDialogPortal({
+	onPassword,
+}: PasswordDialogPortalProps) {
 	const [isError, setIsError] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -23,30 +45,36 @@ export function PasswordDialog({ onPassword, onCancel }: PasswordDialogProps) {
 	};
 
 	return (
-		<dialog className={styles.dialog}>
-			<h3>Authenticate to continue</h3>
-			<form className={styles.form} onSubmit={handleSubmit}>
-				<div className={styles.field}>
-					<Label htmlFor="password">Password</Label>
-					<TextInput
-						type="password"
-						id="password"
-						name="password"
-						invalid={isError}
-						required
-					/>
-				</div>
-				<Button type="submit" level="primary">
-					Continue
-				</Button>
-				<Button
-					type="button"
-					level="secondary"
-					onClick={() => onCancel()}
-				>
-					Cancel
-				</Button>
-			</form>
-		</dialog>
+		<DialogPrimitive.Portal>
+			<DialogPrimitive.Overlay className={styles.overlay} />
+			<DialogPrimitive.Content className={styles.content}>
+				<DialogPrimitive.Title>
+					Authenticate to continue
+				</DialogPrimitive.Title>
+				<DialogPrimitive.Description>
+					Your password is required to change certain settings.
+				</DialogPrimitive.Description>
+				<form className={styles.form} onSubmit={handleSubmit}>
+					<div className={styles.field}>
+						<Label htmlFor="password">Password</Label>
+						<TextInput
+							type="password"
+							id="password"
+							name="password"
+							invalid={isError}
+							required
+						/>
+					</div>
+					<Button type="submit" level="primary">
+						Continue
+					</Button>
+					<DialogPrimitive.Close asChild>
+						<Button type="button" level="secondary">
+							Cancel
+						</Button>
+					</DialogPrimitive.Close>
+				</form>
+			</DialogPrimitive.Content>
+		</DialogPrimitive.Portal>
 	);
 }
