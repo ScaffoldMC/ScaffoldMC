@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/atoms/Button/Button";
 import {
-	PasswordDialog,
-	PasswordDialogPortal,
-	PasswordDialogTrigger,
-} from "@/components/organisms/PasswordDialog/PasswordDialog";
+	DialogRoot,
+	DialogTrigger,
+} from "@/components/organisms/Dialog/Dialog";
+import { PasswordDialogPortal } from "@/components/organisms/PasswordDialog/PasswordDialog";
 import { useSudo } from "@/hooks/auth";
 import { useCurrentUser } from "@/hooks/user";
 import { useEffect, useState } from "react";
@@ -21,19 +21,19 @@ export default function Settings() {
 			<h1>Settings</h1>
 			<h2>Account Settings</h2>
 			{user.isLoading && <p>Loading user data...</p>}
-			<PasswordDialog modal={true}>
-				<PasswordDialogTrigger>
+			<DialogRoot modal={true}>
+				<DialogTrigger>
 					<Button onClick={() => setOpen(true)}>
 						Enter Sudo Mode
 					</Button>
-				</PasswordDialogTrigger>
+				</DialogTrigger>
 				<PasswordDialogPortal
 					onPassword={async (password) => {
 						await mutateSudo({ password });
 						setOpen(false);
 					}}
 				/>
-			</PasswordDialog>
+			</DialogRoot>
 		</div>
 	);
 }

@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { PasswordDialog, PasswordDialogPortal } from "./PasswordDialog";
+import { PasswordDialogPortal } from "./PasswordDialog";
+import { DialogRoot } from "../Dialog/Dialog";
 
 const meta = {
 	render: (args) => (
-		<PasswordDialog open>
+		<DialogRoot open>
 			<PasswordDialogPortal {...args} />
-		</PasswordDialog>
+		</DialogRoot>
 	),
 	component: PasswordDialogPortal,
 } satisfies Meta<typeof PasswordDialogPortal>;

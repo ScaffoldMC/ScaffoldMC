@@ -12,23 +12,6 @@ export interface PasswordDialogPortalProps
 	onPassword?: (password: string) => Promise<void>;
 }
 
-export function PasswordDialog({
-	children,
-	...props
-}: DialogPrimitive.DialogProps) {
-	return <DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root>;
-}
-
-export function PasswordDialogTrigger({
-	children,
-}: {
-	children?: React.ReactNode;
-}) {
-	return (
-		<DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
-	);
-}
-
 export function PasswordDialogPortal({
 	onPassword,
 }: PasswordDialogPortalProps) {
