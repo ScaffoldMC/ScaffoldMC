@@ -8,6 +8,7 @@ import {
 import { PasswordDialogPortal } from "@/components/organisms/PasswordDialog/PasswordDialog";
 import { useSudo } from "@/hooks/auth";
 import { useCurrentUser } from "@/hooks/user";
+import { Unlock, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Settings() {
@@ -21,14 +22,20 @@ export default function Settings() {
 			<h1>Settings</h1>
 			<h2>Account Settings</h2>
 			{user.isLoading && <p>Loading user data...</p>}
+			{sudo.data && <p>Sudo mode is active.</p>}
+
 			<DialogRoot
 				open={open}
 				modal={true}
 				onOpenChange={(open) => setOpen(open)}
 			>
 				<DialogTrigger>
-					<Button onClick={() => setOpen(true)}>
-						Enter Sudo Mode
+					<Button
+						size="icon"
+						onClick={() => setOpen(true)}
+						disabled={sudo.data}
+					>
+						{sudo.data ? <Unlock size={18} /> : <Lock size={18} />}
 					</Button>
 				</DialogTrigger>
 				<PasswordDialogPortal
