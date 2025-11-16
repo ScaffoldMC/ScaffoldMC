@@ -8,6 +8,10 @@
 	max-width: 800px;
 }
 
+.textInput {
+	width: 250px;
+}
+
 .alertContent {
 	display: flex;
 	align-items: center;

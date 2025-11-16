@@ -33,6 +33,11 @@ export function EditableTextInput({
 	return (
 		<div className={styles.container}>
 			<TextInput
+				style={{
+					minWidth: 0,
+					flexGrow: 1,
+					flexShrink: 1,
+				}}
 				disabled={!editMode}
 				value={internalValue}
 				onChange={(e) => setInternalValue(e.target.value)}

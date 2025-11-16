@@ -14,6 +14,7 @@ import { Unlock, Lock, Edit, LockIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { Alert } from "@/components/molecules/Alert/Alert";
+import { EditableTextInput } from "@/components/molecules/EditableTextInput/EditableTextInput";
 
 export default function Settings() {
 	let { sudo, mutateSudo } = useSudo();
@@ -52,26 +53,32 @@ export default function Settings() {
 			<h2>Account Settings</h2>
 			<div className={styles.field}>
 				<Label htmlFor="username">Username</Label>
-				<TextInput
-					id="username"
-					placeholder="Username"
-					disabled={!sudo.data}
-					value={user.data?.username || ""}
-				/>
+				<div className={styles.textInput}>
+					<EditableTextInput
+						editable={sudo.data}
+						value={user.data?.username || ""}
+						onChange={async (value) => {
+							await mutateUser({ username: value });
+						}}
+					/>
+				</div>
 			</div>
 			<div className={styles.field}>
 				<Label htmlFor="name">Name</Label>
-				<TextInput
-					id="name"
-					placeholder="Name"
-					disabled={!sudo.data}
-					value={user.data?.fullname || ""}
-				/>
+				<div className={styles.textInput}>
+					<EditableTextInput
+						editable={sudo.data}
+						value={user.data?.fullname || ""}
+						onChange={async (value) => {
+							await mutateUser({ fullname: value });
+						}}
+					/>
+				</div>
 			</div>
 			<div className={styles.field}>
 				<Label htmlFor="editpassword">Password</Label>
-				<Button id="editpassword" disabled={!sudo.data} size="icon">
-					<Edit size={18} />
+				<Button id="editpassword" disabled={!sudo.data}>
+					Change Password
 				</Button>
 			</div>
 		</div>
