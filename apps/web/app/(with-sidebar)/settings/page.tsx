@@ -10,9 +10,10 @@ import {
 import { PasswordDialogPortal } from "@/components/organisms/PasswordDialog/PasswordDialog";
 import { useSudo } from "@/hooks/auth";
 import { useCurrentUser } from "@/hooks/user";
-import { Unlock, Lock, Edit } from "lucide-react";
+import { Unlock, Lock, Edit, LockIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
+import { Alert } from "@/components/molecules/Alert/Alert";
 
 export default function Settings() {
 	let { sudo, mutateSudo } = useSudo();
@@ -23,23 +24,23 @@ export default function Settings() {
 	return (
 		<div className={styles.layout}>
 			<h1>Settings</h1>
-			{user.isLoading && <p>Loading user data...</p>}
-			{sudo.data && <p>Sudo mode is active.</p>}
+			{!sudo.data && (
+				<Alert type="warning">
+					<div className={styles.alertContent}>
+						<LockIcon size={18} />
+						<b>Limited Access</b>
+						<Button level="ghost" onClick={() => setOpen(true)}>
+							Unlock
+						</Button>
+					</div>
+				</Alert>
+			)}
 
 			<DialogRoot
 				open={open}
 				modal={true}
 				onOpenChange={(open) => setOpen(open)}
 			>
-				<DialogTrigger>
-					<Button
-						size="icon"
-						onClick={() => setOpen(true)}
-						disabled={sudo.data}
-					>
-						{sudo.data ? <Unlock size={18} /> : <Lock size={18} />}
-					</Button>
-				</DialogTrigger>
 				<PasswordDialogPortal
 					onPassword={async (password) => {
 						await mutateSudo({ password });
