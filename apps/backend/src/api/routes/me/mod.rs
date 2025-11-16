@@ -58,12 +58,27 @@ pub async fn patch(
 
 	// Change password if provided
 	if let Some(password) = req.password {
-		let db_res = state.user_service.change_password(&user, &password).await;
+		if let Some(new_password) = req.new_password {
+			if let Err(_) = state.auth_service.verify_password(&user, &password).await {
+				return (StatusCode::UNAUTHORIZED, "Current password is incorrect").into_response();
+			}
 
-		if let Err(_) = db_res {
+			let db_res = state
+				.user_service
+				.change_password(&user, &new_password)
+				.await;
+
+			if let Err(_) = db_res {
+				return (
+					StatusCode::INTERNAL_SERVER_ERROR,
+					"Internal server error updating password",
+				)
+					.into_response();
+			}
+		} else {
 			return (
-				StatusCode::INTERNAL_SERVER_ERROR,
-				"Internal server error updating password",
+				StatusCode::BAD_REQUEST,
+				"New password must be provided when changing password",
 			)
 				.into_response();
 		}

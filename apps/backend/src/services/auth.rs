@@ -76,6 +76,28 @@ impl AuthService {
 		general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
 	}
 
+	pub async fn verify_password(
+		&self,
+		user: &User,
+		password: &str,
+	) -> Result<(), AuthServiceError> {
+		let password_owned = password.to_owned();
+		let password_hash_owned = user.password_hash.clone();
+		let verify_result =
+			spawn_blocking(move || verify_password(&password_owned, &password_hash_owned))
+				.await
+				.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
+
+		if let Err(err) = verify_result {
+			return match err {
+				VerifyError::PasswordInvalid => Err(AuthServiceError::InvalidCredentials),
+				VerifyError::Parse(e) => Err(AuthServiceError::ServerError(e.to_string())),
+			};
+		}
+
+		Ok(())
+	}
+
 	pub async fn authenticate_user(
 		&self,
 		username: &str,
@@ -89,19 +111,7 @@ impl AuthService {
 
 		let user = user.unwrap();
 
-		let password_owned = password.to_owned();
-		let password_hash_owned = user.password_hash.clone();
-		let verify_result =
-			spawn_blocking(move || verify_password(&password_owned, &password_hash_owned))
-				.await
-				.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
-
-		if let Err(err) = verify_result {
-			return match err {
-				VerifyError::PasswordInvalid => Err(AuthServiceError::InvalidCredentials),
-				VerifyError::Parse(e) => Err(AuthServiceError::ServerError(e.to_string())),
-			};
-		}
+		self.verify_password(&user, password).await?;
 
 		let auth_token = self.create_auth_token(user.id.to_string(), false);
 		let ref_token = Self::create_refresh_token();
@@ -115,19 +125,7 @@ impl AuthService {
 	}
 
 	pub async fn sudo_user(&self, user: User, password: &str) -> Result<String, AuthServiceError> {
-		let password_owned = password.to_owned();
-		let password_hash_owned = user.password_hash.clone();
-		let verify_result =
-			spawn_blocking(move || verify_password(&password_owned, &password_hash_owned))
-				.await
-				.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
-
-		if let Err(err) = verify_result {
-			return match err {
-				VerifyError::PasswordInvalid => Err(AuthServiceError::InvalidCredentials),
-				VerifyError::Parse(e) => Err(AuthServiceError::ServerError(e.to_string())),
-			};
-		}
+		self.verify_password(&user, password).await?;
 
 		let sudo_token = self.create_auth_token(user.id.to_string(), true);
 

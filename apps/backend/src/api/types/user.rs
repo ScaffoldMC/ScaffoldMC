@@ -10,6 +10,7 @@ pub struct UserPatchRequest {
 	pub fullname: Option<String>,
 	pub username: Option<String>,
 	pub password: Option<String>,
+	pub new_password: Option<String>,
 }
 
 #[derive(TS, Serialize)]
