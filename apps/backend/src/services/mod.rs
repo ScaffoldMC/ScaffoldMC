@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod binary;
 pub mod server;
+pub mod user;
 
 /// Trait for application services.
 trait Service {
