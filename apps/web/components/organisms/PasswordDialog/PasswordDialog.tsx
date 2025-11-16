@@ -6,6 +6,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { useState } from "react";
 import styles from "./PasswordDialog.module.css";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { DialogContent, DialogOverlay, DialogPortal } from "../Dialog/Dialog";
 
 export interface PasswordDialogPortalProps
 	extends DialogPrimitive.DialogPortalProps {
@@ -28,9 +29,9 @@ export function PasswordDialogPortal({
 	};
 
 	return (
-		<DialogPrimitive.Portal>
-			<DialogPrimitive.Overlay className={styles.overlay} />
-			<DialogPrimitive.Content className={styles.content}>
+		<DialogPortal>
+			<DialogOverlay />
+			<DialogContent>
 				<DialogPrimitive.Title>
 					Authenticate to continue
 				</DialogPrimitive.Title>
@@ -57,7 +58,7 @@ export function PasswordDialogPortal({
 						</Button>
 					</DialogPrimitive.Close>
 				</form>
-			</DialogPrimitive.Content>
-		</DialogPrimitive.Portal>
+			</DialogContent>
+		</DialogPortal>
 	);
 }
