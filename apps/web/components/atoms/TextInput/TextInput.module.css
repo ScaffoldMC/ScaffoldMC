@@ -10,6 +10,11 @@
 	font-size: var(--font-size-small);
 }
 
+.base:disabled:hover {
+	cursor: not-allowed;
+	border-color: var(--color-border);
+}
+
 .base:hover {
 	border-color: var(--color-border-hover);
 }

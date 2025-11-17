@@ -8,7 +8,7 @@ dead_code = "allow"
 
 [dependencies]
 async-trait = "0.1.83"
-axum = "0.8.3"
+axum = { version = "0.8.3", features = ["macros"] }
 axum-server = "0.7.2"
 base64 = "0.22.1"
 colored = "3.0.0"

@@ -23,6 +23,7 @@
 	color: var(--color-text);
 
 	font-size: var(--font-size-medium);
+	font-family: var(--font-manrope);
 }
 
 @media (prefers-color-scheme: dark) {
