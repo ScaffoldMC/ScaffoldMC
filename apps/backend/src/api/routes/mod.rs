@@ -22,6 +22,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 			http::Method::GET,
 			http::Method::POST,
 			http::Method::PUT,
+			http::Method::PATCH,
 			http::Method::DELETE,
 		])
 		.allow_headers([http::header::CONTENT_TYPE])
