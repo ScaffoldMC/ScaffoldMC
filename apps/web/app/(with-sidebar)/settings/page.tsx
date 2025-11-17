@@ -15,12 +15,14 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { Alert } from "@/components/molecules/Alert/Alert";
 import { EditableTextInput } from "@/components/molecules/EditableTextInput/EditableTextInput";
+import { PasswordResetPortal } from "@/components/organisms/PasswordResetDialog/PasswordResetDialog";
 
 export default function Settings() {
 	let { sudo, mutateSudo } = useSudo();
 	let { user, mutateUser } = useCurrentUser();
 
-	const [open, setOpen] = useState(false);
+	const [passwordEntryOpen, setPasswordEntryOpen] = useState(false);
+	const [passwordResetOpen, setPasswordResetOpen] = useState(false);
 
 	return (
 		<div className={styles.layout}>
@@ -30,7 +32,10 @@ export default function Settings() {
 					<div className={styles.alertContent}>
 						<LockIcon size={18} />
 						<b>Limited Access</b>
-						<Button level="ghost" onClick={() => setOpen(true)}>
+						<Button
+							level="ghost"
+							onClick={() => setPasswordEntryOpen(true)}
+						>
 							Unlock
 						</Button>
 					</div>
@@ -38,14 +43,30 @@ export default function Settings() {
 			)}
 
 			<DialogRoot
-				open={open}
+				open={passwordEntryOpen}
 				modal={true}
-				onOpenChange={(open) => setOpen(open)}
+				onOpenChange={(open) => setPasswordEntryOpen(open)}
 			>
 				<PasswordDialogPortal
 					onPassword={async (password) => {
 						await mutateSudo({ password });
-						setOpen(false);
+						setPasswordEntryOpen(false);
+					}}
+				/>
+			</DialogRoot>
+
+			<DialogRoot
+				open={passwordResetOpen}
+				modal={true}
+				onOpenChange={(open) => setPasswordResetOpen(open)}
+			>
+				<PasswordResetPortal
+					onSubmit={async (oldPassword, newPassword) => {
+						await mutateUser({
+							password: oldPassword,
+							new_password: newPassword,
+						});
+						setPasswordResetOpen(false);
 					}}
 				/>
 			</DialogRoot>
@@ -77,7 +98,11 @@ export default function Settings() {
 			</div>
 			<div className={styles.field}>
 				<Label htmlFor="editpassword">Password</Label>
-				<Button id="editpassword" disabled={!sudo.data}>
+				<Button
+					id="editpassword"
+					disabled={!sudo.data}
+					onClick={() => setPasswordResetOpen(true)}
+				>
 					Change Password
 				</Button>
 			</div>
