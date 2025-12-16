@@ -278,7 +278,7 @@ impl ServerService {
 	}
 
 	/// Creates a new server instance with the given configuration.
-	pub async fn create(&mut self, name: String, server_type: Game) -> Result<Uuid, String> {
+	pub async fn create(&mut self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));
 
@@ -297,7 +297,7 @@ impl ServerService {
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
 
 		let server_config = ServerConfig {
-			name,
+			name: name.to_string(),
 			game: server_type,
 			args: bin_info.java_rec_args(),
 			stop_command: "stop".into(), // TODO: Velocity uses "shutdown"
