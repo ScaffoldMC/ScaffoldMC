@@ -17,6 +17,7 @@ use tokio::sync::Mutex;
 use util::logger::Logger;
 
 use crate::services::auth::AuthService;
+use crate::services::user::UserService;
 
 static LOGGER: Logger = Logger;
 
@@ -25,6 +26,7 @@ struct AppState {
 	pub server_service: Arc<Mutex<ServerService>>,
 	pub auth_service: Arc<AuthService>,
 	pub binary_service: Arc<BinaryService>,
+	pub user_service: Arc<UserService>,
 	pub reqwest_client: reqwest::Client,
 }
 
@@ -52,11 +54,13 @@ impl AppState {
 			.expect("Failed to create reqwest client");
 
 		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
+		let user_service = Arc::new(UserService::new(db.clone()));
 
 		AppState {
 			server_service: Arc::new(Mutex::new(ServerService::new(binary_service.clone()))),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
+			user_service,
 			reqwest_client,
 		}
 	}

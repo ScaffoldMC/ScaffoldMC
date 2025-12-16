@@ -4,22 +4,22 @@
 	"devDependencies": {
 		"@monodon/rust": "^2.3.0",
 		"@nx/js": "21.2.0",
-		"@nx/next": "^22.0.2",
+		"@nx/next": "^22.0.3",
 		"@nx/storybook": "21.2.0",
 		"@nx/web": "21.2.0",
 		"@storybook/nextjs": "9.0.9",
-		"@swc-node/register": "~1.9.1",
-		"@swc/core": "~1.5.7",
-		"@swc/helpers": "~0.5.11",
+		"@swc-node/register": "~1.9.2",
+		"@swc/core": "~1.5.29",
+		"@swc/helpers": "~0.5.17",
 		"nx": "21.1.1",
-		"prettier": "^3.5.3",
+		"prettier": "^3.6.2",
 		"prettier-plugin-css-order": "^2.1.2",
 		"storybook": "9.0.9",
 		"ts-node": "10.9.1",
-		"tslib": "^2.3.0",
+		"tslib": "^2.8.1",
 		"typescript": "5.8.2"
 	},
-	"packageManager": "pnpm@9.0.0",
+	"packageManager": "pnpm@10.21.0+sha512.da3337267e400fdd3d479a6c68079ac6db01d8ca4f67572083e722775a796788a7a9956613749e000fac20d424b594f7a791a5f4e2e13581c5ef947f26968a40",
 	"engines": {
 		"node": ">=18"
 	}

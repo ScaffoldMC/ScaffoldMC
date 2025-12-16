@@ -24,11 +24,41 @@ pub async fn require_auth(
 
 	let token = token.unwrap();
 
-	let user = match state.auth_service.get_user_from_token(&token).await {
+	let user = match state.auth_service.get_user_from_token(&token, false).await {
 		Ok(user) => user,
 		Err(err) => match err {
 			AuthServiceError::Unauthorized => return Err(StatusCode::UNAUTHORIZED),
 			AuthServiceError::InvalidCredentials => return Err(StatusCode::UNAUTHORIZED),
+			_ => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+		},
+	};
+
+	req.extensions_mut().insert(user);
+	Ok(next.run(req).await)
+}
+
+pub async fn require_sudo(
+	cookies: Cookies,
+	State(state): State<Arc<AppState>>,
+	mut req: Request,
+	next: Next,
+) -> Result<Response, StatusCode> {
+	let token = cookies
+		.get(AUTH_COOKIE_NAME)
+		.map(|cookie| cookie.value().to_string());
+
+	if token.is_none() {
+		return Err(StatusCode::UNAUTHORIZED);
+	}
+
+	let token = token.unwrap();
+
+	let user = match state.auth_service.get_user_from_token(&token, true).await {
+		Ok(user) => user,
+		Err(err) => match err {
+			AuthServiceError::Unauthorized => return Err(StatusCode::UNAUTHORIZED),
+			AuthServiceError::InvalidCredentials => return Err(StatusCode::UNAUTHORIZED),
+			AuthServiceError::Forbidden => return Err(StatusCode::FORBIDDEN),
 			_ => return Err(StatusCode::INTERNAL_SERVER_ERROR),
 		},
 	};

@@ -1,8 +1,17 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use uuid::Uuid;
 
 use crate::db::user::User;
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct UserPatchRequest {
+	pub fullname: Option<String>,
+	pub username: Option<String>,
+	pub password: Option<String>,
+	pub new_password: Option<String>,
+}
 
 #[derive(TS, Serialize)]
 #[ts(export)]

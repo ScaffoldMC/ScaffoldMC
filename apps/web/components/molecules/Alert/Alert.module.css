@@ -1,0 +1,44 @@
+.alert {
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 8px;
+	padding: 8px;
+}
+
+.info {
+	border-color: #2196f3;
+	background-color: #e3f2fd;
+	color: #0d47a1;
+}
+
+.warning {
+	border-color: #ffcc00;
+	background-color: #fff8e1;
+	color: #665200;
+}
+
+.error {
+	border-color: #ff5c5c;
+	background-color: #ffdddd;
+	color: #a70000;
+}
+
+@media (prefers-color-scheme: dark) {
+	.info {
+		border-color: #1769aa;
+		background-color: #0d47a1;
+		color: #bbdefb;
+	}
+
+	.warning {
+		border-color: #cca300;
+		background-color: #665200;
+		color: #fff3e0;
+	}
+
+	.error {
+		border-color: #ff8c8c;
+		background-color: #660000;
+		color: #ffb3b3;
+	}
+}

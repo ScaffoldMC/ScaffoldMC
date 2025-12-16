@@ -1,0 +1,29 @@
+.layout {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin-right: auto;
+	margin-left: auto;
+	width: 100%;
+	max-width: 800px;
+}
+
+.textInput {
+	width: 250px;
+}
+
+.alertContent {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.alertContent > :last-child {
+	margin-left: auto;
+}
+
+.field {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}

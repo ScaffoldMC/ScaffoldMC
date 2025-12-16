@@ -22,6 +22,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 			http::Method::GET,
 			http::Method::POST,
 			http::Method::PUT,
+			http::Method::PATCH,
 			http::Method::DELETE,
 		])
 		.allow_headers([http::header::CONTENT_TYPE])
@@ -30,10 +31,10 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 	Router::new()
 		.nest("/servers", servers::create_router())
 		.nest("/binaries", binaries::create_router())
-		.nest("/me", me::create_router())
+		.nest("/me", me::create_router(state.clone()))
 		.nest("/jvms", jvms::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
-		.nest("/auth", auth::create_router())
+		.nest("/auth", auth::create_router(state.clone()))
 		.layer(CookieManagerLayer::new())
 		.layer(cors)
 		.with_state(state)
