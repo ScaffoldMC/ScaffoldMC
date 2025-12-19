@@ -1,6 +1,10 @@
+use crate::api::types::server::CreateServerRequest;
+use crate::core::game::Game;
+use crate::core::version::vanilla::VanillaVersionInfo;
 use crate::AppState;
+use axum::extract::State;
 use axum::response::IntoResponse;
-use axum::{routing, Router};
+use axum::{routing, Json, Router};
 use reqwest::StatusCode;
 use std::sync::Arc;
 
@@ -18,7 +22,31 @@ async fn get() -> impl IntoResponse {
 	StatusCode::OK.into_response()
 }
 
-async fn post() -> impl IntoResponse {
-	// TODO: Create a new server
+#[axum::debug_handler]
+async fn post(
+	State(state): State<Arc<AppState>>,
+	Json(req): Json<CreateServerRequest>,
+) -> impl IntoResponse {
+	let create_res = state
+		.server_service
+		.create(
+			&req.name,
+			Game::MinecraftJava {
+				version: VanillaVersionInfo::new("1.21.11".into()),
+			},
+		)
+		.await;
+
+	let server_id = match create_res {
+		Ok(id) => id,
+		Err(err) => {
+			return (
+				StatusCode::INTERNAL_SERVER_ERROR,
+				format!("Failed to create server: {}", err),
+			)
+				.into_response();
+		}
+	};
+
 	StatusCode::CREATED.into_response()
 }
