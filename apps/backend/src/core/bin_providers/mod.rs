@@ -8,7 +8,7 @@ pub mod fabric;
 pub mod paper;
 pub mod vanilla;
 
-pub trait BinaryInfo {
+pub trait BinaryInfo: Send + Sync {
 	/// Get the download URL for this binary
 	fn download_url(&self) -> &Url;
 
