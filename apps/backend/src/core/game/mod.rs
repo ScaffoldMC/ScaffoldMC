@@ -2,8 +2,10 @@ pub mod java;
 
 use java::MinecraftJava;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(TS, Debug, Clone, Deserialize, Serialize)]
+#[ts(export)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Game {
 	MinecraftJava(MinecraftJava),

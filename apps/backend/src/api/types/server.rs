@@ -15,4 +15,5 @@ pub struct PartialServer {
 #[ts(export)]
 pub struct CreateServerRequest {
 	pub name: String,
+	pub game: Game,
 }
