@@ -88,7 +88,7 @@ impl BinaryService {
 		};
 
 		let binary_name = match &download_info {
-			DownloadInfo::Java(info) => info.file_name().clone(),
+			DownloadInfo::Java(info) => info.file_name(),
 		};
 
 		let binary_path = binary_dir.join(binary_name);
