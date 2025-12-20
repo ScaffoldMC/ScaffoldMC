@@ -2,13 +2,12 @@ use crate::core::api_clients::fabric::FabricMetaAPIClient;
 use crate::core::api_clients::paper::PaperDownloadsAPIClient;
 use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
-use crate::core::bin_providers::BinaryInfo;
-use crate::core::bin_providers::{
-	fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider, BinaryProvider,
-};
+use crate::core::bin_providers::DownloadInfo;
+use crate::core::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider};
 use crate::core::files::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
 };
+use crate::core::game::java::JavaRuntime;
 use crate::core::game::Game;
 use crate::services::Service;
 use crate::util::download::download_file;
@@ -45,19 +44,30 @@ impl BinaryService {
 		}
 	}
 
-	/// Get the appropriate binary provider for a given game
-	pub fn get_provider(&self, game: &Game) -> &dyn BinaryProvider {
-		match game {
-			Game::MinecraftJava { .. } => &self.mcje,
-			Game::MinecraftJavaFabric { .. } => &self.fabric,
-			Game::MinecraftJavaPaper { .. } => &self.paper,
-		}
-	}
-
 	/// Get information about a specific game version.
-	pub async fn get_bin_info(&self, game: &Game) -> Result<Box<dyn BinaryInfo>, String> {
-		let provider = self.get_provider(game);
-		provider.get(game.version()).await
+	pub async fn get_bin_info(&self, game: &Game) -> Result<Box<dyn DownloadInfo>, String> {
+		match game {
+			Game::MinecraftJava(minecraft_java) => match &minecraft_java.loader {
+				JavaRuntime::Vanilla => {
+					let info = self.mcje.get(&minecraft_java.version).await?;
+					Ok(Box::new(info))
+				}
+				JavaRuntime::Fabric { loader, launcher } => {
+					let info = self
+						.fabric
+						.get(&minecraft_java.version, loader, launcher)
+						.await?;
+					Ok(Box::new(info))
+				}
+				JavaRuntime::Paper { build } => {
+					let info = self
+						.paper
+						.get(&minecraft_java.version, build.clone())
+						.await?;
+					Ok(Box::new(info))
+				}
+			},
+		}
 	}
 
 	/// Installs a game with the specified configuration.
@@ -71,10 +81,9 @@ impl BinaryService {
 				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
 		}
 
-		let provider = self.get_provider(game);
-		let binary = provider.get(game.version()).await?;
-		let download_url = binary.download_url();
-		let binary_name = provider.binary_name();
+		let download_info = self.get_bin_info(game).await?;
+		let download_url = download_info.download_url();
+		let binary_name = download_info.file_name();
 		let binary_path = binary_dir.join(binary_name);
 
 		download_file(
@@ -97,7 +106,7 @@ impl BinaryService {
 			hash: None,
 		};
 
-		if let Some((hash, hash_algorithm)) = binary.hash() {
+		if let Some((hash, hash_algorithm)) = download_info.hash() {
 			lockfile_entry.hash = Some(BinaryLockfileHash {
 				algorithm: hash_algorithm,
 				hash: hash.to_string(),
@@ -153,7 +162,7 @@ impl BinaryService {
 	fn binary_dir(&self, game: &Game) -> PathBuf {
 		PathBuf::from(&self.binaries_dir)
 			.join(game.identifier())
-			.join(game.version().identifier())
+			.join(game.version_identifier())
 	}
 
 	/// Internal: Load the binary lockfile.

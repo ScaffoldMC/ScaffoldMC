@@ -15,4 +15,20 @@ impl Game {
 			Game::MinecraftJava { .. } => "minecraft-java",
 		}
 	}
+
+	pub fn version_identifier(&self) -> String {
+		match self {
+			Game::MinecraftJava(minecraft_java) => format!(
+				"{}-{}",
+				minecraft_java.version,
+				match &minecraft_java.loader {
+					java::JavaRuntime::Vanilla => "vanilla".to_string(),
+					java::JavaRuntime::Fabric { loader, launcher } => {
+						format!("fabric-{}-{}", loader, launcher)
+					}
+					java::JavaRuntime::Paper { build } => format!("paper-{}", build),
+				}
+			),
+		}
+	}
 }
