@@ -1,5 +1,6 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
+use crate::core::bin_providers::DownloadInfo;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
 use crate::core::server::Server;
@@ -292,10 +293,14 @@ impl ServerService {
 
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
 
+		let java_args = match &bin_info {
+			DownloadInfo::Java(info) => info.java_rec_args(),
+		};
+
 		let server_config = ServerConfig {
 			name: name.to_string(),
 			game: server_type,
-			args: bin_info.java_rec_args(),
+			args: java_args,
 			stop_command: "stop".into(), // TODO: Velocity uses "shutdown"
 		};
 
