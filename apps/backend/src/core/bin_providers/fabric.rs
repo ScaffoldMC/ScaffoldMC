@@ -8,10 +8,8 @@ impl FabricBinaryProvider {
 	pub fn new(api_client: FabricMetaAPIClient) -> Self {
 		Self { api_client }
 	}
-}
 
-impl FabricBinaryProvider {
-	async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
+	pub async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_loader = manifest
@@ -40,7 +38,7 @@ impl FabricBinaryProvider {
 		.await
 	}
 
-	async fn get(
+	pub async fn get(
 		&self,
 		game_version: &str,
 		loader_version: &str,
@@ -69,14 +67,14 @@ impl FabricBinaryProvider {
 		Ok(download_info)
 	}
 
-	async fn list_game_versions(&self) -> Result<Vec<String>, String> {
+	pub async fn list_game_versions(&self) -> Result<Vec<String>, String> {
 		let manifest = self.api_client.get_manifest().await?;
 		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
 
 		Ok(versions)
 	}
 
-	async fn list_loader_versions(&self, game_version: &str) -> Result<Vec<String>, String> {
+	pub async fn list_loader_versions(&self, game_version: &str) -> Result<Vec<String>, String> {
 		let loaders = self
 			.api_client
 			.get_versions(game_version)
@@ -91,7 +89,7 @@ impl FabricBinaryProvider {
 		Ok(versions)
 	}
 
-	async fn list_installer_versions(&self) -> Result<Vec<String>, String> {
+	pub async fn list_installer_versions(&self) -> Result<Vec<String>, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let installers: Vec<String> = manifest

@@ -13,7 +13,7 @@ impl PaperBinaryProvider {
 		Self { api_client }
 	}
 
-	async fn get_latest(&self) -> Result<JavaDownloadInfo, String> {
+	pub async fn get_latest(&self) -> Result<JavaDownloadInfo, String> {
 		let versions = self.api_client.get_versions().await?;
 
 		let latest_version = versions.versions.first().ok_or("No versions found")?;
@@ -22,7 +22,7 @@ impl PaperBinaryProvider {
 			.await
 	}
 
-	async fn get(&self, game_version: &str, build: u16) -> Result<JavaDownloadInfo, String> {
+	pub async fn get(&self, game_version: &str, build: u16) -> Result<JavaDownloadInfo, String> {
 		let response = self.api_client.get_version(game_version).await?;
 		let java_version = response.java.version.minimum;
 		let java_args = response.java.flags.recommended;
@@ -45,7 +45,7 @@ impl PaperBinaryProvider {
 		Ok(download_info)
 	}
 
-	async fn list_versions(&self) -> Result<Vec<(String, u16)>, String> {
+	pub async fn list_versions(&self) -> Result<Vec<(String, u16)>, String> {
 		let response = self.api_client.get_versions().await?;
 		let mut versions: Vec<(String, u16)> = Vec::new();
 

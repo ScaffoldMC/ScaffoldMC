@@ -13,7 +13,7 @@ impl VanillaBinaryProvider {
 		Self { api_client }
 	}
 
-	async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
+	pub async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_version = if pre_release {
@@ -25,7 +25,7 @@ impl VanillaBinaryProvider {
 		self.get(&latest_version).await
 	}
 
-	async fn get(&self, game_version: &str) -> Result<JavaDownloadInfo, String> {
+	pub async fn get(&self, game_version: &str) -> Result<JavaDownloadInfo, String> {
 		let version_info = self.api_client.get_version(game_version).await?;
 
 		let download_url = Url::parse(&version_info.downloads.server.url)
@@ -45,7 +45,7 @@ impl VanillaBinaryProvider {
 		Ok(download_info)
 	}
 
-	async fn list_versions(&self) -> Result<Vec<String>, String> {
+	pub async fn list_versions(&self) -> Result<Vec<String>, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let mut listings: Vec<String> = Vec::new();
