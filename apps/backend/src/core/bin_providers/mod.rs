@@ -6,18 +6,8 @@ pub mod fabric;
 pub mod paper;
 pub mod vanilla;
 
-pub trait DownloadInfo: Send + Sync {
-	/// Get the download URL for this binary
-	fn download_url(&self) -> &Url;
-
-	/// Get the file name of the binary, e.g. "server.jar"
-	fn file_name(&self) -> &str;
-
-	/// Get the hash of the binary, if available
-	fn hash(&self) -> Option<(String, HashAlgorithm)> {
-		// Default to none in case the provider does not provide a hash
-		None
-	}
+pub enum DownloadInfo {
+	Java(JavaDownloadInfo),
 }
 
 pub struct JavaDownloadInfo {
@@ -28,31 +18,32 @@ pub struct JavaDownloadInfo {
 	java_args: Vec<String>,
 }
 
-impl DownloadInfo for JavaDownloadInfo {
-	fn download_url(&self) -> &Url {
+impl JavaDownloadInfo {
+	/// Get the download URL of the binary
+	pub fn download_url(&self) -> &Url {
 		&self.download_url
 	}
 
-	fn file_name(&self) -> &str {
+	/// Get the file name of the binary
+	pub fn file_name(&self) -> &str {
 		&self.file_name
 	}
 
-	fn hash(&self) -> Option<(String, HashAlgorithm)> {
+	/// Get the hash and its algorithm, if available
+	pub fn hash(&self) -> Option<(String, HashAlgorithm)> {
 		match self.hash {
 			Some((ref h, ref alg)) => Some((h.clone(), alg.clone())),
 			None => None,
 		}
 	}
-}
 
-impl JavaDownloadInfo {
 	/// Get the Java version required by this binary
-	fn java_version(&self) -> u8 {
+	pub fn java_version(&self) -> u8 {
 		self.java_version
 	}
 
 	/// Get the Java arguments required by this binary
-	fn java_rec_args(&self) -> Vec<String> {
+	pub fn java_rec_args(&self) -> Vec<String> {
 		self.java_args.clone()
 	}
 }

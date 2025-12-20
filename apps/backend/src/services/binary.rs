@@ -45,26 +45,26 @@ impl BinaryService {
 	}
 
 	/// Get information about a specific game version.
-	pub async fn get_bin_info(&self, game: &Game) -> Result<Box<dyn DownloadInfo>, String> {
+	pub async fn get_bin_info(&self, game: &Game) -> Result<DownloadInfo, String> {
 		match game {
 			Game::MinecraftJava(minecraft_java) => match &minecraft_java.loader {
 				JavaRuntime::Vanilla => {
 					let info = self.mcje.get(&minecraft_java.version).await?;
-					Ok(Box::new(info))
+					Ok(DownloadInfo::Java(info))
 				}
 				JavaRuntime::Fabric { loader, launcher } => {
 					let info = self
 						.fabric
 						.get(&minecraft_java.version, loader, launcher)
 						.await?;
-					Ok(Box::new(info))
+					Ok(DownloadInfo::Java(info))
 				}
 				JavaRuntime::Paper { build } => {
 					let info = self
 						.paper
 						.get(&minecraft_java.version, build.clone())
 						.await?;
-					Ok(Box::new(info))
+					Ok(DownloadInfo::Java(info))
 				}
 			},
 		}
@@ -82,13 +82,20 @@ impl BinaryService {
 		}
 
 		let download_info = self.get_bin_info(game).await?;
-		let download_url = download_info.download_url();
-		let binary_name = download_info.file_name();
+
+		let download_url = match &download_info {
+			DownloadInfo::Java(info) => info.download_url().clone(),
+		};
+
+		let binary_name = match &download_info {
+			DownloadInfo::Java(info) => info.file_name().clone(),
+		};
+
 		let binary_path = binary_dir.join(binary_name);
 
 		download_file(
 			self.reqwest_client.clone(),
-			download_url,
+			&download_url,
 			binary_path.clone(),
 		)
 		.await
@@ -106,7 +113,11 @@ impl BinaryService {
 			hash: None,
 		};
 
-		if let Some((hash, hash_algorithm)) = download_info.hash() {
+		let hash = match &download_info {
+			DownloadInfo::Java(info) => info.hash().clone(),
+		};
+
+		if let Some((hash, hash_algorithm)) = hash {
 			lockfile_entry.hash = Some(BinaryLockfileHash {
 				algorithm: hash_algorithm,
 				hash: hash.to_string(),
