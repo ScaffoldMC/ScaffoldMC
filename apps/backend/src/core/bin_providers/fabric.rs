@@ -1,45 +1,4 @@
-use crate::core::{
-	api_clients::fabric::FabricMetaAPIClient,
-	bin_providers::{AdvancedVersionProvider, BinaryInfo, BinaryProvider},
-	version::{fabric::FabricVersionInfo, VersionInfo},
-};
-use async_trait::async_trait;
-use reqwest::Url;
-use std::sync::Arc;
-
-pub struct FabricBinaryInfo {
-	download_url: Url,
-	version: Arc<dyn VersionInfo>,
-	java_version: u8,
-}
-
-impl FabricBinaryInfo {
-	pub fn new(version: Arc<dyn VersionInfo>, download_url: Url, java_version: u8) -> Self {
-		Self {
-			download_url,
-			version,
-			java_version,
-		}
-	}
-}
-
-impl BinaryInfo for FabricBinaryInfo {
-	fn download_url(&self) -> &Url {
-		&self.download_url
-	}
-
-	fn version(&self) -> Arc<dyn VersionInfo> {
-		Arc::clone(&self.version)
-	}
-
-	fn file_name(&self) -> &str {
-		"server.jar"
-	}
-
-	fn java_version(&self) -> u8 {
-		self.java_version
-	}
-}
+use crate::core::{api_clients::fabric::FabricMetaAPIClient, bin_providers::JavaDownloadInfo};
 
 pub struct FabricBinaryProvider {
 	api_client: FabricMetaAPIClient,
@@ -51,13 +10,8 @@ impl FabricBinaryProvider {
 	}
 }
 
-#[async_trait]
-impl BinaryProvider for FabricBinaryProvider {
-	fn binary_name(&self) -> &str {
-		"server.jar"
-	}
-
-	async fn get_latest(&self, pre_release: bool) -> Result<Box<dyn BinaryInfo>, String> {
+impl FabricBinaryProvider {
+	async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_loader = manifest
@@ -78,45 +32,43 @@ impl BinaryProvider for FabricBinaryProvider {
 			.find(|v| v.stable == !pre_release)
 			.ok_or("No suitable game versions found")?;
 
-		let fabric_version = FabricVersionInfo::new(
-			latest_game.version.clone(),
-			latest_loader.version.clone(),
-			latest_installer.version.clone(),
-		);
-
-		self.get(Arc::new(fabric_version)).await
+		self.get(
+			&latest_game.version,
+			&latest_loader.version,
+			&latest_installer.version,
+		)
+		.await
 	}
 
-	async fn get(&self, version: Arc<dyn VersionInfo>) -> Result<Box<dyn BinaryInfo>, String> {
-		// We need to downcast the version to FabricVersionInfo
-		let fabric_version = version
-			.as_any()
-			.downcast_ref::<FabricVersionInfo>()
-			.ok_or("Invalid version type for FabricBinaryProvider")?;
-
+	async fn get(
+		&self,
+		game_version: &str,
+		loader_version: &str,
+		launcher_version: &str,
+	) -> Result<JavaDownloadInfo, String> {
 		let version_info = self
 			.api_client
-			.get_version(fabric_version.game(), fabric_version.fabric())
+			.get_version(game_version, loader_version)
 			.await?;
 
 		let java_version = version_info.launcher_meta.min_java_version;
 
 		let download_url = self
 			.api_client
-			.get_download_url(
-				fabric_version.game(),
-				fabric_version.fabric(),
-				fabric_version.launcher(),
-			)
+			.get_download_url(game_version, loader_version, launcher_version)
 			.await?;
 
-		let binary_info = FabricBinaryInfo::new(version, download_url, java_version);
+		let download_info = JavaDownloadInfo {
+			download_url,
+			file_name: "server.jar".to_string(),
+			hash: None,
+			java_version: java_version,
+			java_args: vec![],
+		};
 
-		Ok(Box::new(binary_info))
+		Ok(download_info)
 	}
-}
 
-impl AdvancedVersionProvider for FabricBinaryProvider {
 	async fn list_game_versions(&self) -> Result<Vec<String>, String> {
 		let manifest = self.api_client.get_manifest().await?;
 		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
@@ -124,39 +76,30 @@ impl AdvancedVersionProvider for FabricBinaryProvider {
 		Ok(versions)
 	}
 
-	async fn list_loader_versions(
-		&self,
-		game_version: &str,
-	) -> Result<Vec<Arc<dyn VersionInfo>>, String> {
-		let manifest = self.api_client.get_manifest().await?;
-
-		let latest_installer: String = manifest
-			.installer
-			.iter()
-			.filter(|v| v.stable)
-			.nth(0)
-			.ok_or("No stable installer versions found")?
-			.version
-			.clone();
-
+	async fn list_loader_versions(&self, game_version: &str) -> Result<Vec<String>, String> {
 		let loaders = self
 			.api_client
 			.get_versions(game_version)
 			.await
 			.map_err(|e| format!("Failed to get loader versions: {}", e))?;
 
-		let versions: Vec<Arc<dyn VersionInfo>> = loaders
+		let versions: Vec<String> = loaders
 			.iter()
-			.map(|loader| {
-				let fabric_version = Arc::new(FabricVersionInfo::new(
-					game_version.to_string(),
-					loader.loader.version.clone(),
-					latest_installer.clone(),
-				));
-				fabric_version as Arc<dyn VersionInfo>
-			})
+			.map(|loader| loader.loader.version.clone())
 			.collect();
 
 		Ok(versions)
+	}
+
+	async fn list_installer_versions(&self) -> Result<Vec<String>, String> {
+		let manifest = self.api_client.get_manifest().await?;
+
+		let installers: Vec<String> = manifest
+			.installer
+			.iter()
+			.map(|installer| installer.version.clone())
+			.collect();
+
+		Ok(installers)
 	}
 }
