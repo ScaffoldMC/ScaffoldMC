@@ -18,9 +18,9 @@ use tokio::sync::Mutex;
 
 pub struct BinaryService {
 	binaries_dir: String,
-	fabric: FabricBinaryProvider,
-	mcje: VanillaBinaryProvider,
-	paper: PaperBinaryProvider,
+	pub fabric: FabricBinaryProvider,
+	pub mcje: VanillaBinaryProvider,
+	pub paper: PaperBinaryProvider,
 	lockfile_mutex: Arc<Mutex<()>>,
 	reqwest_client: reqwest::Client,
 }

@@ -45,16 +45,26 @@ impl PaperBinaryProvider {
 		Ok(download_info)
 	}
 
-	pub async fn list_versions(&self) -> Result<Vec<(String, u16)>, String> {
+	pub async fn list_game_versions(&self) -> Result<Vec<String>, String> {
 		let response = self.api_client.get_versions().await?;
-		let mut versions: Vec<(String, u16)> = Vec::new();
+		let mut versions: Vec<String> = Vec::new();
 
 		for version in response.versions {
-			for build in version.builds {
-				versions.push((version.id.clone(), build));
-			}
+			versions.push(version.id);
 		}
 
 		Ok(versions)
+	}
+
+	pub async fn list_loader_versions(&self, game_version: &str) -> Result<Vec<u16>, String> {
+		let response = self.api_client.get_versions().await?;
+
+		let version = response
+			.versions
+			.iter()
+			.find(|v| v.id == game_version)
+			.ok_or("Game version not found")?;
+
+		Ok(version.builds.clone())
 	}
 }
