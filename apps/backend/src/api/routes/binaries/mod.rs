@@ -10,6 +10,6 @@ pub fn create_router() -> Router<Arc<AppState>> {
 pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	return (
 		axum::http::StatusCode::OK,
-		Json(state.binary_service.list_binaries().await),
+		Json(state.binary_service.get_installed().await),
 	);
 }
