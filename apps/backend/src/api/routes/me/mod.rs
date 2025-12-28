@@ -5,7 +5,7 @@ use axum::middleware;
 use axum::{http::StatusCode, response::IntoResponse, routing, Extension, Json, Router};
 use std::sync::Arc;
 
-use crate::api::types::user::{self, UserPatchRequest, UserResponse};
+use crate::api::types::user::{UserPatchRequest, UserResponse};
 
 pub fn create_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
