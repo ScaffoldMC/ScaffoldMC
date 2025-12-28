@@ -7,7 +7,7 @@ use crate::core::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaB
 use crate::core::files::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
 };
-use crate::core::game::java::JavaRuntime;
+use crate::core::game::java::MinecraftJavaLoader;
 use crate::core::game::Game;
 use crate::services::Service;
 use crate::util::download::download_file;
@@ -48,18 +48,18 @@ impl BinaryService {
 	pub async fn get_bin_info(&self, game: &Game) -> Result<DownloadInfo, String> {
 		match game {
 			Game::MinecraftJava(minecraft_java) => match &minecraft_java.loader {
-				JavaRuntime::Vanilla => {
+				MinecraftJavaLoader::Vanilla => {
 					let info = self.mcje.get(&minecraft_java.version).await?;
 					Ok(DownloadInfo::Java(info))
 				}
-				JavaRuntime::Fabric { loader, launcher } => {
+				MinecraftJavaLoader::Fabric { loader, launcher } => {
 					let info = self
 						.fabric
 						.get(&minecraft_java.version, loader, launcher)
 						.await?;
 					Ok(DownloadInfo::Java(info))
 				}
-				JavaRuntime::Paper { build } => {
+				MinecraftJavaLoader::Paper { build } => {
 					let info = self
 						.paper
 						.get(&minecraft_java.version, build.clone())

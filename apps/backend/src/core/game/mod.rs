@@ -24,11 +24,11 @@ impl Game {
 				"{}-{}",
 				minecraft_java.version,
 				match &minecraft_java.loader {
-					java::JavaRuntime::Vanilla => "vanilla".to_string(),
-					java::JavaRuntime::Fabric { loader, launcher } => {
+					java::MinecraftJavaLoader::Vanilla => "vanilla".to_string(),
+					java::MinecraftJavaLoader::Fabric { loader, launcher } => {
 						format!("fabric-{}-{}", loader, launcher)
 					}
-					java::JavaRuntime::Paper { build } => format!("paper-{}", build),
+					java::MinecraftJavaLoader::Paper { build } => format!("paper-{}", build),
 				}
 			),
 		}
