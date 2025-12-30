@@ -70,7 +70,30 @@ pub async fn get_vanilla(State(state): State<Arc<AppState>>) -> impl IntoRespons
 	}
 }
 
-pub async fn get_vanilla_game(Path(version): Path<String>) -> impl IntoResponse {
+pub async fn get_vanilla_game(
+	State(state): State<Arc<AppState>>,
+	Path(version): Path<String>,
+) -> impl IntoResponse {
+	let versions_res = state.binary_service.mcje.list_versions().await;
+
+	if let Err(err) = versions_res {
+		return (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			format!("Internal server error: {}", err),
+		)
+			.into_response();
+	}
+
+	let versions = versions_res.unwrap();
+
+	if !versions.contains(&version) {
+		return (
+			StatusCode::NOT_FOUND,
+			format!("Version {version} not found"),
+		)
+			.into_response();
+	}
+
 	(
 		StatusCode::OK,
 		Json(Game::MinecraftJava(MinecraftJava {
