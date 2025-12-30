@@ -8,14 +8,19 @@ static PAPER_API_URL: &str = "https://fill.papermc.io/v3/projects/paper";
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct PaperVersions {
-	pub versions: Vec<PaperVersion>,
+	pub versions: Vec<PaperVersionAndBuilds>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct PaperVersion {
 	pub id: String,
-	pub builds: Vec<u16>,
 	pub java: PaperJavaInfo,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct PaperVersionAndBuilds {
+	pub version: PaperVersion,
+	pub builds: Vec<u16>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -42,6 +47,7 @@ pub struct PaperBuildInfo {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct PaperDownloads {
+	#[serde(rename = "server:default")]
 	pub server_default: PaperDownload,
 }
 
@@ -74,9 +80,9 @@ impl PaperDownloadsAPIClient {
 		Ok(response)
 	}
 
-	pub async fn get_version(&self, game_version: &str) -> Result<PaperVersion, String> {
+	pub async fn get_version(&self, game_version: &str) -> Result<PaperVersionAndBuilds, String> {
 		let url = format!("{}/versions/{}", PAPER_API_URL, game_version);
-		let response: PaperVersion = get_and_format(&self.reqwest_client, &url).await?;
+		let response: PaperVersionAndBuilds = get_and_format(&self.reqwest_client, &url).await?;
 
 		Ok(response)
 	}

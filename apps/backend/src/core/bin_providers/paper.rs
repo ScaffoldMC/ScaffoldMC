@@ -18,14 +18,14 @@ impl PaperBinaryProvider {
 
 		let latest_version = versions.versions.first().ok_or("No versions found")?;
 
-		self.get(latest_version.id.as_str(), latest_version.builds[0])
+		self.get(latest_version.version.id.as_str(), latest_version.builds[0])
 			.await
 	}
 
 	pub async fn get(&self, game_version: &str, build: u16) -> Result<JavaDownloadInfo, String> {
 		let response = self.api_client.get_version(game_version).await?;
-		let java_version = response.java.version.minimum;
-		let java_args = response.java.flags.recommended;
+		let java_version = response.version.java.version.minimum;
+		let java_args = response.version.java.flags.recommended;
 
 		let build = self.api_client.get_build(game_version, build).await?;
 
@@ -50,7 +50,7 @@ impl PaperBinaryProvider {
 		let mut versions: Vec<String> = Vec::new();
 
 		for version in response.versions {
-			versions.push(version.id);
+			versions.push(version.version.id);
 		}
 
 		Ok(versions)
@@ -62,7 +62,7 @@ impl PaperBinaryProvider {
 		let version = response
 			.versions
 			.iter()
-			.find(|v| v.id == game_version)
+			.find(|v| v.version.id == game_version)
 			.ok_or("Game version not found")?;
 
 		Ok(version.builds.clone())
