@@ -1,5 +1,4 @@
 use crate::{
-	api::routes::versions,
 	core::game::{
 		java::{MinecraftJava, MinecraftJavaLoader},
 		Game,
