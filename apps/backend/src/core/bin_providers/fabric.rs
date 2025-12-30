@@ -1,4 +1,4 @@
-use crate::core::{api_clients::fabric::FabricMetaAPIClient, bin_providers::JavaDownloadInfo};
+use crate::core::{api_clients::fabric::FabricMetaAPIClient, bin_providers::MCJEDownloadInfo};
 
 pub struct FabricBinaryProvider {
 	api_client: FabricMetaAPIClient,
@@ -9,7 +9,7 @@ impl FabricBinaryProvider {
 		Self { api_client }
 	}
 
-	pub async fn get_latest(&self, pre_release: bool) -> Result<JavaDownloadInfo, String> {
+	pub async fn get_latest(&self, pre_release: bool) -> Result<MCJEDownloadInfo, String> {
 		let manifest = self.api_client.get_manifest().await?;
 
 		let latest_loader = manifest
@@ -43,7 +43,7 @@ impl FabricBinaryProvider {
 		game_version: &str,
 		loader_version: &str,
 		launcher_version: &str,
-	) -> Result<JavaDownloadInfo, String> {
+	) -> Result<MCJEDownloadInfo, String> {
 		let version_info = self
 			.api_client
 			.get_version(game_version, loader_version)
@@ -56,7 +56,7 @@ impl FabricBinaryProvider {
 			.get_download_url(game_version, loader_version, launcher_version)
 			.await?;
 
-		let download_info = JavaDownloadInfo {
+		let download_info = MCJEDownloadInfo {
 			download_url,
 			file_name: "server.jar".to_string(),
 			hash: None,

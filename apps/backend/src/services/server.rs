@@ -294,7 +294,7 @@ impl ServerService {
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
 
 		let java_args = match &bin_info {
-			DownloadInfo::Java(info) => info.java_rec_args(),
+			DownloadInfo::MinecraftJava(info) => info.java_rec_args(),
 		};
 
 		let server_config = ServerConfig {

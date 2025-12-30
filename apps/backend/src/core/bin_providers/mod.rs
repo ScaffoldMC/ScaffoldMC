@@ -7,10 +7,10 @@ pub mod paper;
 pub mod vanilla;
 
 pub enum DownloadInfo {
-	Java(JavaDownloadInfo),
+	MinecraftJava(MCJEDownloadInfo),
 }
 
-pub struct JavaDownloadInfo {
+pub struct MCJEDownloadInfo {
 	download_url: Url,
 	file_name: String,
 	hash: Option<(String, HashAlgorithm)>,
@@ -18,7 +18,7 @@ pub struct JavaDownloadInfo {
 	java_args: Vec<String>,
 }
 
-impl JavaDownloadInfo {
+impl MCJEDownloadInfo {
 	/// Get the download URL of the binary
 	pub fn download_url(&self) -> &Url {
 		&self.download_url

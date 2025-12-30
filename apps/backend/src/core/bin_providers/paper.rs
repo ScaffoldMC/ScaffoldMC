@@ -1,5 +1,5 @@
 use crate::{
-	core::{api_clients::paper::PaperDownloadsAPIClient, bin_providers::JavaDownloadInfo},
+	core::{api_clients::paper::PaperDownloadsAPIClient, bin_providers::MCJEDownloadInfo},
 	util::hash::HashAlgorithm,
 };
 use reqwest::Url;
@@ -13,7 +13,7 @@ impl PaperBinaryProvider {
 		Self { api_client }
 	}
 
-	pub async fn get_latest(&self) -> Result<JavaDownloadInfo, String> {
+	pub async fn get_latest(&self) -> Result<MCJEDownloadInfo, String> {
 		let versions = self.api_client.get_versions().await?;
 
 		let latest_version = versions.versions.first().ok_or("No versions found")?;
@@ -22,7 +22,7 @@ impl PaperBinaryProvider {
 			.await
 	}
 
-	pub async fn get(&self, game_version: &str, build: u16) -> Result<JavaDownloadInfo, String> {
+	pub async fn get(&self, game_version: &str, build: u16) -> Result<MCJEDownloadInfo, String> {
 		let response = self.api_client.get_version(game_version).await?;
 		let java_version = response.version.java.version.minimum;
 		let java_args = response.version.java.flags.recommended;
@@ -34,7 +34,7 @@ impl PaperBinaryProvider {
 
 		let hash = build.downloads.server_default.checksums.sha256;
 
-		let download_info = JavaDownloadInfo {
+		let download_info = MCJEDownloadInfo {
 			download_url,
 			file_name: "server.jar".to_string(),
 			hash: Some((hash, HashAlgorithm::Sha256)),

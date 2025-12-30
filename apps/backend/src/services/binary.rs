@@ -50,21 +50,21 @@ impl BinaryService {
 			Game::MinecraftJava(minecraft_java) => match &minecraft_java.loader {
 				MinecraftJavaLoader::Vanilla => {
 					let info = self.mcje.get(&minecraft_java.version).await?;
-					Ok(DownloadInfo::Java(info))
+					Ok(DownloadInfo::MinecraftJava(info))
 				}
 				MinecraftJavaLoader::Fabric { loader, launcher } => {
 					let info = self
 						.fabric
 						.get(&minecraft_java.version, loader, launcher)
 						.await?;
-					Ok(DownloadInfo::Java(info))
+					Ok(DownloadInfo::MinecraftJava(info))
 				}
 				MinecraftJavaLoader::Paper { build } => {
 					let info = self
 						.paper
 						.get(&minecraft_java.version, build.clone())
 						.await?;
-					Ok(DownloadInfo::Java(info))
+					Ok(DownloadInfo::MinecraftJava(info))
 				}
 			},
 		}
@@ -84,11 +84,11 @@ impl BinaryService {
 		let download_info = self.get_bin_info(game).await?;
 
 		let download_url = match &download_info {
-			DownloadInfo::Java(info) => info.download_url().clone(),
+			DownloadInfo::MinecraftJava(info) => info.download_url().clone(),
 		};
 
 		let binary_name = match &download_info {
-			DownloadInfo::Java(info) => info.file_name(),
+			DownloadInfo::MinecraftJava(info) => info.file_name(),
 		};
 
 		let binary_path = binary_dir.join(binary_name);
@@ -114,7 +114,7 @@ impl BinaryService {
 		};
 
 		let hash = match &download_info {
-			DownloadInfo::Java(info) => info.hash().clone(),
+			DownloadInfo::MinecraftJava(info) => info.hash().clone(),
 		};
 
 		if let Some((hash, hash_algorithm)) = hash {
