@@ -1,5 +1,5 @@
-use crate::core::api_clients::fabric::FabricMetaAPIClient;
-use crate::core::api_clients::paper::PaperDownloadsAPIClient;
+use crate::core::api_clients::fabric_meta::FabricMetaAPIClient;
+use crate::core::api_clients::paper_meta::PaperDownloadsAPIClient;
 use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::DownloadInfo;

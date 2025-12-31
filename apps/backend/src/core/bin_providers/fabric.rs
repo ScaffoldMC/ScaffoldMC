@@ -1,5 +1,5 @@
 use crate::core::{
-	api_clients::{fabric::FabricMetaAPIClient, piston_meta::PistonMetaAPIClient},
+	api_clients::{fabric_meta::FabricMetaAPIClient, piston_meta::PistonMetaAPIClient},
 	bin_providers::MCJEDownloadInfo,
 };
 

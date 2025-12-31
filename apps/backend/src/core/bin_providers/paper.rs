@@ -1,5 +1,5 @@
 use crate::{
-	core::{api_clients::paper::PaperDownloadsAPIClient, bin_providers::MCJEDownloadInfo},
+	core::{api_clients::paper_meta::PaperDownloadsAPIClient, bin_providers::MCJEDownloadInfo},
 	util::hash::HashAlgorithm,
 };
 use reqwest::Url;
