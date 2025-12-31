@@ -51,6 +51,7 @@ pub struct MojangDownloadInfo {
 	pub sha1: String,
 }
 
+#[derive(Clone)]
 pub struct PistonMetaAPIClient {
 	reqwest_client: reqwest::Client,
 }

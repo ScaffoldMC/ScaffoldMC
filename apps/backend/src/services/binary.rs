@@ -36,7 +36,7 @@ impl BinaryService {
 
 		Self {
 			binaries_dir: format!("{}/games", crate::config::DATA_FOLDER),
-			fabric: FabricBinaryProvider::new(fabric_api),
+			fabric: FabricBinaryProvider::new(fabric_api, piston_meta_api.clone()),
 			mcje: VanillaBinaryProvider::new(piston_meta_api),
 			paper: PaperBinaryProvider::new(paper_api),
 			lockfile_mutex: Arc::new(Mutex::new(())),

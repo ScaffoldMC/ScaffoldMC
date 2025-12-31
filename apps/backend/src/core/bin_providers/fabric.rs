@@ -1,16 +1,23 @@
-use crate::core::{api_clients::fabric::FabricMetaAPIClient, bin_providers::MCJEDownloadInfo};
+use crate::core::{
+	api_clients::{fabric::FabricMetaAPIClient, piston_meta::PistonMetaAPIClient},
+	bin_providers::MCJEDownloadInfo,
+};
 
 pub struct FabricBinaryProvider {
-	api_client: FabricMetaAPIClient,
+	fabric_meta: FabricMetaAPIClient,
+	piston_meta: PistonMetaAPIClient,
 }
 
 impl FabricBinaryProvider {
-	pub fn new(api_client: FabricMetaAPIClient) -> Self {
-		Self { api_client }
+	pub fn new(fabric_meta: FabricMetaAPIClient, piston_meta: PistonMetaAPIClient) -> Self {
+		Self {
+			fabric_meta,
+			piston_meta,
+		}
 	}
 
 	pub async fn get_latest(&self, pre_release: bool) -> Result<MCJEDownloadInfo, String> {
-		let manifest = self.api_client.get_manifest().await?;
+		let manifest = self.fabric_meta.get_manifest().await?;
 
 		let latest_loader = manifest
 			.loader
@@ -45,14 +52,27 @@ impl FabricBinaryProvider {
 		launcher_version: &str,
 	) -> Result<MCJEDownloadInfo, String> {
 		let version_info = self
-			.api_client
+			.fabric_meta
 			.get_version(game_version, loader_version)
-			.await?;
+			.await;
 
-		let java_version = version_info.launcher_meta.min_java_version;
+		if let Err(err) = version_info {
+			return Err(format!(
+				"Failed to verify fabric version {} exists: {}",
+				game_version, err
+			));
+		}
+
+		let java_version = self
+			.piston_meta
+			.get_version(game_version)
+			.await
+			.map_err(|e| format!("Cannot query version {} from Mojang: {}", game_version, e))?
+			.java_version
+			.major_version;
 
 		let download_url = self
-			.api_client
+			.fabric_meta
 			.get_download_url(game_version, loader_version, launcher_version)
 			.await?;
 
@@ -68,7 +88,7 @@ impl FabricBinaryProvider {
 	}
 
 	pub async fn list_game_versions(&self) -> Result<Vec<String>, String> {
-		let manifest = self.api_client.get_manifest().await?;
+		let manifest = self.fabric_meta.get_manifest().await?;
 		let versions: Vec<String> = manifest.game.iter().map(|v| v.version.clone()).collect();
 
 		Ok(versions)
@@ -76,7 +96,7 @@ impl FabricBinaryProvider {
 
 	pub async fn list_loader_versions(&self, game_version: &str) -> Result<Vec<String>, String> {
 		let loaders = self
-			.api_client
+			.fabric_meta
 			.get_versions(game_version)
 			.await
 			.map_err(|e| format!("Failed to get loader versions: {}", e))?;
@@ -90,7 +110,7 @@ impl FabricBinaryProvider {
 	}
 
 	pub async fn list_installer_versions(&self) -> Result<Vec<String>, String> {
-		let manifest = self.api_client.get_manifest().await?;
+		let manifest = self.fabric_meta.get_manifest().await?;
 
 		let installers: Vec<String> = manifest
 			.installer
