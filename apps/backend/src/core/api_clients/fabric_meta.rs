@@ -34,14 +34,7 @@ pub struct FabricInstallerVersion {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct FabricLoaderInfo {
-	#[serde(rename = "launcherMeta")]
-	pub launcher_meta: FabricLauncherMeta,
 	pub loader: FabricLoaderVersion,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct FabricLauncherMeta {
-	pub min_java_version: u8,
 }
 
 // API Client
