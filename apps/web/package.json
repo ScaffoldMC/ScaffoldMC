@@ -9,7 +9,8 @@
 		"run": "next start",
 		"lint": "next lint --max-warnings 0",
 		"check-types": "tsc --noEmit",
-		"storybook": "storybook dev"
+		"storybook": "storybook dev",
+		"bootstrap": "node ./scripts/generate-servertypes.js"
 	},
 	"dependencies": {
 		"@nx/storybook": "^21.2.0",
