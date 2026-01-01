@@ -1,4 +1,5 @@
 use crate::{
+	api::types::versions::CompleteVersionResponse,
 	core::game::{
 		java::{MinecraftJava, MinecraftJavaLoader},
 		Game,
@@ -57,12 +58,12 @@ pub async fn get_game(
 			.into_response();
 	}
 
-	(
-		StatusCode::OK,
-		Json(Game::MinecraftJava(MinecraftJava {
-			loader: MinecraftJavaLoader::Vanilla,
-			version,
-		})),
-	)
-		.into_response()
+	let game = Game::MinecraftJava(MinecraftJava {
+		loader: MinecraftJavaLoader::Vanilla,
+		version: version,
+	});
+
+	let res = CompleteVersionResponse { game };
+
+	(StatusCode::OK, Json(res)).into_response()
 }
