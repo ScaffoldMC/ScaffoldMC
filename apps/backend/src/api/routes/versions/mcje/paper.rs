@@ -60,13 +60,15 @@ pub async fn get_loader(
 		)
 			.into_response()
 	} else {
+		let mut res_data = versions_res.unwrap();
+		res_data.sort();
+		res_data.reverse();
+
+		let options = res_data.iter().map(|v| v.to_string()).collect();
+
 		let options = OptionsResponse {
 			message: "Select Loader Version".to_string(),
-			options: versions_res
-				.unwrap()
-				.iter()
-				.map(|v| v.to_string())
-				.collect(),
+			options,
 		};
 
 		(StatusCode::OK, Json(options)).into_response()
