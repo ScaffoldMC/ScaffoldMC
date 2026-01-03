@@ -10,7 +10,9 @@ type VersionResponse = CompleteVersionResponse | OptionsResponse;
 export function VersionSelector() {
 	const [path, setPath] = useState<string[]>([]);
 	const [game, setGame] = useState<CompleteVersionResponse | null>(null);
-	const [levelCache, setLevelCache] = useState<Record<number, string[]>>({});
+	const [levelCache, setLevelCache] = useState<
+		Record<number, OptionsResponse>
+	>({});
 
 	const currentRoute =
 		path.length > 0 ? `/game-versions/${path.join("/")}` : "/game-versions";
@@ -33,10 +35,11 @@ export function VersionSelector() {
 	if (
 		currentLevel.data &&
 		"options" in currentLevel.data &&
+		"message" in currentLevel.data &&
 		!levelCache[path.length]
 	) {
 		// Appeasing typescript
-		const options = currentLevel.data.options;
+		const options = currentLevel.data as OptionsResponse;
 
 		setLevelCache((prev) => ({
 			...prev,
@@ -85,9 +88,12 @@ export function VersionSelector() {
 		});
 	};
 
-	// Get the options for each level
-	const getLevelData = (levelIndex: number): string[] => {
-		return levelCache[levelIndex] || [];
+	const getLevelOptions = (levelIndex: number): string[] => {
+		return levelCache[levelIndex]?.options || [];
+	};
+
+	const getLevelMessage = (levelIndex: number): string => {
+		return levelCache[levelIndex]?.message || "";
 	};
 
 	return (
@@ -100,8 +106,8 @@ export function VersionSelector() {
 					}
 					value={path[levelIndex] || ""}
 				>
-					<option value="">Select Option</option>
-					{getLevelData(levelIndex)?.map((option: string) => (
+					<option value="">{getLevelMessage(levelIndex)}</option>
+					{getLevelOptions(levelIndex)?.map((option: string) => (
 						<option key={option} value={option}>
 							{option}
 						</option>
