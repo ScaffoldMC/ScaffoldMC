@@ -1,6 +1,6 @@
 mod mcje;
 
-use crate::AppState;
+use crate::{api::types::versions::OptionsResponse, AppState};
 use axum::{http::StatusCode, response::IntoResponse, Json, Router};
 use std::sync::Arc;
 
@@ -11,5 +11,10 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 pub async fn get_games() -> impl IntoResponse {
-	(StatusCode::OK, Json(vec!["minecraft-java"])).into_response()
+	let options = OptionsResponse {
+		message: "Select Game".to_string(),
+		options: vec!["minecraft-java".to_string()],
+	};
+
+	(StatusCode::OK, Json(options)).into_response()
 }

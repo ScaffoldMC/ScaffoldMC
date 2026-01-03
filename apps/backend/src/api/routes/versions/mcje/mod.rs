@@ -2,7 +2,7 @@ mod fabric;
 mod paper;
 mod vanilla;
 
-use crate::AppState;
+use crate::{api::types::versions::OptionsResponse, AppState};
 use axum::{http::StatusCode, response::IntoResponse, Json, Router};
 use std::sync::Arc;
 
@@ -15,13 +15,14 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 pub async fn get() -> impl IntoResponse {
-	(
-		StatusCode::OK,
-		Json(vec![
+	let options = OptionsResponse {
+		message: "Select Loader".to_string(),
+		options: vec![
 			"vanilla".to_string(),
 			"fabric".to_string(),
 			"paper".to_string(),
-		]),
-	)
-		.into_response()
+		],
+	};
+
+	(StatusCode::OK, Json(options)).into_response()
 }

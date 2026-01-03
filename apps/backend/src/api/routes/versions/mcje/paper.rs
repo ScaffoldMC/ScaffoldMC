@@ -1,5 +1,5 @@
 use crate::{
-	api::types::versions::CompleteVersionResponse,
+	api::types::versions::{CompleteVersionResponse, OptionsResponse},
 	core::game::{
 		java::{MinecraftJava, MinecraftJavaLoader},
 		Game,
@@ -34,7 +34,12 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 		)
 			.into_response()
 	} else {
-		(StatusCode::OK, Json(versions_res.unwrap())).into_response()
+		let options = OptionsResponse {
+			message: "Select Game Version".to_string(),
+			options: versions_res.unwrap(),
+		};
+
+		(StatusCode::OK, Json(options)).into_response()
 	}
 }
 
@@ -55,7 +60,12 @@ pub async fn get_loader(
 		)
 			.into_response()
 	} else {
-		(StatusCode::OK, Json(versions_res.unwrap())).into_response()
+		let options = OptionsResponse {
+			message: "Select Loader Version".to_string(),
+			options: versions_res.unwrap(),
+		};
+
+		(StatusCode::OK, Json(options)).into_response()
 	}
 }
 
