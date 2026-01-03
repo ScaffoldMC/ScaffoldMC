@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useState, useMemo } from "react";
 import { CompleteVersionResponse, OptionsResponse } from "@/lib/servertypes";
-import { ArrowRight } from "lucide-react";
 
 type VersionResponse = CompleteVersionResponse | OptionsResponse;
 
