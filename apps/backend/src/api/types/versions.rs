@@ -9,7 +9,7 @@ pub struct CompleteVersionResponse {
 }
 #[derive(TS, Serialize, Deserialize)]
 #[ts(export)]
-pub struct OptionsResponse<T> {
+pub struct OptionsResponse {
 	pub message: String,
-	pub options: Vec<T>,
+	pub options: Vec<String>,
 }

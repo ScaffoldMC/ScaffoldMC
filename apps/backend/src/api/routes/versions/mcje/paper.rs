@@ -62,7 +62,11 @@ pub async fn get_loader(
 	} else {
 		let options = OptionsResponse {
 			message: "Select Loader Version".to_string(),
-			options: versions_res.unwrap(),
+			options: versions_res
+				.unwrap()
+				.iter()
+				.map(|v| v.to_string())
+				.collect(),
 		};
 
 		(StatusCode::OK, Json(options)).into_response()
