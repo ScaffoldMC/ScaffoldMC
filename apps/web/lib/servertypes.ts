@@ -5,6 +5,7 @@ export * from "../../backend/bindings/Game";
 export * from "../../backend/bindings/LoginRequest";
 export * from "../../backend/bindings/MinecraftJava";
 export * from "../../backend/bindings/MinecraftJavaLoader";
+export * from "../../backend/bindings/OptionsResponse";
 export * from "../../backend/bindings/PartialServer";
 export * from "../../backend/bindings/SudoCheckResponse";
 export * from "../../backend/bindings/SudoRequest";
