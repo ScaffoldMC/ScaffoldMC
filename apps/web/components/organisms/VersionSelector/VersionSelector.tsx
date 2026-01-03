@@ -2,14 +2,21 @@ import { Dropdown } from "@/components/atoms/Dropdown/Dropdown";
 import styles from "./VersionSelector.module.css";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import { useState, useMemo } from "react";
-import { CompleteVersionResponse, OptionsResponse } from "@/lib/servertypes";
+import { useState, useMemo, useEffect } from "react";
+import {
+	CompleteVersionResponse,
+	Game,
+	OptionsResponse,
+} from "@/lib/servertypes";
 
 type VersionResponse = CompleteVersionResponse | OptionsResponse;
 
-export function VersionSelector() {
+export interface VersionSelectorProps {
+	onGame: (game?: Game) => void;
+}
+
+export function VersionSelector({ onGame }: VersionSelectorProps) {
 	const [path, setPath] = useState<string[]>([]);
-	const [game, setGame] = useState<CompleteVersionResponse | null>(null);
 	const [levelCache, setLevelCache] = useState<
 		Record<number, OptionsResponse>
 	>({});
@@ -26,26 +33,28 @@ export function VersionSelector() {
 		retry: false,
 	});
 
-	// Reached complete version response
-	if (currentLevel.data && "game" in currentLevel.data && !game) {
-		setGame(currentLevel.data);
-	}
+	useEffect(() => {
+		// Reached complete version response
+		if (currentLevel.data && "game" in currentLevel.data) {
+			onGame(currentLevel.data.game);
+		}
 
-	// Cache options for each selection level
-	if (
-		currentLevel.data &&
-		"options" in currentLevel.data &&
-		"message" in currentLevel.data &&
-		!levelCache[path.length]
-	) {
-		// Appeasing typescript
-		const options = currentLevel.data as OptionsResponse;
+		// Cache options for each selection level
+		if (
+			currentLevel.data &&
+			"options" in currentLevel.data &&
+			"message" in currentLevel.data &&
+			!levelCache[path.length]
+		) {
+			// Appeasing typescript
+			const options = currentLevel.data as OptionsResponse;
 
-		setLevelCache((prev) => ({
-			...prev,
-			[path.length]: options,
-		}));
-	}
+			setLevelCache((prev) => ({
+				...prev,
+				[path.length]: options,
+			}));
+		}
+	}, [currentLevel.data, path.length, levelCache]);
 
 	// Memoize levels to display
 	const levels = useMemo(() => {
@@ -65,7 +74,7 @@ export function VersionSelector() {
 	}, [path.length, currentLevel.data]);
 
 	const handleSelectChange = (levelIndex: number, value: string) => {
-		setGame(null);
+		onGame(null);
 
 		if (!value) {
 			const newPath = path.slice(0, levelIndex);
