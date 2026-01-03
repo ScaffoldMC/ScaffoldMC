@@ -9,10 +9,17 @@
 	border-radius: var(--border-radius);
 	padding: 0 8px;
 	width: fit-content;
-	min-width: 36px;
 	height: 36px;
 	font-weight: 600;
 	font-size: var(--font-size-medium);
+}
+
+.defaultSize {
+	height: 36px;
+}
+
+.variableSize {
+	height: fit-content;
 }
 
 .base svg {
