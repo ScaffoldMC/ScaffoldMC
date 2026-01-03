@@ -7,7 +7,7 @@ import {
 } from "@/components/organisms/Sidebar/Sidebar";
 import styles from "./layout.module.css";
 import { User } from "@/components/molecules/User/User";
-import { Home, Server, Settings } from "lucide-react";
+import { Home, PlusCircle, Server, Settings } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -41,6 +41,10 @@ export default async function DashboardLayout({
 					<SidebarLink href="/servers">
 						<Server size={18} className={styles.icon} />
 						Servers
+					</SidebarLink>
+					<SidebarLink href="/create-server">
+						<PlusCircle size={18} className={styles.icon} />
+						Create Server
 					</SidebarLink>
 					<SidebarLink href="/settings">
 						<Settings size={18} className={styles.icon} />
