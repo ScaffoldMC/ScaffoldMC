@@ -3,6 +3,7 @@ mod binaries;
 mod jvms;
 mod me;
 mod servers;
+mod versions;
 
 use crate::api::middleware::auth::require_auth;
 use crate::AppState;
@@ -29,6 +30,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 		.allow_credentials(true);
 
 	Router::new()
+		.nest("/game-versions", versions::create_router())
 		.nest("/servers", servers::create_router())
 		.nest("/binaries", binaries::create_router())
 		.nest("/me", me::create_router(state.clone()))

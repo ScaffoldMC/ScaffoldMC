@@ -1,0 +1,26 @@
+.layout {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	width: 100%;
+	max-width: 800px;
+}
+
+.createOption {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	width: 200px;
+	height: 200px;
+	font-size: var(--font-size-large);
+}
+
+.createOptions {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+	padding: 8px;
+	width: 100%;
+}

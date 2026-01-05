@@ -1,0 +1,15 @@
+.select {
+	transition:
+		background-color 50ms ease-in-out,
+		border-color 100ms ease-in-out;
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	background-color: var(--color-foreground);
+	padding: 6px;
+	color: var(--color-text);
+	font-size: var(--font-size-small);
+}
+
+.select:hover {
+	border-color: var(--color-border-hover);
+}

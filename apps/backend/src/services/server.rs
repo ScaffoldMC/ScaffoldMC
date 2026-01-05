@@ -1,5 +1,6 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
+use crate::core::bin_providers::DownloadInfo;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
 use crate::core::server::Server;
@@ -163,11 +164,7 @@ impl ServerService {
 	}
 
 	/// Send a command to a running server instance.
-	pub async fn send_command(
-		&mut self,
-		server_id: Uuid,
-		command: &str,
-	) -> Result<(), ServerError> {
+	pub async fn send_command(&self, server_id: Uuid, command: &str) -> Result<(), ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -198,7 +195,7 @@ impl ServerService {
 	}
 
 	/// Starts a server instance by ID using its configuration.
-	pub async fn start(&mut self, server_id: Uuid) -> Result<(), ServerError> {
+	pub async fn start(&self, server_id: Uuid) -> Result<(), ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -233,7 +230,7 @@ impl ServerService {
 	}
 
 	/// Stops a running server instance.
-	pub async fn stop(&mut self, server_id: Uuid) -> Result<(), ServerError> {
+	pub async fn stop(&self, server_id: Uuid) -> Result<(), ServerError> {
 		let stop_command = {
 			let servers_guard = self.servers.read().await;
 			let server = servers_guard
@@ -248,7 +245,7 @@ impl ServerService {
 		Ok(())
 	}
 
-	pub async fn kill(&mut self, server_id: Uuid) -> Result<(), ServerError> {
+	pub async fn kill(&self, server_id: Uuid) -> Result<(), ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -278,7 +275,7 @@ impl ServerService {
 	}
 
 	/// Creates a new server instance with the given configuration.
-	pub async fn create(&mut self, name: String, server_type: Game) -> Result<Uuid, String> {
+	pub async fn create(&self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));
 
@@ -296,10 +293,14 @@ impl ServerService {
 
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
 
+		let java_args = match &bin_info {
+			DownloadInfo::MinecraftJava(info) => info.java_rec_args(),
+		};
+
 		let server_config = ServerConfig {
-			name,
+			name: name.to_string(),
 			game: server_type,
-			args: bin_info.java_rec_args(),
+			args: java_args,
 			stop_command: "stop".into(), // TODO: Velocity uses "shutdown"
 		};
 

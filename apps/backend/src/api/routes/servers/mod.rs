@@ -1,6 +1,8 @@
+use crate::api::types::server::CreateServerRequest;
 use crate::AppState;
+use axum::extract::State;
 use axum::response::IntoResponse;
-use axum::{routing, Router};
+use axum::{routing, Json, Router};
 use reqwest::StatusCode;
 use std::sync::Arc;
 
@@ -18,7 +20,16 @@ async fn get() -> impl IntoResponse {
 	StatusCode::OK.into_response()
 }
 
-async fn post() -> impl IntoResponse {
-	// TODO: Create a new server
+#[axum::debug_handler]
+async fn post(
+	State(state): State<Arc<AppState>>,
+	Json(req): Json<CreateServerRequest>,
+) -> impl IntoResponse {
+	let result = state.server_service.create(&req.name, req.game).await;
+
+	if let Err(err) = result {
+		return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
+	}
+
 	StatusCode::CREATED.into_response()
 }
