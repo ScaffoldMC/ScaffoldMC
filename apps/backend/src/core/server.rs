@@ -1,11 +1,39 @@
-use std::sync::Arc;
 use tokio::{process::Child, sync::RwLock};
+use uuid::Uuid;
 
-use crate::core::files::server_config::ServerConfig;
+use crate::core::{files::server_config::ServerConfig, game::Game};
 
-/// Utility struct to represent a server instance.
-/// It contains the server configuration and the process handle.
+/// Server instance representation
 pub struct Server {
-	pub config: Arc<RwLock<ServerConfig>>,
-	pub process: Arc<RwLock<Option<Child>>>,
+	pub id: Uuid,
+	pub config: RwLock<ServerConfig>,
+	pub process: RwLock<ServerProcessState>,
+}
+
+/// Server process state
+/// TODO: Add more states (starting, stopping, etc.) to give more granular info
+pub enum ServerProcessState {
+	Stopped,
+	Running(Child),
+}
+
+/// Information about a server instance for listing purposes
+pub struct ServerInfo {
+	pub id: Uuid,
+	pub name: String,
+	pub game: Game,
+}
+
+impl Server {
+	pub fn info(&self) -> ServerInfo {
+		let config = self.config.blocking_read();
+		let name = config.name.clone();
+		let game = config.game.clone();
+
+		ServerInfo {
+			id: self.id,
+			name,
+			game,
+		}
+	}
 }
