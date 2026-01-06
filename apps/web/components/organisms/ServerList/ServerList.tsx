@@ -16,7 +16,6 @@ import { List, ListItem } from "@/components/organisms/List/List";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-// TODO: Hook up to backend logic
 // TODO: Make brief & detailed view of server list
 
 export function ServerList() {
