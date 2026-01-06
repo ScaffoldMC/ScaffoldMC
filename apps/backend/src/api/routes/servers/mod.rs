@@ -16,7 +16,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-	let servers = state.server_service.list_servers().await;
+	let servers = state.server_service.list_server_ids().await;
 	(StatusCode::OK, Json(servers)).into_response()
 }
 

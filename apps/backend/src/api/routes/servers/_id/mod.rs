@@ -1,9 +1,14 @@
 use std::sync::Arc;
 
-use axum::{response::IntoResponse, routing, Router};
+use axum::{
+	extract::{Path, State},
+	response::IntoResponse,
+	routing, Json, Router,
+};
 use reqwest::StatusCode;
+use uuid::Uuid;
 
-use crate::AppState;
+use crate::{services::server::ServerError, AppState};
 
 mod console;
 mod files;
@@ -19,9 +24,19 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.nest("/console", console::create_router())
 }
 
-async fn get() -> impl IntoResponse {
-	// TODO: Return server information
-	StatusCode::OK.into_response()
+async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	let server_info = state.server_service.get_server_info(id).await;
+
+	if let Err(err) = server_info {
+		match err {
+			ServerError::NoSuchServer(_) => {
+				return (StatusCode::NOT_FOUND, err.to_string()).into_response()
+			}
+			_ => return (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
+		}
+	}
+
+	(StatusCode::OK, Json(server_info.unwrap())).into_response()
 }
 
 async fn patch() -> impl IntoResponse {

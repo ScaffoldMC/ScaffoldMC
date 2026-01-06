@@ -168,15 +168,22 @@ impl ServerService {
 	}
 
 	/// Lists all server instance IDs.
-	pub async fn list_servers(&self) -> Vec<ServerInfo> {
+	pub async fn list_server_ids(&self) -> Vec<Uuid> {
 		let servers_guard = self.servers.read().await;
 
-		let futures: Vec<_> = servers_guard
-			.iter()
-			.map(|(_, server)| server.info())
-			.collect();
+		servers_guard.keys().cloned().collect()
+	}
 
-		join_all(futures).await
+	/// Gets information about a server instance by ID.
+	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let info = server.info().await;
+
+		Ok(info)
 	}
 
 	/// Send a command to a running server instance.
