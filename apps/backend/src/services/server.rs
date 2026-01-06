@@ -8,6 +8,7 @@ use crate::core::server::ServerInfo;
 use crate::core::server::ServerProcessState;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
+use futures_util::future::join_all;
 use log::{error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -170,10 +171,12 @@ impl ServerService {
 	pub async fn list_servers(&self) -> Vec<ServerInfo> {
 		let servers_guard = self.servers.read().await;
 
-		servers_guard
+		let futures: Vec<_> = servers_guard
 			.iter()
 			.map(|(_, server)| server.info())
-			.collect()
+			.collect();
+
+		join_all(futures).await
 	}
 
 	/// Send a command to a running server instance.
