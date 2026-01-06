@@ -15,12 +15,11 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.nest("/{id}", _id::create_router())
 }
 
-async fn get() -> impl IntoResponse {
-	// TODO: Return server listings
-	StatusCode::OK.into_response()
+async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+	let servers = state.server_service.list_server_ids().await;
+	(StatusCode::OK, Json(servers)).into_response()
 }
 
-#[axum::debug_handler]
 async fn post(
 	State(state): State<Arc<AppState>>,
 	Json(req): Json<CreateServerRequest>,

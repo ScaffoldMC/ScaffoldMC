@@ -8,7 +8,6 @@ export default function Dashboard() {
 			<h1>Hello John Doe</h1>
 			<div className={styles.dashboardGrid}>
 				<ServerList />
-				<div style={{ backgroundColor: "red" }}></div>
 			</div>
 		</div>
 	);

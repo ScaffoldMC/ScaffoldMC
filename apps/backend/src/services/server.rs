@@ -4,6 +4,8 @@ use crate::core::bin_providers::DownloadInfo;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
 use crate::core::server::Server;
+use crate::core::server::ServerInfo;
+use crate::core::server::ServerProcessState;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use log::{error, info};
@@ -35,7 +37,7 @@ pub enum ServerError {
 
 pub struct ServerService {
 	servers_dir: String,
-	servers: Arc<RwLock<HashMap<Uuid, Server>>>,
+	servers: RwLock<HashMap<Uuid, Arc<Server>>>,
 	binary_service: Arc<BinaryService>,
 }
 
@@ -58,7 +60,7 @@ impl Service for ServerService {
 		let start = std::time::Instant::now();
 
 		for server_id in server_ids.clone() {
-			while self.is_running(server_id).await {
+			while let Ok(true) = self.is_running(server_id).await {
 				if start.elapsed() > timeout {
 					break;
 				}
@@ -68,7 +70,7 @@ impl Service for ServerService {
 
 		// If any servers are still running after the timeout, force kill them
 		for server_id in server_ids {
-			if self.is_running(server_id).await {
+			if let Ok(true) = self.is_running(server_id).await {
 				if let Err(e) = self.kill(server_id).await {
 					error!("Failed to force kill server {}: {}", server_id, e);
 				}
@@ -102,7 +104,7 @@ impl ServerService {
 		let dir_entries =
 			std::fs::read_dir(&path).expect("Failed to read server instances directory");
 
-		let mut servers = HashMap::<Uuid, Server>::new();
+		let mut servers = HashMap::<Uuid, Arc<Server>>::new();
 
 		// Load the server configurations from the server instances directory.
 		for entry in dir_entries {
@@ -148,19 +150,39 @@ impl ServerService {
 				}
 			};
 
-			let server = Server {
-				config: Arc::new(RwLock::new(server_config)),
-				process: Arc::new(RwLock::new(None)),
-			};
+			let server = Arc::new(Server {
+				id: uuid,
+				config: RwLock::new(server_config),
+				process: RwLock::new(ServerProcessState::Stopped),
+			});
 
 			servers.insert(uuid, server);
 		}
 
 		Self {
 			servers_dir,
-			servers: Arc::new(RwLock::new(servers)),
+			servers: RwLock::new(servers),
 			binary_service,
 		}
+	}
+
+	/// Lists all server instance IDs.
+	pub async fn list_server_ids(&self) -> Vec<Uuid> {
+		let servers_guard = self.servers.read().await;
+
+		servers_guard.keys().cloned().collect()
+	}
+
+	/// Gets information about a server instance by ID.
+	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let info = server.info().await;
+
+		Ok(info)
 	}
 
 	/// Send a command to a running server instance.
@@ -171,7 +193,10 @@ impl ServerService {
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
 		let mut process_guard = server.process.write().await;
-		let child: &mut Child = process_guard.as_mut().ok_or(ServerError::NotRunning)?;
+		let child: &mut Child = match &mut *process_guard {
+			ServerProcessState::Running(child) => child,
+			_ => return Err(ServerError::NotRunning),
+		};
 
 		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
 
@@ -202,7 +227,8 @@ impl ServerService {
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
 		let mut process_guard = server.process.write().await;
-		if process_guard.is_some() {
+
+		if let ServerProcessState::Running(_) = *process_guard {
 			return Err(ServerError::AlreadyRunning);
 		}
 
@@ -222,7 +248,7 @@ impl ServerService {
 
 		match cmd.spawn() {
 			Ok(child) => {
-				*process_guard = Some(child);
+				*process_guard = ServerProcessState::Running(child);
 				Ok(())
 			}
 			Err(e) => Err(ServerError::StartError(e.to_string())),
@@ -252,7 +278,8 @@ impl ServerService {
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
 		let mut process_guard = server.process.write().await;
-		if let Some(mut child) = process_guard.take() {
+
+		if let ServerProcessState::Running(child) = &mut *process_guard {
 			if let Err(e) = child.kill().await {
 				return Err(ServerError::StopError(e.to_string()));
 			}
@@ -264,13 +291,16 @@ impl ServerService {
 	}
 
 	/// Checks if a server instance is currently running.
-	pub async fn is_running(&self, server_id: Uuid) -> bool {
+	pub async fn is_running(&self, server_id: Uuid) -> Result<bool, ServerError> {
 		let servers_guard = self.servers.read().await;
 		if let Some(server) = servers_guard.get(&server_id) {
 			let process_guard = server.process.read().await;
-			process_guard.is_some()
+			match *process_guard {
+				ServerProcessState::Running(_) => Ok(true),
+				_ => Ok(false),
+			}
 		} else {
-			false
+			Err(ServerError::NoSuchServer(server_id.to_string()))
 		}
 	}
 
@@ -308,10 +338,11 @@ impl ServerService {
 			.save_to_file(config_path)
 			.map_err(|e| e.to_string())?;
 
-		let server = Server {
-			config: Arc::new(RwLock::new(server_config)),
-			process: Arc::new(RwLock::new(None)),
-		};
+		let server = Arc::new(Server {
+			id: server_id,
+			config: RwLock::new(server_config),
+			process: RwLock::new(ServerProcessState::Stopped),
+		});
 
 		let mut servers_guard = self.servers.write().await;
 		servers_guard.insert(server_id, server);
