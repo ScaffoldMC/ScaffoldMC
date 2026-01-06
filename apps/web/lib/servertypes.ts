@@ -7,6 +7,8 @@ export * from "../../backend/bindings/MinecraftJava";
 export * from "../../backend/bindings/MinecraftJavaLoader";
 export * from "../../backend/bindings/OptionsResponse";
 export * from "../../backend/bindings/PartialServer";
+export * from "../../backend/bindings/ServerInfo";
+export * from "../../backend/bindings/ServerStateInfo";
 export * from "../../backend/bindings/SudoCheckResponse";
 export * from "../../backend/bindings/SudoRequest";
 export * from "../../backend/bindings/UserPatchRequest";
