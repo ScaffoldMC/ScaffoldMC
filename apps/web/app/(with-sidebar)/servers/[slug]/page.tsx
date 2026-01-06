@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	Avatar,
 	AvatarFallback,
@@ -12,13 +14,32 @@ import {
 } from "@/components/organisms/Tabs/Tabs";
 
 import styles from "./page.module.css";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/axios";
+import { useParams, useRouter } from "next/navigation";
+import { ServerInfo } from "@/lib/servertypes";
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ slug: string }>;
-}) {
-	const { slug } = await params;
+export default function Page() {
+	const { slug } = useParams();
+
+	const server = useQuery({
+		queryKey: ["server", slug],
+		queryFn: (): Promise<ServerInfo> =>
+			api.get(`/servers/${slug}`).then((res) => res.data),
+		retry: false,
+	});
+
+	const router = useRouter();
+
+	if (!server.data && !server.isLoading) {
+		router.push("/404");
+		return null;
+	}
+
+	if (!server.data) {
+		return <div>Loading...</div>;
+	}
+
 	return (
 		<div className={styles.page}>
 			<div className={styles.title}>
@@ -27,8 +48,8 @@ export default async function Page({
 					<AvatarImage src="/images/server-default.png" />
 				</Avatar>
 				<div className={styles.titleInfo}>
-					<h1>Server Name</h1>
-					<p>Additional info</p>
+					<h1>{server.data.name}</h1>
+					<p>{server.data.state}</p>
 				</div>
 			</div>
 
