@@ -1,9 +1,11 @@
 import { cva } from "class-variance-authority";
 import styles from "./Indicator.module.css";
 
-interface IndicatorProps {
-	state: "success" | "working" | "error";
+export interface IndicatorProps {
+	state: IndicatorState;
 }
+
+export type IndicatorState = "success" | "working" | "error";
 
 const indicatorStyles = cva(styles.base, {
 	variants: {

@@ -19,6 +19,23 @@ pub enum ServerProcessState {
 	Running(Child),
 }
 
+impl ServerProcessState {
+	pub fn info(&self) -> ServerStateInfo {
+		match self {
+			ServerProcessState::Stopped => ServerStateInfo::Stopped,
+			ServerProcessState::Running(_) => ServerStateInfo::Running,
+		}
+	}
+}
+
+/// Information about the current state of a server
+#[derive(Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum ServerStateInfo {
+	Stopped,
+	Running,
+}
+
 /// Information about a server instance for listing purposes
 #[derive(Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
@@ -26,6 +43,7 @@ pub struct ServerInfo {
 	pub id: Uuid,
 	pub name: String,
 	pub game: Game,
+	pub state: ServerStateInfo,
 }
 
 impl Server {
@@ -33,11 +51,13 @@ impl Server {
 		let config = self.config.read().await;
 		let name = config.name.clone();
 		let game = config.game.clone();
+		let state = self.process.read().await.info();
 
 		ServerInfo {
 			id: self.id,
 			name,
 			game,
+			state,
 		}
 	}
 }
