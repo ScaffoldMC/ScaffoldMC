@@ -5,7 +5,7 @@ mod me;
 mod servers;
 mod versions;
 
-use crate::api::middleware::auth::require_auth;
+use crate::api::middleware::{auth::require_auth, log::log_request};
 use crate::AppState;
 use axum::{http, middleware, Router};
 use std::sync::Arc;
@@ -37,6 +37,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 		.nest("/jvms", jvms::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
 		.nest("/auth", auth::create_router(state.clone()))
+		.route_layer(middleware::from_fn(log_request))
 		.layer(CookieManagerLayer::new())
 		.layer(cors)
 		.with_state(state)
