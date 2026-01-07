@@ -17,12 +17,12 @@ impl Database {
 			.filename(db_path)
 			.create_if_missing(true);
 
-		tracing::debug!("Connecting to database at {}", db_path.display());
+		tracing::info!("Connecting to database at {}", db_path.display());
 		let pool = sqlx::SqlitePool::connect_with(options)
 			.await
 			.expect("Failed to connect to database");
 
-		tracing::debug!("Running database migrations");
+		tracing::info!("Running database migrations");
 		sqlx::migrate!("./migrations")
 			.run(&pool)
 			.await
