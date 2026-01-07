@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, response::IntoResponse};
 use axum::{routing, Router};
-use log::error;
 use tower_cookies::Cookie;
 use tower_cookies::Cookies;
 
@@ -39,7 +38,7 @@ async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl Into
 				return (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response();
 			}
 			AuthServiceError::ServerError(err) => {
-				error!("Failed to refresh tokens: {}", err);
+				tracing::error!("Failed to refresh tokens: {}", err);
 				return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
 			}
 			_ => {

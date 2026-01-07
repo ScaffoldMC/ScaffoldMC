@@ -8,7 +8,6 @@ use crate::core::server::ServerInfo;
 use crate::core::server::ServerProcessState;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
-use log::{error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -17,6 +16,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
 use tokio::process::Command;
 use tokio::sync::RwLock;
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Debug, Error)]
@@ -42,6 +42,7 @@ pub struct ServerService {
 }
 
 impl Service for ServerService {
+	#[instrument(name = "ServerService::shutdown", skip_all)]
 	async fn shutdown(&mut self) -> Result<(), String> {
 		let server_ids: Vec<Uuid> = {
 			let servers_guard = self.servers.read().await;
@@ -72,7 +73,7 @@ impl Service for ServerService {
 		for server_id in server_ids {
 			if let Ok(true) = self.is_running(server_id).await {
 				if let Err(e) = self.kill(server_id).await {
-					error!("Failed to force kill server {}: {}", server_id, e);
+					tracing::error!("Failed to force kill server {}: {}", server_id, e);
 				}
 			}
 		}
@@ -87,8 +88,9 @@ impl Service for ServerService {
 /// Service for managing server instances.
 impl ServerService {
 	/// Creates a new `ServerService` instance.
+	#[instrument(name = "ServerService::new", skip_all)]
 	pub fn new(binary_service: Arc<BinaryService>) -> Self {
-		info!("Loading server instances");
+		tracing::info!("Loading server instances");
 
 		let servers_dir = format!("{}/servers", config::DATA_FOLDER);
 		let path = PathBuf::from(&servers_dir);
@@ -109,14 +111,14 @@ impl ServerService {
 		// Load the server configurations from the server instances directory.
 		for entry in dir_entries {
 			if let Err(err) = entry {
-				error!("Failed to read directory entry: {}", err);
+				tracing::error!("Failed to read directory entry: {}", err);
 				continue;
 			}
 
 			let entry = entry.unwrap();
 
 			if !path.is_dir() {
-				error!("Path {:?} is not a directory", path);
+				tracing::error!("Path {:?} is not a directory", path);
 				continue;
 			}
 
@@ -127,7 +129,7 @@ impl ServerService {
 			let dir_name = match dir_name {
 				Some(name) => name,
 				None => {
-					error!("Failed to get directory name from path {:?}", path);
+					tracing::error!("Failed to get directory name from path {:?}", path);
 					continue;
 				}
 			};
@@ -135,7 +137,7 @@ impl ServerService {
 			let uuid = match Uuid::try_parse(dir_name) {
 				Ok(uuid) => uuid,
 				Err(_) => {
-					error!("Invalid UUID in directory name: {}", dir_name);
+					tracing::error!("Invalid UUID in directory name: {}", dir_name);
 					continue;
 				}
 			};
@@ -145,7 +147,7 @@ impl ServerService {
 			let server_config = match ServerConfig::load_from_file(config_path.clone()) {
 				Ok(cfg) => cfg,
 				Err(e) => {
-					error!("Failed to load server config from {:?}: {}", config_path, e);
+					tracing::error!("Failed to load server config from {:?}: {}", config_path, e);
 					continue;
 				}
 			};
@@ -174,6 +176,7 @@ impl ServerService {
 	}
 
 	/// Gets information about a server instance by ID.
+	#[instrument(name = "ServerService::get_server_info", skip(self))]
 	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
@@ -186,7 +189,10 @@ impl ServerService {
 	}
 
 	/// Send a command to a running server instance.
+	#[instrument(name = "ServerService::send_command", skip(self))]
 	pub async fn send_command(&self, server_id: Uuid, command: &str) -> Result<(), ServerError> {
+		tracing::info!("Sending command to server {}: {}", server_id, command);
+
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -220,7 +226,10 @@ impl ServerService {
 	}
 
 	/// Starts a server instance by ID using its configuration.
+	#[instrument(name = "ServerService::start", skip(self))]
 	pub async fn start(&self, server_id: Uuid) -> Result<(), ServerError> {
+		tracing::info!("Starting server instance {}", server_id);
+
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -256,7 +265,10 @@ impl ServerService {
 	}
 
 	/// Stops a running server instance.
+	#[instrument(name = "ServerService::stop", skip(self))]
 	pub async fn stop(&self, server_id: Uuid) -> Result<(), ServerError> {
+		tracing::info!("Stopping server instance {}", server_id);
+
 		let stop_command = {
 			let servers_guard = self.servers.read().await;
 			let server = servers_guard
@@ -271,7 +283,10 @@ impl ServerService {
 		Ok(())
 	}
 
+	#[instrument(name = "ServerService::kill", skip(self))]
 	pub async fn kill(&self, server_id: Uuid) -> Result<(), ServerError> {
+		tracing::info!("Killing server instance {}", server_id);
+
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
@@ -305,6 +320,7 @@ impl ServerService {
 	}
 
 	/// Creates a new server instance with the given configuration.
+	#[instrument(name = "ServerService::create", skip(self))]
 	pub async fn create(&self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));
@@ -343,6 +359,8 @@ impl ServerService {
 			config: RwLock::new(server_config),
 			process: RwLock::new(ServerProcessState::Stopped),
 		});
+
+		tracing::info!("Creating new server instance: name='{}'", name);
 
 		let mut servers_guard = self.servers.write().await;
 		servers_guard.insert(server_id, server);

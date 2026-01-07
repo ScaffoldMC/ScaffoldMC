@@ -1,4 +1,3 @@
-use log::warn;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use thiserror::Error;
@@ -108,7 +107,7 @@ pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 			.await;
 
 		if probe_output.is_err() {
-			warn!(
+			tracing::warn!(
 				"Failed to run Java probe on JVM: {}",
 				probe_output.unwrap_err()
 			);
@@ -123,7 +122,7 @@ pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 				javas.push(java_version);
 			}
 			Err(e) => {
-				warn!(
+				tracing::warn!(
 					"Failed to deserialize JavaVersion from probe output for JVM {}: {}",
 					jvm.display(),
 					e
