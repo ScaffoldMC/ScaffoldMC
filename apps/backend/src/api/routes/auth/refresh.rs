@@ -39,11 +39,11 @@ async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl Into
 			}
 			AuthServiceError::ServerError(err) => {
 				tracing::error!("Failed to refresh tokens: {}", err);
-				return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 			_ => {
-				return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
-					.into_response();
+				tracing::error!("Unexpected error refreshing tokens: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 		},
 	};

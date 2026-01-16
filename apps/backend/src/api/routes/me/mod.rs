@@ -33,6 +33,8 @@ pub async fn patch(
 					return (StatusCode::CONFLICT, "Username already taken").into_response();
 				}
 				crate::services::user::UserServiceError::ServerError(_) => {
+					tracing::error!("Error updating username: {}", err);
+
 					return (
 						StatusCode::INTERNAL_SERVER_ERROR,
 						"Internal server error updating username",

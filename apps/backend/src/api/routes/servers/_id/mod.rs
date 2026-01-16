@@ -32,7 +32,10 @@ async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl I
 			ServerError::NoSuchServer(_) => {
 				return (StatusCode::NOT_FOUND, err.to_string()).into_response()
 			}
-			_ => return (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
+			_ => {
+				tracing::error!("Error retrieving server info: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+			}
 		}
 	}
 

@@ -33,11 +33,12 @@ async fn post(
 				return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
 			}
 			AuthServiceError::ServerError(err) => {
-				return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
+				tracing::error!("Authentication error: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 			_ => {
-				return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
-					.into_response();
+				tracing::error!("Authentication error: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 		},
 	};

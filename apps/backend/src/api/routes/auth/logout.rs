@@ -20,7 +20,7 @@ async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl Into
 	if let Some(ref_token) = refresh_token {
 		if let Err(err) = state.auth_service.delete_refresh_token(&ref_token).await {
 			tracing::error!("Failed to delete refresh token: {}", err);
-			return (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response();
+			return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 		}
 	}
 
