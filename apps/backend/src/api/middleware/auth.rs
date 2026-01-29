@@ -29,7 +29,10 @@ pub async fn require_auth(
 		Err(err) => match err {
 			AuthServiceError::Unauthorized => return Err(StatusCode::UNAUTHORIZED),
 			AuthServiceError::InvalidCredentials => return Err(StatusCode::UNAUTHORIZED),
-			_ => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+			_ => {
+				tracing::error!("Authentication error: {}", err);
+				return Err(StatusCode::INTERNAL_SERVER_ERROR);
+			}
 		},
 	};
 

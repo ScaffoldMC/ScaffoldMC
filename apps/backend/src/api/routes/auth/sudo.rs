@@ -30,7 +30,8 @@ async fn get(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoR
 		.await;
 
 	if let Err(err) = is_sudo {
-		return (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response();
+		tracing::error!("Error checking sudo status: {}", err);
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
 
 	(
@@ -58,11 +59,12 @@ async fn post(
 				return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
 			}
 			AuthServiceError::ServerError(err) => {
-				return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
+				tracing::error!("Authentication error: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 			_ => {
-				return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
-					.into_response();
+				tracing::error!("Unexpected server error: {}", err);
+				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
 		},
 	};

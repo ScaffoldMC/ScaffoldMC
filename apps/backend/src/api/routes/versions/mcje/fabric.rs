@@ -32,6 +32,8 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let versions_res = state.binary_service.fabric.list_game_versions().await;
 
 	if let Err(err) = versions_res {
+		tracing::error!("Error fetching game versions: {}", err);
+
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", err),
@@ -58,6 +60,8 @@ pub async fn get_loader(
 		.await;
 
 	if let Err(err) = versions_res {
+		tracing::error!("Error fetching loader versions: {}", err);
+
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", err),
@@ -77,6 +81,8 @@ pub async fn get_installer(State(state): State<Arc<AppState>>) -> impl IntoRespo
 	let versions_res = state.binary_service.fabric.list_installer_versions().await;
 
 	if let Err(err) = versions_res {
+		tracing::error!("Error fetching installer versions: {}", err);
+
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", err),

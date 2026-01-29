@@ -6,7 +6,6 @@ use crate::{
 };
 use base64::{engine::general_purpose, Engine};
 use jsonwebtoken::{Algorithm, Validation};
-use log::error;
 use password_auth::{verify_password, VerifyError};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -210,7 +209,7 @@ impl AuthService {
 		let user_uuid = match Uuid::parse_str(&token_data.claims.sub) {
 			Ok(uuid) => uuid,
 			Err(err) => {
-				error!("Unable to parse UUID: {}", err);
+				tracing::error!("Unable to parse UUID: {}", err);
 				return Err(AuthServiceError::Unauthorized);
 			}
 		};

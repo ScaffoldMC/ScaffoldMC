@@ -8,17 +8,14 @@ mod util;
 use config::CLIENT_USER_AGENT;
 use core::secrets::Secrets;
 use db::Database;
-use log::{info, LevelFilter};
 use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
-use util::logger::Logger;
+use tracing::instrument;
 
 use crate::services::auth::AuthService;
 use crate::services::user::UserService;
-
-static LOGGER: Logger = Logger;
 
 #[derive(Clone)]
 struct AppState {
@@ -35,8 +32,15 @@ impl AppState {
 			.expect("Current dir should be accessible")
 			.join(config::DATA_FOLDER);
 
+		tracing::info!("Using base data directory: {:?}", base_dir);
+
 		if !base_dir.exists() {
-			std::fs::create_dir_all(&base_dir).expect("Read/write should be available");
+			tracing::info!(
+				"Base data directory {:?} does not exist, creating it now",
+				base_dir
+			);
+
+			std::fs::create_dir_all(&base_dir).expect("Unable to create base data directory.");
 		}
 
 		let db = Arc::new(
@@ -67,15 +71,20 @@ impl AppState {
 
 #[tokio::main]
 async fn main() {
-	log::set_logger(&LOGGER)
-		.map(|()| log::set_max_level(LevelFilter::Info))
-		.expect("Failed to set logger");
+	let tracing_subscriber = tracing_subscriber::fmt()
+		.compact()
+		.with_max_level(tracing::Level::INFO)
+		.with_target(false)
+		.finish();
+
+	tracing::subscriber::set_global_default(tracing_subscriber)
+		.expect("Failed to set tracing subscriber.");
 
 	let state = Arc::new(AppState::new().await);
 	let app = api::routes::create_router(state);
 	let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
-	info!("Starting server on {}", addr);
+	tracing::info!("Starting server on {}", addr);
 	axum_server::bind(addr)
 		.serve(app.into_make_service())
 		.await

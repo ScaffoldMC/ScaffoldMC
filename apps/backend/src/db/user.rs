@@ -46,7 +46,11 @@ impl Database {
 		return user;
 	}
 
-	pub async fn update_user_username(&self, user_id: Uuid, username: &str) -> Result<(), sqlx::Error> {
+	pub async fn update_user_username(
+		&self,
+		user_id: Uuid,
+		username: &str,
+	) -> Result<(), sqlx::Error> {
 		sqlx::query!(
 			r#"UPDATE users SET username = ? WHERE id = ?"#,
 			username,
@@ -54,11 +58,15 @@ impl Database {
 		)
 		.execute(&self.pool)
 		.await?;
-		
+
 		Ok(())
 	}
 
-	pub async fn update_user_fullname(&self, user_id: Uuid, fullname: &str) -> Result<(), sqlx::Error> {
+	pub async fn update_user_fullname(
+		&self,
+		user_id: Uuid,
+		fullname: &str,
+	) -> Result<(), sqlx::Error> {
 		sqlx::query!(
 			r#"UPDATE users SET fullname = ? WHERE id = ?"#,
 			fullname,
@@ -66,11 +74,15 @@ impl Database {
 		)
 		.execute(&self.pool)
 		.await?;
-		
+
 		Ok(())
 	}
 
-	pub async fn update_user_password_hash(&self, user_id: Uuid, password_hash: &str) -> Result<(), sqlx::Error> {
+	pub async fn update_user_password_hash(
+		&self,
+		user_id: Uuid,
+		password_hash: &str,
+	) -> Result<(), sqlx::Error> {
 		sqlx::query!(
 			r#"UPDATE users SET password_hash = ? WHERE id = ?"#,
 			password_hash,
@@ -98,18 +110,15 @@ impl Database {
 		)
 		.execute(&self.pool)
 		.await?;
-		
+
 		Ok(())
 	}
 
 	pub async fn delete_user(&self, user_id: Uuid) -> Result<(), sqlx::Error> {
-		sqlx::query!(
-			r#"DELETE FROM users WHERE id = ?"#,
-			user_id
-		)
-		.execute(&self.pool)
-		.await?;
-		
+		sqlx::query!(r#"DELETE FROM users WHERE id = ?"#, user_id)
+			.execute(&self.pool)
+			.await?;
+
 		Ok(())
 	}
 }

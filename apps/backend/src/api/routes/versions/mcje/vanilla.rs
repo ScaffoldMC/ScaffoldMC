@@ -24,6 +24,8 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 	let versions_res = state.binary_service.mcje.list_versions().await;
 
 	if let Err(err) = versions_res {
+		tracing::error!("Error fetching game versions: {}", err);
+
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", err),
@@ -46,6 +48,8 @@ pub async fn get_game(
 	let versions_res = state.binary_service.mcje.list_versions().await;
 
 	if let Err(err) = versions_res {
+		tracing::error!("Error fetching game versions: {}", err);
+
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Internal server error: {}", err),

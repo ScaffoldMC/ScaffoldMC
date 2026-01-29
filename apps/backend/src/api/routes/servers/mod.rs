@@ -27,7 +27,8 @@ async fn post(
 	let result = state.server_service.create(&req.name, req.game).await;
 
 	if let Err(err) = result {
-		return (StatusCode::INTERNAL_SERVER_ERROR, err).into_response();
+		tracing::error!("Error creating server: {}", err);
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
 
 	StatusCode::CREATED.into_response()
