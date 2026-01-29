@@ -42,7 +42,7 @@ pub struct ServerService {
 }
 
 impl Service for ServerService {
-	#[instrument(name = "ServerService::shutdown", skip_all)]
+	#[instrument(name = "ServerService.Shutdown", skip_all)]
 	async fn shutdown(&mut self) -> Result<(), String> {
 		let server_ids: Vec<Uuid> = {
 			let servers_guard = self.servers.read().await;
@@ -88,7 +88,7 @@ impl Service for ServerService {
 /// Service for managing server instances.
 impl ServerService {
 	/// Creates a new `ServerService` instance.
-	#[instrument(name = "ServerService::new", skip_all)]
+	#[instrument(name = "ServerService.Startup", skip_all)]
 	pub fn new(binary_service: Arc<BinaryService>) -> Self {
 		tracing::info!("Loading server instances");
 
@@ -176,7 +176,7 @@ impl ServerService {
 	}
 
 	/// Gets information about a server instance by ID.
-	#[instrument(name = "ServerService::get_server_info", skip(self))]
+	#[instrument(name = "ServerService.GetServerInfo", skip(self))]
 	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
@@ -189,7 +189,7 @@ impl ServerService {
 	}
 
 	/// Send a command to a running server instance.
-	#[instrument(name = "ServerService::send_command", skip(self))]
+	#[instrument(name = "ServerService.SendCommand", skip(self))]
 	pub async fn send_command(&self, server_id: Uuid, command: &str) -> Result<(), ServerError> {
 		tracing::info!("Sending command to server {}: {}", server_id, command);
 
@@ -226,7 +226,7 @@ impl ServerService {
 	}
 
 	/// Starts a server instance by ID using its configuration.
-	#[instrument(name = "ServerService::start", skip(self))]
+	#[instrument(name = "ServerService.StartServer", skip(self))]
 	pub async fn start(&self, server_id: Uuid) -> Result<(), ServerError> {
 		tracing::info!("Starting server instance {}", server_id);
 
@@ -265,7 +265,7 @@ impl ServerService {
 	}
 
 	/// Stops a running server instance.
-	#[instrument(name = "ServerService::stop", skip(self))]
+	#[instrument(name = "ServerService.StopServer", skip(self))]
 	pub async fn stop(&self, server_id: Uuid) -> Result<(), ServerError> {
 		tracing::info!("Stopping server instance {}", server_id);
 
@@ -283,7 +283,7 @@ impl ServerService {
 		Ok(())
 	}
 
-	#[instrument(name = "ServerService::kill", skip(self))]
+	#[instrument(name = "ServerService.KillServer", skip(self))]
 	pub async fn kill(&self, server_id: Uuid) -> Result<(), ServerError> {
 		tracing::info!("Killing server instance {}", server_id);
 
@@ -320,7 +320,7 @@ impl ServerService {
 	}
 
 	/// Creates a new server instance with the given configuration.
-	#[instrument(name = "ServerService::create", skip(self))]
+	#[instrument(name = "ServerService.CreateServer", skip(self))]
 	pub async fn create(&self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
 		let server_dir = PathBuf::from(format!("{}/{}", &self.servers_dir, server_id));

@@ -27,7 +27,6 @@ struct AppState {
 }
 
 impl AppState {
-	#[instrument(name = "AppState::new", skip_all)]
 	pub async fn new() -> Self {
 		let base_dir = env::current_dir()
 			.expect("Current dir should be accessible")

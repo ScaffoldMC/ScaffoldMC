@@ -11,7 +11,7 @@ pub struct Database {
 }
 
 impl Database {
-	#[instrument(name = "Database::new", skip(db_path))]
+	#[instrument(name = "Database.Startup", skip(db_path))]
 	pub async fn new(db_path: &PathBuf) -> Result<Self, sqlx::Error> {
 		let options = sqlx::sqlite::SqliteConnectOptions::new()
 			.filename(db_path)
