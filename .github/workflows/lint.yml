@@ -49,5 +49,6 @@ jobs:
 
           # Rust
           VALIDATE_RUST_2021: true
+          VALIDATE_RUST_CLIPPY: true
 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
