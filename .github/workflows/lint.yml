@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    lint:
+        name: Lint
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+            packages: read
+            issues: write # PR Comments
+            pull-requests: write
+            statuses: write
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v6
+              with:
+                # super-linter needs the full git history to get the
+                # list of files that changed across commits
+                fetch-depth: 0
+                persist-credentials: false
+            - name: Super-linter
+              uses: super-linter/super-linter@v8.5.0 # x-release-please-version
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
