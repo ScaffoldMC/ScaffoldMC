@@ -47,6 +47,7 @@ jobs:
           # ESLint
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_TYPESCRIPT_ES: true
+          TYPESCRIPT_ES_CONFIG_FILE: apps/web/eslint.config.js
 
           # Rust
           VALIDATE_RUST_2021: true
