@@ -42,6 +42,7 @@ jobs:
           VALIDATE_JSX_PRETTIER: true
           VALIDATE_MARKDOWN_PRETTIER: true
           VALIDATE_TYPESCRIPT_PRETTIER: true
+          PRETTIER_COMMAND_OPTIONS: "--ignore-path .gitignore"
 
           # ESLint
           VALIDATE_JAVASCRIPT_ES: true
