@@ -18,8 +18,9 @@ jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 password-auth = "1.0.0"
 pem = { version = "3.0.5", features = ["serde"] }
 rand = "0.9.1"
-reqwest = { version = "0.12.20", features = ["json"] }
+reqwest = { version = "0.12.20", features = ["json", "rustls-tls"] }
 rsa = { version = "0.9.8", features = ["pkcs5"] }
+rustls = "0.23.36"
 serde = "1.0.219"
 serde_json = "1.0.140"
 sha1 = "0.10.6"
