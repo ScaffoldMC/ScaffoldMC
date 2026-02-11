@@ -1,9 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
-node_modules
-.pnp
-.pnp.js
+**/node_modules
+**/.pnp
+**/.pnp.js
 
 # Local env files
 .env
@@ -13,17 +13,16 @@ node_modules
 .env.production.local
 
 # Testing
-coverage
+**/coverage
 
 # Vercel
 .vercel
 
 # Build Outputs
-.next/
+**/.next/
 out/
 build
 dist
-
 
 # Debug
 npm-debug.log*
@@ -35,6 +34,18 @@ yarn-error.log*
 *.pem
 data/
 
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env files (can opt-in for commiting if needed)
+.env*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
 .vscode
 target/
 
@@ -43,5 +54,8 @@ target/
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+apps/backend/data/
+apps/backend/.sqlx/
+apps/backend/bindings/
 
 storybook-static
