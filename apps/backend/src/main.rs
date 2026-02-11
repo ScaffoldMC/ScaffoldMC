@@ -12,7 +12,6 @@ use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
-use tracing::instrument;
 
 use crate::services::auth::AuthService;
 use crate::services::user::UserService;

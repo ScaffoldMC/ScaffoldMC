@@ -49,7 +49,7 @@ pub async fn patch(
 	if let Some(fullname) = req.fullname {
 		let db_res = state.user_service.change_full_name(&user, &fullname).await;
 
-		if let Err(_) = db_res {
+		if db_res.is_err() {
 			return (
 				StatusCode::INTERNAL_SERVER_ERROR,
 				"Internal server error updating fullname",
@@ -61,7 +61,12 @@ pub async fn patch(
 	// Change password if provided
 	if let Some(password) = req.password {
 		if let Some(new_password) = req.new_password {
-			if let Err(_) = state.auth_service.verify_password(&user, &password).await {
+			if state
+				.auth_service
+				.verify_password(&user, &password)
+				.await
+				.is_err()
+			{
 				return (StatusCode::UNAUTHORIZED, "Current password is incorrect").into_response();
 			}
 
@@ -70,7 +75,7 @@ pub async fn patch(
 				.change_password(&user, &new_password)
 				.await;
 
-			if let Err(_) = db_res {
+			if db_res.is_err() {
 				return (
 					StatusCode::INTERNAL_SERVER_ERROR,
 					"Internal server error updating password",
@@ -88,7 +93,7 @@ pub async fn patch(
 
 	let user_updated = state.user_service.get_user_by_id(user.id).await;
 
-	if let Err(_) = user_updated {
+	if user_updated.is_err() {
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
 			"Internal server error fetching updated user",

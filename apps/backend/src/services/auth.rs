@@ -72,7 +72,7 @@ impl AuthService {
 	fn create_refresh_token() -> String {
 		let mut bytes = [0u8; 32];
 		rand::rng().fill(&mut bytes);
-		general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
+		general_purpose::URL_SAFE_NO_PAD.encode(bytes)
 	}
 
 	pub async fn verify_password(
@@ -104,7 +104,7 @@ impl AuthService {
 	) -> Result<(String, String), AuthServiceError> {
 		let user = self.db.get_user_by_username(username).await;
 
-		if let Err(_) = user {
+		if user.is_err() {
 			return Err(AuthServiceError::InvalidCredentials);
 		}
 
@@ -153,14 +153,14 @@ impl AuthService {
 		let token_age = current_time - db_entry.created_at;
 
 		if token_age > REFRESH_TOKEN_LENGTH {
-			if let Err(err) = self.db.delete_refresh_token(&ref_token).await {
+			if let Err(err) = self.db.delete_refresh_token(ref_token).await {
 				return Err(AuthServiceError::ServerError(err.to_string()));
 			}
 
 			return Err(AuthServiceError::Unauthorized);
 		}
 
-		if let Err(err) = self.db.delete_refresh_token(&ref_token).await {
+		if let Err(err) = self.db.delete_refresh_token(ref_token).await {
 			return Err(AuthServiceError::ServerError(err.to_string()));
 		}
 
@@ -194,7 +194,7 @@ impl AuthService {
 		sudo: bool,
 	) -> Result<User, AuthServiceError> {
 		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
-			&token,
+			token,
 			&self.secrets.jwt_dec,
 			&Validation::new(Algorithm::RS256),
 		) {
@@ -224,7 +224,7 @@ impl AuthService {
 
 	pub async fn token_is_sudo(&self, token: &str) -> Result<bool, AuthServiceError> {
 		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
-			&token,
+			token,
 			&self.secrets.jwt_dec,
 			&Validation::new(Algorithm::RS256),
 		) {

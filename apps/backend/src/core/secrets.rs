@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use jsonwebtoken;
 use pem::Pem;
@@ -38,7 +38,7 @@ impl Secrets {
 		(pem::encode(&private_pem), pem::encode(&public_pem))
 	}
 
-	pub fn new(base_dir: &PathBuf) -> Secrets {
+	pub fn new(base_dir: &Path) -> Secrets {
 		let secrets_dir = base_dir.join("secrets/");
 		if !secrets_dir.exists() {
 			std::fs::create_dir_all(&secrets_dir).expect("Read/write should be available");

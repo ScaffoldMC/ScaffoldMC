@@ -69,7 +69,7 @@ pub async fn get_game(
 
 	let game = Game::MinecraftJava(MinecraftJava {
 		loader: MinecraftJavaLoader::Vanilla,
-		version: version,
+		version,
 	});
 
 	let res = CompleteVersionResponse { game };
