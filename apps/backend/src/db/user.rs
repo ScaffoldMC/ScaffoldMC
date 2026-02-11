@@ -32,7 +32,7 @@ impl Database {
 		.fetch_one(&self.pool)
 		.await;
 
-		return user;
+		user
 	}
 
 	pub async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
@@ -43,7 +43,7 @@ impl Database {
 		)
 		.fetch_one(&self.pool)
 		.await;
-		return user;
+		user
 	}
 
 	pub async fn update_user_username(

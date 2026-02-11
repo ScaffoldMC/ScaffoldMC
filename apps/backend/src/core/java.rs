@@ -106,11 +106,8 @@ pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 			.output()
 			.await;
 
-		if probe_output.is_err() {
-			tracing::warn!(
-				"Failed to run Java probe on JVM: {}",
-				probe_output.unwrap_err()
-			);
+		if let Err(err) = probe_output {
+			tracing::warn!("Failed to run Java probe on JVM: {}", err);
 			continue;
 		}
 

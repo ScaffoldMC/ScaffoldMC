@@ -29,7 +29,7 @@ impl Database {
 		.await;
 
 		if result.is_err() {
-			return Err(result.err().unwrap());
+			Err(result.err().unwrap())
 		} else {
 			Ok(())
 		}
@@ -41,7 +41,7 @@ impl Database {
 			.await;
 
 		if result.is_err() {
-			return Err(result.err().unwrap());
+			Err(result.err().unwrap())
 		} else {
 			Ok(())
 		}
