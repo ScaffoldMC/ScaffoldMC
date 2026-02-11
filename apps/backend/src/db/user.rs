@@ -37,7 +37,7 @@ impl Database {
 
 	pub async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
-			User, 
+			User,
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE username = ?"#,
 			username
 		)
