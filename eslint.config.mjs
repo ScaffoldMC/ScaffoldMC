@@ -39,6 +39,9 @@ export default defineConfig([
 			react: {
 				version: "detect",
 			},
+			next: {
+				rootDir: "apps/web",
+			},
 		},
 	},
 ]);
