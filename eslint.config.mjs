@@ -17,7 +17,7 @@ export default defineConfig([
 		languageOptions: {
 			parser: parserTypescript,
 			parserOptions: {
-				project: "./apps/web/tsconfig.json",
+				projectService: true,
 			},
 		},
 		plugins: {
