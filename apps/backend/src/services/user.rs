@@ -41,7 +41,7 @@ impl UserService {
 		user: &User,
 		new_username: &str,
 	) -> Result<(), UserServiceError> {
-		if let Ok(_) = self.db.get_user_by_username(new_username).await {
+		if self.db.get_user_by_username(new_username).await.is_ok() {
 			return Err(UserServiceError::UsernameTaken);
 		}
 

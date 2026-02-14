@@ -34,7 +34,7 @@ impl FabricBinaryProvider {
 		let latest_game = manifest
 			.game
 			.iter()
-			.find(|v| v.stable == !pre_release)
+			.find(|v| v.stable != pre_release)
 			.ok_or("No suitable game versions found")?;
 
 		self.get(
@@ -80,7 +80,7 @@ impl FabricBinaryProvider {
 			download_url,
 			file_name: "server.jar".to_string(),
 			hash: None,
-			java_version: java_version,
+			java_version,
 			java_args: vec![],
 		};
 

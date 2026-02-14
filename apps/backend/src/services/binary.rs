@@ -60,10 +60,7 @@ impl BinaryService {
 					Ok(DownloadInfo::MinecraftJava(info))
 				}
 				MinecraftJavaLoader::Paper { build } => {
-					let info = self
-						.paper
-						.get(&minecraft_java.version, build.clone())
-						.await?;
+					let info = self.paper.get(&minecraft_java.version, *build).await?;
 					Ok(DownloadInfo::MinecraftJava(info))
 				}
 			},
@@ -152,7 +149,7 @@ impl BinaryService {
 			.await
 			.map_err(|e| format!("Failed to ensure binary: {}", e))?;
 
-		return Ok(binary_path);
+		Ok(binary_path)
 	}
 
 	/// Returns a list of installed games.

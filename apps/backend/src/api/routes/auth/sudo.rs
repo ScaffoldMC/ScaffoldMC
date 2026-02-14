@@ -26,7 +26,7 @@ async fn get(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoR
 
 	let is_sudo = state
 		.auth_service
-		.token_is_sudo(&auth_cookie.unwrap().value())
+		.token_is_sudo(auth_cookie.unwrap().value())
 		.await;
 
 	if let Err(err) = is_sudo {

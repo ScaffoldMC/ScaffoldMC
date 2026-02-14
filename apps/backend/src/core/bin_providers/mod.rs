@@ -32,7 +32,7 @@ impl MCJEDownloadInfo {
 	/// Get the hash and its algorithm, if available
 	pub fn hash(&self) -> Option<(String, HashAlgorithm)> {
 		match self.hash {
-			Some((ref h, ref alg)) => Some((h.clone(), alg.clone())),
+			Some((ref h, ref alg)) => Some((h.clone(), *alg)),
 			None => None,
 		}
 	}

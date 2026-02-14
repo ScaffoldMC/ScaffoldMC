@@ -32,18 +32,18 @@ impl Database {
 		.fetch_one(&self.pool)
 		.await;
 
-		return user;
+		user
 	}
 
 	pub async fn get_user_by_username(&self, username: &str) -> Result<User, sqlx::Error> {
 		let user = sqlx::query_as!(
-			User, 
+			User,
 			r#"SELECT id as "id: uuid::Uuid", fullname, username, password_hash FROM users WHERE username = ?"#,
 			username
 		)
 		.fetch_one(&self.pool)
 		.await;
-		return user;
+		user
 	}
 
 	pub async fn update_user_username(
