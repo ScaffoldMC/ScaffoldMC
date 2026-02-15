@@ -32,7 +32,6 @@ sqlx = { version = "0.8.5", features = [
 	"time",
 	"runtime-tokio",
 	"uuid",
-	"offline",
 ] }
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
 thiserror = "2.0.12"
