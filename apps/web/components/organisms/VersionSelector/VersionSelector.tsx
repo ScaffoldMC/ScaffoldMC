@@ -54,7 +54,7 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 				[path.length]: options,
 			}));
 		}
-	}, [currentLevel.data, path.length, levelCache]);
+	}, [currentLevel.data, path.length, levelCache, onGame]);
 
 	// Memoize levels to display
 	const levels = useMemo(() => {

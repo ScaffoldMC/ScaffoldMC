@@ -2,16 +2,12 @@
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Label } from "@/components/atoms/Label/Label";
-import { TextInput } from "@/components/atoms/TextInput/TextInput";
-import {
-	DialogRoot,
-	DialogTrigger,
-} from "@/components/organisms/Dialog/Dialog";
+import { DialogRoot } from "@/components/organisms/Dialog/Dialog";
 import { PasswordDialogPortal } from "@/components/organisms/PasswordDialog/PasswordDialog";
 import { useSudo } from "@/hooks/auth";
 import { useCurrentUser } from "@/hooks/user";
-import { Unlock, Lock, Edit, LockIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { LockIcon } from "lucide-react";
+import { useState } from "react";
 import styles from "./page.module.css";
 import { Alert } from "@/components/molecules/Alert/Alert";
 import { EditableTextInput } from "@/components/molecules/EditableTextInput/EditableTextInput";
