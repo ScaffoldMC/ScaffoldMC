@@ -16,8 +16,8 @@ export default defineConfig([
 		ignores: ["**/node_modules/**", "**/.next/**"],
 	},
 	{
-		ignores: ["apps/web/.storybook/**"],
-		files: ["apps/web/**/*.{ts,tsx}"],
+		ignores: ["**/.storybook/**"],
+		files: ["**/apps/web/**/*.{ts,tsx}"],
 		languageOptions: {
 			parser: parserTypescript,
 			parserOptions: {

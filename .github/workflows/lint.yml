@@ -36,6 +36,7 @@ jobs:
         uses: super-linter/super-linter@v8.5.0 # x-release-please-version
         env:
           # Prettier
+          TYPESCRIPT_ES_CONFIG_FILE: eslint.config.mjs
           VALIDATE_CSS_PRETTIER: true
           VALIDATE_HTML_PRETTIER: true
           VALIDATE_JAVASCRIPT_PRETTIER: true
@@ -45,6 +46,8 @@ jobs:
           VALIDATE_MARKDOWN_PRETTIER: true
           VALIDATE_TYPESCRIPT_PRETTIER: true
           PRETTIER_COMMAND_OPTIONS: "--ignore-path .prettierignore"
+          
+          USE_ESLINT_FLAT_CONFIG: true
 
           # ESLint
           VALIDATE_JAVASCRIPT_ES: true
