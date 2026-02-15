@@ -4,6 +4,7 @@ import pluginNext from "@next/eslint-plugin-next";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginPrettier from "eslint-plugin-prettier";
+import pluginImport from "eslint-plugin-import";
 import path from "node:path";
 
 import { defineConfig } from "eslint/config";
@@ -15,7 +16,7 @@ export default defineConfig([
 		ignores: ["**/node_modules/**", "**/.next/**"],
 	},
 	{
-		ignores: ["apps/web/.storybook/**"],
+		ignores: ["apps/web/.storybook/**", "apps/web/lib/servertypes.ts"],
 		files: ["apps/web/**/*.{ts,tsx}"],
 		languageOptions: {
 			parser: parserTypescript,
@@ -29,6 +30,7 @@ export default defineConfig([
 			react: pluginReact,
 			"react-hooks": pluginReactHooks,
 			prettier: pluginPrettier,
+			import: pluginImport,
 		},
 		rules: {
 			...pluginTypeScript.configs.recommended.rules,
@@ -36,6 +38,7 @@ export default defineConfig([
 			...pluginReact.configs.recommended.rules,
 			...pluginReactHooks.configs.recommended.rules,
 			...pluginPrettier.configs.recommended.rules,
+			...pluginImport.configs.recommended.rules,
 			"react/react-in-jsx-scope": "off",
 			"@typescript-eslint/no-unused-vars": [
 				"warn",
@@ -44,6 +47,7 @@ export default defineConfig([
 					varsIgnorePattern: "^_",
 				},
 			],
+			"n/no-missing-import": "off",
 		},
 		settings: {
 			react: {
@@ -51,6 +55,11 @@ export default defineConfig([
 			},
 			next: {
 				rootDir: path.join(__dirname, "apps/web"),
+			},
+			"import/resolver": {
+				typescript: {
+					project: path.join(__dirname, "apps/web/tsconfig.json"),
+				},
 			},
 		},
 	},
