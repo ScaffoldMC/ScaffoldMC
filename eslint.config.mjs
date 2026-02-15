@@ -4,8 +4,11 @@ import pluginNext from "@next/eslint-plugin-next";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginPrettier from "eslint-plugin-prettier";
+import path from "node:path";
 
 import { defineConfig } from "eslint/config";
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export default defineConfig([
 	{
@@ -47,7 +50,7 @@ export default defineConfig([
 				version: "detect",
 			},
 			next: {
-				rootDir: "apps/web",
+				rootDir: path.join(__dirname, "apps/web"),
 			},
 		},
 	},
