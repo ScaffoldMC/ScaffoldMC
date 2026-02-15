@@ -22,10 +22,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
-            # super-linter needs the full git history to get the
-            # list of files that changed across commits
-            fetch-depth: 0
-            persist-credentials: false
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
+          persist-credentials: false
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Install Dependencies
@@ -44,7 +44,7 @@ jobs:
           VALIDATE_JSX_PRETTIER: true
           VALIDATE_MARKDOWN_PRETTIER: true
           VALIDATE_TYPESCRIPT_PRETTIER: true
-          PRETTIER_COMMAND_OPTIONS: "--ignore-path .gitignore"
+          PRETTIER_COMMAND_OPTIONS: "--ignore-path .prettierignore"
 
           # ESLint
           VALIDATE_JAVASCRIPT_ES: true
