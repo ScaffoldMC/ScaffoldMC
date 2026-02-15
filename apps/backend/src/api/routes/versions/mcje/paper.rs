@@ -68,7 +68,10 @@ pub async fn get_loader(
 		res_data.sort_unstable();
 		res_data.reverse();
 
-		let options = res_data.iter().map(std::string::ToString::to_string).collect();
+		let options = res_data
+			.iter()
+			.map(std::string::ToString::to_string)
+			.collect();
 
 		let options = OptionsResponse {
 			message: "Select Loader Version".to_string(),
@@ -102,9 +105,7 @@ pub async fn get_game(
 	if !versions.contains(&loader_version) {
 		return (
 			StatusCode::NOT_FOUND,
-			format!(
-				"Loader version {loader_version} for game version {game_version} not found"
-			),
+			format!("Loader version {loader_version} for game version {game_version} not found"),
 		)
 			.into_response();
 	}
