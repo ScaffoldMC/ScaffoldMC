@@ -193,13 +193,12 @@ impl AuthService {
 		token: &str,
 		sudo: bool,
 	) -> Result<User, AuthServiceError> {
-		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
+		let Ok(token_data) = jsonwebtoken::decode::<AuthTokenClaims>(
 			token,
 			&self.secrets.jwt_dec,
 			&Validation::new(Algorithm::RS256),
-		) {
-			Ok(data) => data,
-			Err(_) => return Err(AuthServiceError::Unauthorized),
+		) else {
+			return Err(AuthServiceError::Unauthorized);
 		};
 
 		if sudo && !token_data.claims.sudo {
@@ -214,22 +213,20 @@ impl AuthService {
 			}
 		};
 
-		let user = match self.db.get_user_by_id(user_uuid).await {
-			Ok(user) => user,
-			Err(_) => return Err(AuthServiceError::Unauthorized),
+		let Ok(user) = self.db.get_user_by_id(user_uuid).await else {
+			return Err(AuthServiceError::Unauthorized);
 		};
 
 		Ok(user)
 	}
 
-	pub async fn token_is_sudo(&self, token: &str) -> Result<bool, AuthServiceError> {
-		let token_data = match jsonwebtoken::decode::<AuthTokenClaims>(
+	pub fn token_is_sudo(&self, token: &str) -> Result<bool, AuthServiceError> {
+		let Ok(token_data) = jsonwebtoken::decode::<AuthTokenClaims>(
 			token,
 			&self.secrets.jwt_dec,
 			&Validation::new(Algorithm::RS256),
-		) {
-			Ok(data) => data,
-			Err(_) => return Err(AuthServiceError::Unauthorized),
+		) else {
+			return Err(AuthServiceError::Unauthorized);
 		};
 
 		Ok(token_data.claims.sudo)

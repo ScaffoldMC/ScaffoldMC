@@ -36,9 +36,9 @@ async fn post(
 				tracing::error!("Authentication error: {}", err);
 				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
-			_ => {
+			AuthServiceError::Forbidden => {
 				tracing::error!("Authentication error: {}", err);
-				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+				return StatusCode::FORBIDDEN.into_response();
 			}
 		},
 	};

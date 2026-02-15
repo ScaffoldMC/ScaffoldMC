@@ -41,9 +41,8 @@ async fn post(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl Into
 				tracing::error!("Failed to refresh tokens: {}", err);
 				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
-			_ => {
-				tracing::error!("Unexpected error refreshing tokens: {}", err);
-				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+			AuthServiceError::Forbidden => {
+				return (StatusCode::FORBIDDEN, "Forbidden").into_response();
 			}
 		},
 	};

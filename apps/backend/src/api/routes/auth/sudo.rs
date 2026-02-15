@@ -26,8 +26,7 @@ async fn get(cookies: Cookies, State(state): State<Arc<AppState>>) -> impl IntoR
 
 	let is_sudo = state
 		.auth_service
-		.token_is_sudo(auth_cookie.unwrap().value())
-		.await;
+		.token_is_sudo(auth_cookie.unwrap().value());
 
 	if let Err(err) = is_sudo {
 		tracing::error!("Error checking sudo status: {}", err);
@@ -62,9 +61,9 @@ async fn post(
 				tracing::error!("Authentication error: {}", err);
 				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 			}
-			_ => {
-				tracing::error!("Unexpected server error: {}", err);
-				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+			AuthServiceError::Forbidden => {
+				tracing::error!("Forbidden: {}", err);
+				return StatusCode::FORBIDDEN.into_response();
 			}
 		},
 	};

@@ -27,8 +27,9 @@ pub async fn require_auth(
 	let user = match state.auth_service.get_user_from_token(&token, false).await {
 		Ok(user) => user,
 		Err(err) => match err {
-			AuthServiceError::Unauthorized => return Err(StatusCode::UNAUTHORIZED),
-			AuthServiceError::InvalidCredentials => return Err(StatusCode::UNAUTHORIZED),
+			AuthServiceError::Unauthorized | AuthServiceError::InvalidCredentials => {
+				return Err(StatusCode::UNAUTHORIZED)
+			}
 			_ => {
 				tracing::error!("Authentication error: {}", err);
 				return Err(StatusCode::INTERNAL_SERVER_ERROR);
@@ -59,10 +60,11 @@ pub async fn require_sudo(
 	let user = match state.auth_service.get_user_from_token(&token, true).await {
 		Ok(user) => user,
 		Err(err) => match err {
-			AuthServiceError::Unauthorized => return Err(StatusCode::UNAUTHORIZED),
-			AuthServiceError::InvalidCredentials => return Err(StatusCode::UNAUTHORIZED),
+			AuthServiceError::Unauthorized | AuthServiceError::InvalidCredentials => {
+				return Err(StatusCode::UNAUTHORIZED)
+			}
 			AuthServiceError::Forbidden => return Err(StatusCode::FORBIDDEN),
-			_ => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+			AuthServiceError::ServerError(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
 		},
 	};
 

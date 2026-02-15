@@ -123,7 +123,6 @@ pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 					jvm.display(),
 					e
 				);
-				continue;
 			}
 		}
 	}

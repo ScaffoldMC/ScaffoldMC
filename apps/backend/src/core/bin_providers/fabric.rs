@@ -70,10 +70,17 @@ impl FabricBinaryProvider {
 			.java_version
 			.major_version;
 
-		let download_url = self
-			.fabric_meta
-			.get_download_url(game_version, loader_version, launcher_version)
-			.await?;
+		let download_url_res =
+			FabricMetaAPIClient::get_download_url(game_version, loader_version, launcher_version);
+
+		let download_url = match download_url_res {
+			Ok(url) => url,
+			Err(err) => {
+				return Err(format!(
+					"Failed to construct download URL for game version {game_version}, loader version {loader_version}, installer version {launcher_version}: {err}"
+				))
+			}
+		};
 
 		let download_info = MCJEDownloadInfo {
 			download_url,

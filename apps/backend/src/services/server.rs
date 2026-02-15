@@ -124,15 +124,15 @@ impl ServerService {
 
 			let dir_name = path.file_name().and_then(|name| name.to_str());
 
-			let dir_name = if let Some(name) = dir_name { name } else {
-   					tracing::error!("Failed to get directory name from path {:?}", path);
-   					continue;
-   				};
+			let Some(name) = dir_name else {
+				tracing::error!("Failed to get directory name from path {:?}", path);
+				continue;
+			};
 
-			let uuid = if let Ok(uuid) = Uuid::try_parse(dir_name) { uuid } else {
-   					tracing::error!("Invalid UUID in directory name: {}", dir_name);
-   					continue;
-   				};
+			let Ok(uuid) = Uuid::try_parse(name) else {
+				tracing::error!("Invalid UUID in directory name: {}", name);
+				continue;
+			};
 
 			let config_path = path.join(SERVER_CONFIG_FILE_NAME);
 
@@ -193,7 +193,7 @@ impl ServerService {
 		let mut process_guard = server.process.write().await;
 		let child: &mut Child = match &mut *process_guard {
 			ServerProcessState::Running(child) => child,
-			_ => return Err(ServerError::NotRunning),
+			ServerProcessState::Stopped => return Err(ServerError::NotRunning),
 		};
 
 		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
@@ -304,7 +304,7 @@ impl ServerService {
 			let process_guard = server.process.read().await;
 			match *process_guard {
 				ServerProcessState::Running(_) => Ok(true),
-				_ => Ok(false),
+				ServerProcessState::Stopped => Ok(false),
 			}
 		} else {
 			Err(ServerError::NoSuchServer(server_id.to_string()))

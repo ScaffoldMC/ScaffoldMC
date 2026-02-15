@@ -9,7 +9,7 @@ mod logout;
 mod refresh;
 mod sudo;
 
-pub fn create_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+pub fn create_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
 		.nest("/sudo", sudo::create_router())
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_auth))
