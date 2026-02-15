@@ -30,6 +30,8 @@ jobs:
         uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Generate backend bindings
+        run: cargo test --workspace
       - name: Super-linter
         uses: super-linter/super-linter@v8.5.0 # x-release-please-version
         env:
