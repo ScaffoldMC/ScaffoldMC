@@ -55,7 +55,6 @@ target/
 .github/instructions/nx.instructions.md
 
 apps/backend/data/
-apps/backend/.sqlx/
 apps/backend/bindings/
 
 storybook-static
