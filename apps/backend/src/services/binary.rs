@@ -206,7 +206,10 @@ impl BinaryService {
 	/// Internal: Validate a binary entry against its expected hash.
 	async fn validate_binary(&self, entry: &BinaryLockfileEntry) -> Result<(), String> {
 		if !entry.path.exists() {
-			return Err(format!("Binary path does not exist: {:?}", entry.path));
+			return Err(format!(
+				"Binary path does not exist: {}",
+				entry.path.display()
+			));
 		}
 
 		if entry.hash.is_none() {
@@ -227,8 +230,10 @@ impl BinaryService {
 
 		if file_hash != hash_info.hash {
 			return Err(format!(
-				"Binary hash mismatch for {:?}: expected {}, got {}",
-				entry.path, hash_info.hash, file_hash
+				"Binary hash mismatch for {}: expected {}, got {}",
+				entry.path.display(),
+				hash_info.hash,
+				file_hash
 			));
 		}
 

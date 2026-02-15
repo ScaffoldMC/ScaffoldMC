@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use crate::api::types::user::{UserPatchRequest, UserResponse};
 
-pub fn create_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+pub fn create_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
 		.route("/", routing::patch(patch))
 		.route_layer(middleware::from_fn_with_state(state.clone(), require_sudo))

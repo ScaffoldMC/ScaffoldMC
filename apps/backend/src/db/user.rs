@@ -12,6 +12,7 @@ pub struct User {
 }
 
 impl std::fmt::Debug for User {
+	#![allow(clippy::missing_fields_in_debug)]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		// Manually implement Debug to avoid printing password_hash
 		f.debug_struct("User")
