@@ -12,7 +12,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		onLogin: (username, password) => {
+		onLogin: (_username, _password) => {
 			return Promise.resolve();
 		},
 	},
@@ -20,7 +20,7 @@ export const Default: Story = {
 
 export const Invalid: Story = {
 	args: {
-		onLogin: (username, password) => {
+		onLogin: (_username, _password) => {
 			return Promise.reject();
 		},
 	},

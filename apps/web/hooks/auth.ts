@@ -70,7 +70,7 @@ export function useAuth() {
 			queryClient.removeQueries({ queryKey: ["me"] });
 			router.replace("/login");
 		}
-	}, [user.isError, user.isLoading]);
+	}, [user.isError, user.isLoading, queryClient, router]);
 
 	return {
 		user: user.data as UserResponse | null,
