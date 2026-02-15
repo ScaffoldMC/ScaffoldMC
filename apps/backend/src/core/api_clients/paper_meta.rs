@@ -92,9 +92,7 @@ impl PaperDownloadsAPIClient {
 		game_version: &str,
 		build_id: u16,
 	) -> Result<PaperBuildInfo, String> {
-		let url = format!(
-			"{PAPER_API_URL}/versions/{game_version}/builds/{build_id}"
-		);
+		let url = format!("{PAPER_API_URL}/versions/{game_version}/builds/{build_id}");
 		let response: PaperBuildInfo = get_and_format(&self.reqwest_client, &url).await?;
 
 		Ok(response)
