@@ -75,7 +75,7 @@ impl BinaryService {
 		// Ensure the binary directory exists
 		if !binary_dir.exists() {
 			std::fs::create_dir_all(&binary_dir)
-				.map_err(|e| format!("Failed to create binary directory: {}", e))?;
+				.map_err(|e| format!("Failed to create binary directory: {e}"))?;
 		}
 
 		let download_info = self.get_bin_info(game).await?;
@@ -96,13 +96,13 @@ impl BinaryService {
 			binary_path.clone(),
 		)
 		.await
-		.map_err(|e| format!("Failed to download game: {}", e))?;
+		.map_err(|e| format!("Failed to download game: {e}"))?;
 
 		// Add binary to the lockfile
 		let mut lockfile = self
 			.load_lockfile()
 			.await
-			.map_err(|e| format!("Failed to load lockfile: {}", e))?;
+			.map_err(|e| format!("Failed to load lockfile: {e}"))?;
 
 		let mut lockfile_entry = BinaryLockfileEntry {
 			game: game.clone(),
@@ -117,7 +117,7 @@ impl BinaryService {
 		if let Some((hash, hash_algorithm)) = hash {
 			lockfile_entry.hash = Some(BinaryLockfileHash {
 				algorithm: hash_algorithm,
-				hash: hash.to_string(),
+				hash: hash.clone(),
 			});
 		}
 
@@ -147,7 +147,7 @@ impl BinaryService {
 		let binary_path = self
 			.install_game(game)
 			.await
-			.map_err(|e| format!("Failed to ensure binary: {}", e))?;
+			.map_err(|e| format!("Failed to ensure binary: {e}"))?;
 
 		Ok(binary_path)
 	}

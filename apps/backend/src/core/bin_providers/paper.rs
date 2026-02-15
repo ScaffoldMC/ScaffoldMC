@@ -30,7 +30,7 @@ impl PaperBinaryProvider {
 		let build = self.api_client.get_build(game_version, build).await?;
 
 		let download_url = Url::parse(&build.downloads.server_default.url)
-			.map_err(|e| format!("Failed to parse download URL: {}", e))?;
+			.map_err(|e| format!("Failed to parse download URL: {e}"))?;
 
 		let hash = build.downloads.server_default.checksums.sha256;
 

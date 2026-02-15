@@ -46,14 +46,14 @@ impl Service for ServerService {
 	async fn shutdown(&mut self) -> Result<(), String> {
 		let server_ids: Vec<Uuid> = {
 			let servers_guard = self.servers.read().await;
-			servers_guard.keys().cloned().collect()
+			servers_guard.keys().copied().collect()
 		};
 
 		// Gracefully stop all running servers
 		for server_id in server_ids.clone() {
 			self.stop(server_id)
 				.await
-				.map_err(|e| format!("Failed to stop server {}: {}", server_id, e))?;
+				.map_err(|e| format!("Failed to stop server {server_id}: {e}"))?;
 		}
 
 		// Wait up to 30 seconds for all servers to shut down
@@ -99,9 +99,7 @@ impl ServerService {
 			std::fs::create_dir_all(&path).expect("Failed to create server instances directory");
 		}
 
-		if !path.is_dir() {
-			panic!("Server instances path must be a directory");
-		}
+		assert!(path.is_dir(), "Server instances path must be a directory");
 
 		let dir_entries =
 			std::fs::read_dir(&path).expect("Failed to read server instances directory");
@@ -126,21 +124,15 @@ impl ServerService {
 
 			let dir_name = path.file_name().and_then(|name| name.to_str());
 
-			let dir_name = match dir_name {
-				Some(name) => name,
-				None => {
-					tracing::error!("Failed to get directory name from path {:?}", path);
-					continue;
-				}
-			};
+			let dir_name = if let Some(name) = dir_name { name } else {
+   					tracing::error!("Failed to get directory name from path {:?}", path);
+   					continue;
+   				};
 
-			let uuid = match Uuid::try_parse(dir_name) {
-				Ok(uuid) => uuid,
-				Err(_) => {
-					tracing::error!("Invalid UUID in directory name: {}", dir_name);
-					continue;
-				}
-			};
+			let uuid = if let Ok(uuid) = Uuid::try_parse(dir_name) { uuid } else {
+   					tracing::error!("Invalid UUID in directory name: {}", dir_name);
+   					continue;
+   				};
 
 			let config_path = path.join(SERVER_CONFIG_FILE_NAME);
 
@@ -172,7 +164,7 @@ impl ServerService {
 	pub async fn list_server_ids(&self) -> Vec<Uuid> {
 		let servers_guard = self.servers.read().await;
 
-		servers_guard.keys().cloned().collect()
+		servers_guard.keys().copied().collect()
 	}
 
 	/// Gets information about a server instance by ID.
@@ -246,7 +238,7 @@ impl ServerService {
 			.binary_service
 			.ensure_binary(&config_guard.game)
 			.await
-			.map_err(|e| ServerError::StartError(e.to_string()))?;
+			.map_err(|e| ServerError::StartError(e.clone()))?;
 
 		let mut cmd = Command::new(binary_path);
 
@@ -334,7 +326,7 @@ impl ServerService {
 		let install_result = self.binary_service.install_game(&server_type).await;
 
 		if let Err(err) = install_result {
-			return Err(format!("Failed to install game: {}", err));
+			return Err(format!("Failed to install game: {err}"));
 		}
 
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;

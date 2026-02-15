@@ -28,8 +28,7 @@ pub async fn get_suitable_for(major_version: u8) -> Result<JavaVersion, JavaErro
 		.find(|java| java.major_version == major_version);
 
 	suitable.ok_or(JavaError::NotFound(format!(
-		"No suitable Java version found for major version {}",
-		major_version
+		"No suitable Java version found for major version {major_version}"
 	)))
 }
 

@@ -28,7 +28,7 @@ pub fn compute_file_hash(alg: HashAlgorithm, path: &PathBuf) -> Result<String, S
 	let mut reader = std::io::BufReader::new(file);
 
 	std::io::copy(&mut reader, &mut hasher)
-		.map_err(|e| format!("Failed to read file for hashing: {}", e))?;
+		.map_err(|e| format!("Failed to read file for hashing: {e}"))?;
 
 	let hash = hasher.finalize_reset();
 

@@ -29,7 +29,7 @@ impl VanillaBinaryProvider {
 		let version_info = self.api_client.get_version(game_version).await?;
 
 		let download_url = Url::parse(&version_info.downloads.server.url)
-			.map_err(|e| format!("Failed to parse URL: {}", e))?;
+			.map_err(|e| format!("Failed to parse URL: {e}"))?;
 		let hash = version_info.downloads.server.sha1.clone();
 
 		let java_version = version_info.java_version.major_version;

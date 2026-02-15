@@ -58,8 +58,7 @@ impl FabricBinaryProvider {
 
 		if let Err(err) = version_info {
 			return Err(format!(
-				"Failed to verify fabric version {} exists: {}",
-				game_version, err
+				"Failed to verify fabric version {game_version} exists: {err}"
 			));
 		}
 
@@ -67,7 +66,7 @@ impl FabricBinaryProvider {
 			.piston_meta
 			.get_version(game_version)
 			.await
-			.map_err(|e| format!("Cannot query version {} from Mojang: {}", game_version, e))?
+			.map_err(|e| format!("Cannot query version {game_version} from Mojang: {e}"))?
 			.java_version
 			.major_version;
 
@@ -99,7 +98,7 @@ impl FabricBinaryProvider {
 			.fabric_meta
 			.get_versions(game_version)
 			.await
-			.map_err(|e| format!("Failed to get loader versions: {}", e))?;
+			.map_err(|e| format!("Failed to get loader versions: {e}"))?;
 
 		let versions: Vec<String> = loaders
 			.iter()

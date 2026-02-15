@@ -73,7 +73,7 @@ impl PistonMetaAPIClient {
 			.versions
 			.iter()
 			.find(|v| v.id == version_id)
-			.ok_or_else(|| format!("Version not found: {}", version_id))?;
+			.ok_or_else(|| format!("Version not found: {version_id}"))?;
 
 		let package_info: MojangPackageInfo =
 			get_and_format(&self.reqwest_client, &version_info.url).await?;
