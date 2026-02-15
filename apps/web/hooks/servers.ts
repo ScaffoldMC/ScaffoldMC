@@ -11,7 +11,7 @@ export function useServers() {
 		retry: false,
 	});
 
-	let mutateServers = useMutation({
+	const mutateServers = useMutation({
 		mutationFn: async (createRequest: CreateServerRequest) =>
 			await api.post("/servers", createRequest),
 		onSuccess: () => {
