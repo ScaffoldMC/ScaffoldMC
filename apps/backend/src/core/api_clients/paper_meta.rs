@@ -74,14 +74,14 @@ impl PaperDownloadsAPIClient {
 	}
 
 	pub async fn get_versions(&self) -> Result<PaperVersions, String> {
-		let url = format!("{}/versions", PAPER_API_URL);
+		let url = format!("{PAPER_API_URL}/versions");
 		let response: PaperVersions = get_and_format(&self.reqwest_client, &url).await?;
 
 		Ok(response)
 	}
 
 	pub async fn get_version(&self, game_version: &str) -> Result<PaperVersionAndBuilds, String> {
-		let url = format!("{}/versions/{}", PAPER_API_URL, game_version);
+		let url = format!("{PAPER_API_URL}/versions/{game_version}");
 		let response: PaperVersionAndBuilds = get_and_format(&self.reqwest_client, &url).await?;
 
 		Ok(response)
@@ -93,8 +93,7 @@ impl PaperDownloadsAPIClient {
 		build_id: u16,
 	) -> Result<PaperBuildInfo, String> {
 		let url = format!(
-			"{}/versions/{}/builds/{}",
-			PAPER_API_URL, game_version, build_id
+			"{PAPER_API_URL}/versions/{game_version}/builds/{build_id}"
 		);
 		let response: PaperBuildInfo = get_and_format(&self.reqwest_client, &url).await?;
 

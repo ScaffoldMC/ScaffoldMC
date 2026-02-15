@@ -17,7 +17,7 @@ pub async fn get() -> impl IntoResponse {
 
 			(
 				axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-				format!("Internal server error: {}", e),
+				format!("Internal server error: {e}"),
 			)
 				.into_response()
 		}

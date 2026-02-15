@@ -49,7 +49,7 @@ impl FabricMetaAPIClient {
 	}
 
 	pub async fn get_manifest(&self) -> Result<FabricVersionsManifest, String> {
-		let url_str = format!("{}/versions", FABRIC_API_URL);
+		let url_str = format!("{FABRIC_API_URL}/versions");
 		let manifest: FabricVersionsManifest =
 			get_and_format(&self.reqwest_client, &url_str).await?;
 
@@ -57,7 +57,7 @@ impl FabricMetaAPIClient {
 	}
 
 	pub async fn get_versions(&self, game_version: &str) -> Result<Vec<FabricLoaderInfo>, String> {
-		let url_str = format!("{}/versions/loader/{}/", FABRIC_API_URL, game_version);
+		let url_str = format!("{FABRIC_API_URL}/versions/loader/{game_version}/");
 		let versions: Vec<FabricLoaderInfo> =
 			get_and_format(&self.reqwest_client, &url_str).await?;
 
@@ -70,8 +70,7 @@ impl FabricMetaAPIClient {
 		fabric_version: &str,
 	) -> Result<FabricLoaderInfo, String> {
 		let url_str = format!(
-			"{}/versions/loader/{}/{}/",
-			FABRIC_API_URL, game_version, fabric_version
+			"{FABRIC_API_URL}/versions/loader/{game_version}/{fabric_version}/"
 		);
 
 		let response: FabricLoaderInfo = get_and_format(&self.reqwest_client, &url_str).await?;
@@ -86,12 +85,11 @@ impl FabricMetaAPIClient {
 		installer_version: &str,
 	) -> Result<Url, String> {
 		let url_str = format!(
-			"{}/versions/loader/{}/{}/{}/server/jar",
-			FABRIC_API_URL, game_version, fabric_version, installer_version
+			"{FABRIC_API_URL}/versions/loader/{game_version}/{fabric_version}/{installer_version}/server/jar"
 		);
 
 		let download_url =
-			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {}", e))?;
+			Url::parse(&url_str).map_err(|e| format!("Failed to parse URL: {e}"))?;
 
 		Ok(download_url)
 	}

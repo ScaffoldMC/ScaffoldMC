@@ -12,7 +12,7 @@ pub async fn download_file(
 		.get(url.clone())
 		.send()
 		.await
-		.map_err(|e| format!("Failed to download: {}", e))?;
+		.map_err(|e| format!("Failed to download: {e}"))?;
 
 	if !response.status().is_success() {
 		return Err(format!(
@@ -25,9 +25,9 @@ pub async fn download_file(
 	let bytes = response
 		.bytes()
 		.await
-		.map_err(|e| format!("Failed to read response: {}", e))?;
+		.map_err(|e| format!("Failed to read response: {e}"))?;
 
-	std::fs::write(path, bytes).map_err(|e| format!("Failed to save file: {}", e))?;
+	std::fs::write(path, bytes).map_err(|e| format!("Failed to save file: {e}"))?;
 
 	Ok(())
 }

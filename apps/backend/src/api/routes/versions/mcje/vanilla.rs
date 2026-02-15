@@ -28,7 +28,7 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
-			format!("Internal server error: {}", err),
+			format!("Internal server error: {err}"),
 		)
 			.into_response()
 	} else {
@@ -52,7 +52,7 @@ pub async fn get_game(
 
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
-			format!("Internal server error: {}", err),
+			format!("Internal server error: {err}"),
 		)
 			.into_response();
 	}

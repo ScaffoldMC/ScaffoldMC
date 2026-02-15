@@ -28,15 +28,11 @@ async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl I
 	let server_info = state.server_service.get_server_info(id).await;
 
 	if let Err(err) = server_info {
-		match err {
-			ServerError::NoSuchServer(_) => {
-				return (StatusCode::NOT_FOUND, err.to_string()).into_response()
-			}
-			_ => {
-				tracing::error!("Error retrieving server info: {}", err);
-				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-			}
-		}
+		if let ServerError::NoSuchServer(_) = err {
+  				return (StatusCode::NOT_FOUND, err.to_string()).into_response()
+  			}
+  				tracing::error!("Error retrieving server info: {}", err);
+  				return StatusCode::INTERNAL_SERVER_ERROR.into_response();
 	}
 
 	(StatusCode::OK, Json(server_info.unwrap())).into_response()

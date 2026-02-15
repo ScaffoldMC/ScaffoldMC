@@ -26,9 +26,9 @@ impl Game {
 				match &minecraft_java.loader {
 					java::MinecraftJavaLoader::Vanilla => "vanilla".to_string(),
 					java::MinecraftJavaLoader::Fabric { loader, launcher } => {
-						format!("fabric-{}-{}", loader, launcher)
+						format!("fabric-{loader}-{launcher}")
 					}
-					java::MinecraftJavaLoader::Paper { build } => format!("paper-{}", build),
+					java::MinecraftJavaLoader::Paper { build } => format!("paper-{build}"),
 				}
 			),
 		}

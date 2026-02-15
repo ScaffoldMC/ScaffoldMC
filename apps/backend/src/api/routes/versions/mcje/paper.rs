@@ -32,7 +32,7 @@ pub async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
-			format!("Internal server error: {}", err),
+			format!("Internal server error: {err}"),
 		)
 			.into_response()
 	} else {
@@ -60,15 +60,15 @@ pub async fn get_loader(
 
 		(
 			StatusCode::INTERNAL_SERVER_ERROR,
-			format!("Internal server error: {}", err),
+			format!("Internal server error: {err}"),
 		)
 			.into_response()
 	} else {
 		let mut res_data = versions_res.unwrap();
-		res_data.sort();
+		res_data.sort_unstable();
 		res_data.reverse();
 
-		let options = res_data.iter().map(|v| v.to_string()).collect();
+		let options = res_data.iter().map(std::string::ToString::to_string).collect();
 
 		let options = OptionsResponse {
 			message: "Select Loader Version".to_string(),
@@ -92,7 +92,7 @@ pub async fn get_game(
 	if let Err(err) = versions_res {
 		return (
 			StatusCode::NOT_FOUND,
-			format!("Error verifying game version {}: {}", game_version, err),
+			format!("Error verifying game version {game_version}: {err}"),
 		)
 			.into_response();
 	}
@@ -103,8 +103,7 @@ pub async fn get_game(
 		return (
 			StatusCode::NOT_FOUND,
 			format!(
-				"Loader version {} for game version {} not found",
-				loader_version, game_version
+				"Loader version {loader_version} for game version {game_version} not found"
 			),
 		)
 			.into_response();
