@@ -5,6 +5,7 @@ import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginPrettier from "eslint-plugin-prettier";
 import pluginImport from "eslint-plugin-import";
+import pluginNode from "eslint-plugin-n";
 import path from "node:path";
 
 import { defineConfig } from "eslint/config";
@@ -22,6 +23,7 @@ export default defineConfig([
 			parser: parserTypescript,
 			parserOptions: {
 				projectService: true,
+				tsconfigRootDir: __dirname,
 			},
 		},
 		plugins: {
@@ -31,6 +33,7 @@ export default defineConfig([
 			"react-hooks": pluginReactHooks,
 			prettier: pluginPrettier,
 			import: pluginImport,
+			n: pluginNode,
 		},
 		rules: {
 			...pluginTypeScript.configs.recommended.rules,
