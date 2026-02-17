@@ -13,50 +13,45 @@ jobs:
 
     permissions:
       contents: read
-      packages: read
-      issues: write # PR Comments
-      pull-requests: write
-      statuses: write
+
+    env:
+      SQLX_OFFLINE: true
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          # super-linter needs the full git history to get the
-          # list of files that changed across commits
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install pnpm
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      - name: Install Dependencies
+
+      - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
       - name: Generate backend bindings
         run: cargo test export_bindings
-      - name: Super-linter
-        uses: super-linter/super-linter@v8.5.0 # x-release-please-version
-        env:
-          # Prettier
-          VALIDATE_CSS_PRETTIER: true
-          VALIDATE_HTML_PRETTIER: true
-          VALIDATE_JAVASCRIPT_PRETTIER: true
-          VALIDATE_JSON_PRETTIER: true
-          VALIDATE_JSONC_PRETTIER: true
-          VALIDATE_JSX_PRETTIER: true
-          VALIDATE_MARKDOWN_PRETTIER: true
-          VALIDATE_TYPESCRIPT_PRETTIER: true
-          PRETTIER_COMMAND_OPTIONS: "--ignore-path .prettierignore"
 
-          # ESLint
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_TYPESCRIPT_ES: true
-          TYPESCRIPT_ES_CONFIG_FILE: eslint.config.mjs
-          USE_ESLINT_FLAT_CONFIG: true
+      - name: Check Rust format
+        run: cargo fmt --all -- --check
 
-          # Rust
-          VALIDATE_RUST_2021: true
-          VALIDATE_RUST_CLIPPY: true
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run ESLint
+        run: pnpm eslint . --max-warnings=0
 
-          # Non-workflow
-          SQLX_OFFLINE: true
+      - name: Check Prettier format
+        run: pnpm prettier . --check --ignore-path .prettierignore
