@@ -16,7 +16,7 @@ export function useSudo() {
 		retry: false,
 	});
 
-	let mutateSudo = useMutation({
+	const mutateSudo = useMutation({
 		mutationFn: async (sudoRequest: SudoRequest) =>
 			await api.post("/auth/sudo", sudoRequest),
 		onSuccess: () => {
