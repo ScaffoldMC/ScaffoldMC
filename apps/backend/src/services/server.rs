@@ -167,6 +167,30 @@ impl ServerService {
 		servers_guard.keys().copied().collect()
 	}
 
+	/// Refreshes the process state of a server instance by checking if its process is still running.
+	async fn refresh_server_state(server: &Server) -> Result<(), ServerError> {
+		let mut process_guard = server.process.write().await;
+
+		if let ServerProcessState::Running(child) = &mut *process_guard {
+			match child.try_wait() {
+				Ok(Some(status)) => {
+					tracing::info!("Server process exited on its own: {}", status);
+					*process_guard = ServerProcessState::Stopped;
+				}
+				Ok(None) => {
+					// still running
+				}
+				Err(e) => {
+					return Err(ServerError::StopError(format!(
+						"Failed to check process status: {e}"
+					)));
+				}
+			}
+		}
+
+		Ok(())
+	}
+
 	/// Gets information about a server instance by ID.
 	#[instrument(name = "ServerService.GetServerInfo", skip(self))]
 	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
@@ -175,6 +199,7 @@ impl ServerService {
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
+		Self::refresh_server_state(server).await?;
 		let info = server.info().await;
 
 		Ok(info)
@@ -189,6 +214,8 @@ impl ServerService {
 		let server = servers_guard
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		Self::refresh_server_state(server).await?;
 
 		let mut process_guard = server.process.write().await;
 		let child: &mut Child = match &mut *process_guard {
@@ -317,14 +344,16 @@ impl ServerService {
 	/// Checks if a server instance is currently running.
 	pub async fn is_running(&self, server_id: Uuid) -> Result<bool, ServerError> {
 		let servers_guard = self.servers.read().await;
-		if let Some(server) = servers_guard.get(&server_id) {
-			let process_guard = server.process.read().await;
-			match *process_guard {
-				ServerProcessState::Running(_) => Ok(true),
-				ServerProcessState::Stopped => Ok(false),
-			}
-		} else {
-			Err(ServerError::NoSuchServer(server_id.to_string()))
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		Self::refresh_server_state(server).await?;
+
+		let process_guard = server.process.read().await;
+		match *process_guard {
+			ServerProcessState::Running(_) => Ok(true),
+			ServerProcessState::Stopped => Ok(false),
 		}
 	}
 
