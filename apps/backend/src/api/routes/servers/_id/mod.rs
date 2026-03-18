@@ -21,6 +21,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/", routing::delete(delete))
 		.route("/start", routing::post(start_post))
 		.route("/stop", routing::post(stop_post))
+		.route("/kill", routing::post(kill_post))
 		.nest("/status", status::create_router())
 		.nest("/files", files::create_router())
 		.nest("/console", console::create_router())
@@ -41,6 +42,16 @@ async fn stop_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> 
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
 			tracing::error!("Error stopping server: {}", err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		}
+	}
+}
+
+async fn kill_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	match state.server_service.kill(id).await {
+		Ok(()) => StatusCode::OK.into_response(),
+		Err(err) => {
+			tracing::error!("Error killing server: {}", err);
 			StatusCode::INTERNAL_SERVER_ERROR.into_response()
 		}
 	}
