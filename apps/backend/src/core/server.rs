@@ -23,7 +23,7 @@ impl ServerRuntime {
 		self.command_tx
 			.send(ProcessCommand::Kill)
 			.await
-			.map_err(|e| format!("Failed to send kill command: {}", e))?;
+			.map_err(|e| format!("Failed to send kill command: {e}"))?;
 
 		Ok(())
 	}

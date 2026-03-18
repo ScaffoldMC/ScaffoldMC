@@ -231,15 +231,14 @@ impl ServerService {
 			.await
 			.map_err(|e| ServerError::StartError(e.clone()))?;
 		let binary_path = std::fs::canonicalize(&binary_path)
-			.map_err(|e| ServerError::StartError(format!("Invalid binary path: {}", e)))?;
+			.map_err(|e| ServerError::StartError(format!("Invalid binary path: {e}")))?;
 		let binary_path = binary_path.to_str().ok_or_else(|| {
 			ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
 		})?;
 
 		let server_dir = format!("{}/{}/", &self.servers_dir, server_id);
-		let server_dir = std::fs::canonicalize(&server_dir).map_err(|e| {
-			ServerError::StartError(format!("Invalid server directory path: {}", e))
-		})?;
+		let server_dir = std::fs::canonicalize(&server_dir)
+			.map_err(|e| ServerError::StartError(format!("Invalid server directory path: {e}")))?;
 
 		// TODO: Handle custom arguments, use correct start command for software
 		let mut cmd = Command::new("java");
