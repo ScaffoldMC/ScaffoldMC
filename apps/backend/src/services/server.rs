@@ -234,15 +234,32 @@ impl ServerService {
 		}
 
 		let config_guard = server.config.read().await;
+
 		let binary_path = self
 			.binary_service
 			.ensure_binary(&config_guard.game)
 			.await
 			.map_err(|e| ServerError::StartError(e.clone()))?;
+		let binary_path = std::fs::canonicalize(&binary_path)
+			.map_err(|e| ServerError::StartError(format!("Invalid binary path: {}", e)))?;
+		let binary_path = binary_path.to_str().ok_or_else(|| {
+			ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
+		})?;
 
-		let mut cmd = Command::new(binary_path);
+		let server_dir = format!("{}/{}/", &self.servers_dir, server_id);
+		let server_dir = std::fs::canonicalize(&server_dir).map_err(|e| {
+			ServerError::StartError(format!("Invalid server directory path: {}", e))
+		})?;
 
-		cmd.current_dir(format!("{}/server/{}/", &self.servers_dir, server_id));
+		// TODO: Handle custom arguments, use correct start command for software
+		let mut cmd = Command::new("java");
+
+		cmd.current_dir(&server_dir);
+
+		cmd.arg("-jar");
+		cmd.arg(binary_path);
+		cmd.arg("-nogui");
+
 		cmd.stdin(std::process::Stdio::piped());
 		cmd.stdout(std::process::Stdio::piped());
 		cmd.stderr(std::process::Stdio::piped());
