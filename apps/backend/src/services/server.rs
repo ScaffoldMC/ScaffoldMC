@@ -21,6 +21,7 @@ use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::sync::RwLock;
 use tracing::instrument;
+use tracing::Instrument;
 use uuid::Uuid;
 
 #[derive(Debug, Error)]
@@ -275,7 +276,7 @@ impl ServerService {
 
 		// Spawn a task to monitor the child process and handle commands
 		let server_for_task = server.clone();
-		tokio::spawn(async move {
+		let watcher = async move {
 			let mut ticker = tokio::time::interval(Duration::from_millis(200));
 
 			loop {
@@ -321,7 +322,11 @@ impl ServerService {
 			let _ = running_tx.send(false);
 			let mut guard = server_for_task.process.write().await;
 			*guard = ServerProcessState::Stopped;
-		});
+		};
+
+		tokio::spawn(
+			watcher.instrument(tracing::info_span!("ServerWatcher", server_id = %server_id)),
+		);
 
 		Ok(())
 	}
