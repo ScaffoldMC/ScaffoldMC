@@ -19,9 +19,31 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/", routing::get(get))
 		.route("/", routing::patch(patch))
 		.route("/", routing::delete(delete))
+		.route("/start", routing::post(start_post))
+		.route("/stop", routing::post(stop_post))
 		.nest("/status", status::create_router())
 		.nest("/files", files::create_router())
 		.nest("/console", console::create_router())
+}
+
+async fn start_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	match state.server_service.start(id).await {
+		Ok(_) => StatusCode::OK.into_response(),
+		Err(err) => {
+			tracing::error!("Error starting server: {}", err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		}
+	}
+}
+
+async fn stop_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	match state.server_service.stop(id).await {
+		Ok(_) => StatusCode::OK.into_response(),
+		Err(err) => {
+			tracing::error!("Error stopping server: {}", err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		}
+	}
 }
 
 async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
