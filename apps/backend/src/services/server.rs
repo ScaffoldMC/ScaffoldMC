@@ -3,18 +3,22 @@ use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::bin_providers::DownloadInfo;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
+use crate::core::server::ProcessCommand;
 use crate::core::server::Server;
 use crate::core::server::ServerInfo;
 use crate::core::server::ServerProcessState;
+use crate::core::server::ServerRuntime;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 use thiserror::Error;
 use tokio::io::AsyncWriteExt;
-use tokio::process::Child;
 use tokio::process::Command;
+use tokio::sync::mpsc;
+use tokio::sync::watch;
 use tokio::sync::RwLock;
 use tracing::instrument;
 use uuid::Uuid;
@@ -167,30 +171,6 @@ impl ServerService {
 		servers_guard.keys().copied().collect()
 	}
 
-	/// Refreshes the process state of a server instance by checking if its process is still running.
-	async fn refresh_server_state(server: &Server) -> Result<(), ServerError> {
-		let mut process_guard = server.process.write().await;
-
-		if let ServerProcessState::Running(child) = &mut *process_guard {
-			match child.try_wait() {
-				Ok(Some(status)) => {
-					tracing::info!("Server process exited on its own: {}", status);
-					*process_guard = ServerProcessState::Stopped;
-				}
-				Ok(None) => {
-					// still running
-				}
-				Err(e) => {
-					return Err(ServerError::StopError(format!(
-						"Failed to check process status: {e}"
-					)));
-				}
-			}
-		}
-
-		Ok(())
-	}
-
 	/// Gets information about a server instance by ID.
 	#[instrument(name = "ServerService.GetServerInfo", skip(self))]
 	pub async fn get_server_info(&self, server_id: Uuid) -> Result<ServerInfo, ServerError> {
@@ -199,7 +179,6 @@ impl ServerService {
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		Self::refresh_server_state(server).await?;
 		let info = server.info().await;
 
 		Ok(info)
@@ -215,33 +194,15 @@ impl ServerService {
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		Self::refresh_server_state(server).await?;
+		let process_guard = server.process.read().await;
 
-		let mut process_guard = server.process.write().await;
-		let child: &mut Child = match &mut *process_guard {
-			ServerProcessState::Running(child) => child,
-			ServerProcessState::Stopped => return Err(ServerError::NotRunning),
-		};
-
-		let stdin = child.stdin.as_mut().ok_or(ServerError::NotRunning)?;
-
-		// Ensure the command ends with a newline so it is actually sent
-		// instead of being buffered and screwing up future commands.
-		let command_with_newline = if command.ends_with('\n') {
-			command.to_string()
-		} else {
-			format!("{command}\n")
-		};
-
-		if let Err(err) = stdin.write_all(command_with_newline.as_bytes()).await {
-			return Err(ServerError::CommandError(err.to_string()));
+		match &*process_guard {
+			ServerProcessState::Stopped => Err(ServerError::NotRunning),
+			ServerProcessState::Running(runtime) => runtime
+				.send_line(command.to_string())
+				.await
+				.map_err(ServerError::CommandError),
 		}
-
-		if let Err(err) = stdin.flush().await {
-			return Err(ServerError::CommandError(err.to_string()));
-		}
-
-		Ok(())
 	}
 
 	/// Starts a server instance by ID using its configuration.
@@ -262,6 +223,7 @@ impl ServerService {
 
 		let config_guard = server.config.read().await;
 
+		// Build absolute paths for server binary and directory
 		let binary_path = self
 			.binary_service
 			.ensure_binary(&config_guard.game)
@@ -291,13 +253,77 @@ impl ServerService {
 		cmd.stdout(std::process::Stdio::piped());
 		cmd.stderr(std::process::Stdio::piped());
 
-		match cmd.spawn() {
-			Ok(child) => {
-				*process_guard = ServerProcessState::Running(child);
-				Ok(())
+		// Spawn child and create runtime
+		let mut child = cmd
+			.spawn()
+			.map_err(|e| ServerError::StartError(e.to_string()))?;
+
+		// TODO: Watch stdout/stderr
+
+		let mut stdin = child.stdin.take();
+
+		let (command_tx, mut command_rx) = mpsc::channel::<ProcessCommand>(64);
+		let (running_tx, running_rx) = watch::channel(true);
+
+		let runtime = Arc::new(ServerRuntime {
+			command_tx,
+			running_rx,
+		});
+
+		*process_guard = ServerProcessState::Running(runtime.clone());
+		drop(process_guard);
+
+		// Spawn a task to monitor the child process and handle commands
+		let server_for_task = server.clone();
+		tokio::spawn(async move {
+			let mut ticker = tokio::time::interval(Duration::from_millis(200));
+
+			loop {
+				tokio::select! {
+					maybe_cmd = command_rx.recv() => {
+						match maybe_cmd {
+							Some(ProcessCommand::Kill) => {
+								if let Err(e) = child.kill().await {
+									tracing::warn!("kill failed: {}", e);
+								}
+							},
+							Some(ProcessCommand::Write(mut line)) => {
+								if !line.ends_with('\n') {
+									line.push('\n');
+								}
+								if let Some(stdin_handle) = stdin.as_mut() {
+									if let Err(e) = stdin_handle.write_all(line.as_bytes()).await {
+										tracing::warn!("stdin write failed: {}", e);
+									} else if let Err(e) = stdin_handle.flush().await {
+										tracing::warn!("stdin flush failed: {}", e);
+									}
+								}
+							},
+							None => break,
+						}
+					}
+					_ = ticker.tick() => {
+						match child.try_wait() {
+							Ok(Some(status)) => {
+								tracing::info!("Server process exited: {}", status);
+								break;
+							}
+							Ok(None) => {}
+							Err(e) => {
+								tracing::warn!("try_wait failed: {}", e);
+								break;
+							}
+						}
+					}
+				}
 			}
-			Err(e) => Err(ServerError::StartError(e.to_string())),
-		}
+
+			let _ = running_tx.send(false);
+			let mut guard = server_for_task.process.write().await;
+			*guard = ServerProcessState::Stopped;
+		});
+
+		Ok(())
 	}
 
 	/// Stops a running server instance.
@@ -328,17 +354,14 @@ impl ServerService {
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		let mut process_guard = server.process.write().await;
+		let process_guard = server.process.read().await;
 
-		if let ServerProcessState::Running(child) = &mut *process_guard {
-			if let Err(e) = child.kill().await {
-				return Err(ServerError::StopError(e.to_string()));
+		match &*process_guard {
+			ServerProcessState::Stopped => Err(ServerError::NotRunning),
+			ServerProcessState::Running(runtime) => {
+				runtime.kill().await.map_err(ServerError::StopError)
 			}
-		} else {
-			return Err(ServerError::NotRunning);
 		}
-
-		Ok(())
 	}
 
 	/// Checks if a server instance is currently running.
@@ -348,11 +371,9 @@ impl ServerService {
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
-		Self::refresh_server_state(server).await?;
-
 		let process_guard = server.process.read().await;
-		match *process_guard {
-			ServerProcessState::Running(_) => Ok(true),
+		match &*process_guard {
+			ServerProcessState::Running(runtime) => Ok(runtime.is_running()),
 			ServerProcessState::Stopped => Ok(false),
 		}
 	}
