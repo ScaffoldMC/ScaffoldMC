@@ -331,9 +331,9 @@ impl ServerService {
 			*guard = ServerProcessState::Stopped;
 		};
 
-		tokio::spawn(
-			watcher.instrument(tracing::info_span!("ServerWatcher", server_id = %server_id)),
-		);
+		tokio::spawn(watcher.instrument(
+			tracing::info_span!(parent: None, "ServerWatcher", server_id = %server_id),
+		));
 
 		Ok(())
 	}
