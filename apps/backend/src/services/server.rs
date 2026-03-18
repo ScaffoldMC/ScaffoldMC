@@ -240,15 +240,23 @@ impl ServerService {
 		let server_dir = std::fs::canonicalize(&server_dir)
 			.map_err(|e| ServerError::StartError(format!("Invalid server directory path: {e}")))?;
 
-		// TODO: Handle custom arguments, use correct start command for software
-		let mut cmd = Command::new("java");
+		// Create command to start the server process
+		let mut cmd = match config_guard.game {
+			Game::MinecraftJava(_) => {
+				let mut cmd = Command::new("java");
+
+				cmd.arg("-jar");
+				cmd.arg(binary_path);
+
+				for arg in &config_guard.args {
+					cmd.arg(arg);
+				}
+
+				cmd
+			}
+		};
 
 		cmd.current_dir(&server_dir);
-
-		cmd.arg("-jar");
-		cmd.arg(binary_path);
-		cmd.arg("-nogui");
-
 		cmd.stdin(std::process::Stdio::piped());
 		cmd.stdout(std::process::Stdio::piped());
 		cmd.stderr(std::process::Stdio::piped());
