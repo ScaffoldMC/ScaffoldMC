@@ -16,6 +16,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
 use tokio::io::AsyncWriteExt;
+use tokio::process::Child;
 use tokio::process::Command;
 use tokio::sync::mpsc;
 use tokio::sync::watch;
@@ -268,9 +269,9 @@ impl ServerService {
 
 		// TODO: Watch stdout/stderr
 
-		let mut stdin = child.stdin.take();
+		let stdin = child.stdin.take();
 
-		let (command_tx, mut command_rx) = mpsc::channel::<ProcessCommand>(64);
+		let (command_tx, command_rx) = mpsc::channel::<ProcessCommand>(64);
 		let (running_tx, running_rx) = watch::channel(true);
 
 		let runtime = Arc::new(ServerRuntime {
@@ -278,62 +279,11 @@ impl ServerService {
 			running_rx,
 		});
 
+		// Set state to running
 		*process_guard = ServerProcessState::Running(runtime.clone());
 		drop(process_guard);
 
-		// Spawn a task to monitor the child process and handle commands
-		let server_for_task = server.clone();
-		let watcher = async move {
-			let mut ticker = tokio::time::interval(Duration::from_millis(200));
-
-			loop {
-				tokio::select! {
-					maybe_cmd = command_rx.recv() => {
-						match maybe_cmd {
-							Some(ProcessCommand::Kill) => {
-								if let Err(e) = child.kill().await {
-									tracing::warn!("kill failed: {}", e);
-								}
-							},
-							Some(ProcessCommand::Write(mut line)) => {
-								if !line.ends_with('\n') {
-									line.push('\n');
-								}
-								if let Some(stdin_handle) = stdin.as_mut() {
-									if let Err(e) = stdin_handle.write_all(line.as_bytes()).await {
-										tracing::warn!("stdin write failed: {}", e);
-									} else if let Err(e) = stdin_handle.flush().await {
-										tracing::warn!("stdin flush failed: {}", e);
-									}
-								}
-							},
-							None => break,
-						}
-					}
-					_ = ticker.tick() => {
-						match child.try_wait() {
-							Ok(Some(status)) => {
-								tracing::info!("Server process exited: {}", status);
-								break;
-							}
-							Ok(None) => {}
-							Err(e) => {
-								tracing::warn!("try_wait failed: {}", e);
-								break;
-							}
-						}
-					}
-				}
-			}
-
-			let _ = running_tx.send(false);
-			let mut guard = server_for_task.process.write().await;
-			*guard = ServerProcessState::Stopped;
-		};
-
-		tokio::spawn(watcher.instrument(
-			tracing::info_span!(parent: None, "ServerWatcher", server_id = %server_id),
-		));
+		Self::start_watcher(server, child, running_tx.clone(), command_rx, stdin);
 
 		Ok(())
 	}
@@ -436,5 +386,76 @@ impl ServerService {
 		let mut servers_guard = self.servers.write().await;
 		servers_guard.insert(server_id, server);
 		Ok(server_id)
+	}
+
+	/// Internal: Spawns a watcher task for a server process.
+	fn start_watcher(
+		server: &Arc<Server>,
+		child: Child,
+		running_tx: watch::Sender<bool>,
+		command_rx: mpsc::Receiver<ProcessCommand>,
+		stdin: Option<tokio::process::ChildStdin>,
+	) {
+		let server_for_task = server.clone();
+		let watcher = async move {
+			Self::watcher_loop(child, command_rx, stdin).await;
+			let _ = running_tx.send(false);
+			let mut guard = server_for_task.process.write().await;
+			*guard = ServerProcessState::Stopped;
+		};
+
+		tokio::spawn(watcher.instrument(
+			tracing::info_span!(parent: None, "ServerWatcher", server_id = %server.id),
+		));
+	}
+
+	/// Internal: Watcher loop function that handles process monitoring and command execution.
+	/// Exits on process termination or on error.
+	async fn watcher_loop(
+		mut child: Child,
+		mut command_rx: mpsc::Receiver<ProcessCommand>,
+		mut stdin: Option<tokio::process::ChildStdin>,
+	) {
+		let mut ticker = tokio::time::interval(Duration::from_millis(200));
+
+		loop {
+			tokio::select! {
+				maybe_cmd = command_rx.recv() => {
+					match maybe_cmd {
+						Some(ProcessCommand::Kill) => {
+							if let Err(e) = child.kill().await {
+								tracing::warn!("kill failed: {}", e);
+							}
+						},
+						Some(ProcessCommand::Write(mut line)) => {
+							if !line.ends_with('\n') {
+								line.push('\n');
+							}
+							if let Some(stdin_handle) = stdin.as_mut() {
+								if let Err(e) = stdin_handle.write_all(line.as_bytes()).await {
+									tracing::warn!("stdin write failed: {}", e);
+								} else if let Err(e) = stdin_handle.flush().await {
+									tracing::warn!("stdin flush failed: {}", e);
+								}
+							}
+						},
+						None => break,
+					}
+				}
+				_ = ticker.tick() => {
+					match child.try_wait() {
+						Ok(Some(status)) => {
+							tracing::info!("Server process exited: {}", status);
+							break;
+						}
+						Ok(None) => {}
+						Err(e) => {
+							tracing::warn!("try_wait failed: {}", e);
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 }
