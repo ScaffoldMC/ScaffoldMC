@@ -1,9 +1,44 @@
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
-use tokio::{process::Child, sync::RwLock};
+use tokio::sync::{mpsc, watch, RwLock};
 use ts_rs::TS;
 use uuid::Uuid;
 
 use crate::core::{files::server_config::ServerConfig, game::Game};
+
+#[derive(Debug, Clone)]
+pub enum ProcessCommand {
+	Kill,
+	Write(String),
+}
+
+pub struct ServerRuntime {
+	pub command_tx: mpsc::Sender<ProcessCommand>,
+	pub running_rx: watch::Receiver<bool>,
+}
+
+impl ServerRuntime {
+	pub async fn kill(&self) -> Result<(), String> {
+		self.command_tx
+			.send(ProcessCommand::Kill)
+			.await
+			.map_err(|e| format!("Failed to send kill command: {}", e))?;
+
+		Ok(())
+	}
+
+	pub async fn send_line(&self, line: String) -> Result<(), String> {
+		self.command_tx
+			.send(ProcessCommand::Write(line))
+			.await
+			.map_err(|_| "Process supervisor is not running".to_string())
+	}
+
+	pub fn is_running(&self) -> bool {
+		*self.running_rx.borrow()
+	}
+}
 
 /// Server instance representation
 pub struct Server {
@@ -16,7 +51,7 @@ pub struct Server {
 /// TODO: Add more states (starting, stopping, etc.) to give more granular info
 pub enum ServerProcessState {
 	Stopped,
-	Running(Child),
+	Running(Arc<ServerRuntime>),
 }
 
 impl ServerProcessState {
