@@ -17,3 +17,9 @@ pub struct CreateServerRequest {
 	pub name: String,
 	pub game: Game,
 }
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct ServerCommandRequest {
+	pub command: String,
+}
