@@ -414,6 +414,26 @@ impl ServerService {
 		Ok(server_id)
 	}
 
+	/// Get a snapshot of a server's console output
+	pub async fn get_console_snapshot(
+		&self,
+		server_id: Uuid,
+		since_line: Option<u64>,
+	) -> Result<Vec<ConsoleLine>, ServerError> {
+		let servers = self.servers.read().await;
+		let server = servers
+			.get(&server_id)
+			.cloned()
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let lines = server.console_lines.read().await;
+		let iter = lines
+			.iter()
+			.filter(|l| since_line.is_none_or(|s| l.num > s));
+
+		Ok(iter.take(SERVER_CONSOLE_MAX_LINES).cloned().collect())
+	}
+
 	/// Internal: Generic reader task for stdout/stderr of a server process
 	fn reader_task<R: AsyncRead + Unpin + Send + 'static>(
 		server: Arc<Server>,

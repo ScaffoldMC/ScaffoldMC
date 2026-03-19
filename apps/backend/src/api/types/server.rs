@@ -23,3 +23,9 @@ pub struct CreateServerRequest {
 pub struct ServerCommandRequest {
 	pub command: String,
 }
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct ConsoleQueryParams {
+	pub since: Option<u64>,
+}
