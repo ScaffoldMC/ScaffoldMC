@@ -37,6 +37,7 @@ strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
 thiserror = "2.0.12"
 time = { version = "0.3.41", features = ["serde"] }
 tokio = { version = "1.44.2", features = ["full"] }
+tokio-stream = "0.1.18"
 toml = "0.8.20"
 tower = "0.5.2"
 tower-cookies = "0.11.0"
