@@ -99,32 +99,71 @@ pub async fn get_versions() -> Result<Vec<JavaVersion>, JavaError> {
 	let mut javas: Vec<JavaVersion> = Vec::new();
 
 	for jvm in jvm_paths {
-		let probe_output = Command::new(&jvm)
-			.arg("-jar")
-			.arg("assets/JavaProbe.jar")
+		let command_output = Command::new(&jvm)
+			.arg("-XshowSettings:properties")
+			.arg("-version")
 			.output()
 			.await;
 
-		if let Err(err) = probe_output {
-			tracing::warn!("Failed to run Java probe on JVM: {}", err);
+		if let Err(err) = command_output {
+			tracing::warn!("Failed to run command on JVM {}: {}", jvm.display(), err);
 			continue;
 		}
 
-		let probe_output = probe_output.unwrap();
-		let stdout = String::from_utf8_lossy(&probe_output.stdout);
+		let probe_output = command_output.unwrap();
+		let stdout = String::from_utf8_lossy(&probe_output.stderr);
 
-		match serde_json::from_str::<JavaVersion>(&stdout) {
-			Ok(java_version) => {
-				javas.push(java_version);
+		let mut major_version: Option<u8> = None;
+		let mut version_string: Option<String> = None;
+		let mut vendor: Option<String> = None;
+		let mut arch: Option<String> = None;
+
+		for line in stdout.lines() {
+			let line = line.trim();
+
+			if let Some(rest) = line.strip_prefix("java.specification.version =") {
+				let trimmed = rest.trim();
+
+				// Handle legacy version strings by stripping "1." prefix
+				let version_part = if trimmed.starts_with("1.") {
+					trimmed.trim_start_matches("1.")
+				} else {
+					trimmed
+				};
+
+				let parsed_version = version_part.parse::<u8>();
+
+				if let Ok(version) = parsed_version {
+					major_version = Some(version);
+				} else {
+					tracing::warn!(
+						"Failed to parse major version from JVM output: {}",
+						rest.trim()
+					);
+				}
 			}
-			Err(e) => {
-				tracing::warn!(
-					"Failed to deserialize JavaVersion from probe output for JVM {}: {}",
-					jvm.display(),
-					e
-				);
+
+			if let Some(rest) = line.strip_prefix("java.vm.version =") {
+				version_string = Some(rest.trim().to_string());
+			}
+
+			if let Some(rest) = line.strip_prefix("java.vm.name =") {
+				vendor = Some(rest.trim().to_string());
+			}
+
+			if let Some(rest) = line.strip_prefix("os.arch =") {
+				arch = Some(rest.trim().to_string());
 			}
 		}
+
+		let version = JavaVersion {
+			major_version: major_version.unwrap_or(0),
+			version_string: version_string.unwrap_or_else(|| "Unknown".into()),
+			vendor: vendor.unwrap_or_else(|| "Unknown".into()),
+			arch: arch.unwrap_or_else(|| "Unknown".into()),
+		};
+
+		javas.push(version);
 	}
 
 	Ok(javas)
