@@ -58,3 +58,5 @@ apps/backend/data/
 apps/backend/bindings/
 
 storybook-static
+
+*.log
