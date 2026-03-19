@@ -1,14 +1,18 @@
 use std::sync::Arc;
 
 use axum::{
-	extract::{Path, State},
+	extract::{Path, Query, State},
 	response::IntoResponse,
 	routing, Json, Router,
 };
 use reqwest::StatusCode;
 use uuid::Uuid;
 
-use crate::{api::types::server::ServerCommandRequest, services::server::ServerError, AppState};
+use crate::{
+	api::types::server::{ConsoleQueryParams, ServerCommandRequest},
+	services::server::ServerError,
+	AppState,
+};
 
 pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new()
@@ -16,9 +20,24 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/", routing::post(post))
 }
 
-async fn get() -> impl IntoResponse {
-	// TODO: Return console output stream
-	StatusCode::OK.into_response()
+async fn get(
+	State(state): State<Arc<AppState>>,
+	Path(id): Path<Uuid>,
+	Query(query): Query<ConsoleQueryParams>,
+) -> impl IntoResponse {
+	let console_lines = match state
+		.server_service
+		.get_console_snapshot(id, query.since)
+		.await
+	{
+		Ok(lines) => lines,
+		Err(err) => {
+			tracing::error!("Error getting console lines for server {}: {}", id, err);
+			return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+		}
+	};
+
+	(StatusCode::OK, Json(console_lines)).into_response()
 }
 
 async fn post(
