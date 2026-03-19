@@ -51,15 +51,14 @@ async fn post(
 		.await
 	{
 		Ok(()) => StatusCode::OK.into_response(),
-		Err(err) => match err {
-			ServerError::NoSuchServer(_) => {
+		Err(err) => {
+			if let ServerError::NoSuchServer(_) = err {
 				tracing::error!("Server not found: {}", id);
-				return StatusCode::NOT_FOUND.into_response();
-			}
-			_ => {
+				StatusCode::NOT_FOUND.into_response()
+			} else {
 				tracing::error!("Error sending command to server {}: {}", id, err);
 				StatusCode::INTERNAL_SERVER_ERROR.into_response()
 			}
-		},
+		}
 	}
 }
