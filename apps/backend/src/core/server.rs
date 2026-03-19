@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+	collections::VecDeque,
+	sync::{atomic::AtomicU64, Arc},
+};
 
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, watch, RwLock};
@@ -6,6 +9,21 @@ use ts_rs::TS;
 use uuid::Uuid;
 
 use crate::core::{files::server_config::ServerConfig, game::Game};
+
+#[derive(Clone, Serialize, Deserialize, ts_rs::TS)]
+#[ts(export)]
+pub struct ConsoleLine {
+	pub num: u64,
+	pub stream: ConsoleStreamType,
+	pub line: String,
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, ts_rs::TS)]
+#[ts(export)]
+pub enum ConsoleStreamType {
+	Stdout,
+	Stderr,
+}
 
 #[derive(Debug, Clone)]
 pub enum ProcessCommand {
@@ -45,6 +63,8 @@ pub struct Server {
 	pub id: Uuid,
 	pub config: RwLock<ServerConfig>,
 	pub process: RwLock<ServerProcessState>,
+	pub console_lines: RwLock<VecDeque<ConsoleLine>>,
+	pub next_line_num: AtomicU64,
 }
 
 /// Server process state

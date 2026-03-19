@@ -1,4 +1,5 @@
 use time::Duration;
+use tokio::time::Duration as TokioDuration;
 
 // File system
 pub const DATA_FOLDER: &str = "data";
@@ -12,3 +13,7 @@ pub static AUTH_TOKEN_LENGTH: Duration = Duration::minutes(5);
 
 // Reqwest
 pub static CLIENT_USER_AGENT: &str = "ScaffoldMC/0.0.0 (https://github.com/ScaffoldMC/ScaffoldMC)";
+
+// Server runtime
+pub static SERVER_WATCHER_TICK: TokioDuration = TokioDuration::from_millis(200);
+pub static SERVER_CONSOLE_MAX_LINES: usize = 500;

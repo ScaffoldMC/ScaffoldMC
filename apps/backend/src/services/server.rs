@@ -1,8 +1,12 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
+use crate::config::SERVER_CONSOLE_MAX_LINES;
+use crate::config::SERVER_WATCHER_TICK;
 use crate::core::bin_providers::DownloadInfo;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
+use crate::core::server::ConsoleLine;
+use crate::core::server::ConsoleStreamType;
 use crate::core::server::ProcessCommand;
 use crate::core::server::Server;
 use crate::core::server::ServerInfo;
@@ -11,16 +15,22 @@ use crate::core::server::ServerRuntime;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::path::PathBuf;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
-use std::time::Duration;
 use thiserror::Error;
+use tokio::io::AsyncBufReadExt;
+use tokio::io::AsyncRead;
 use tokio::io::AsyncWriteExt;
+use tokio::io::BufReader;
 use tokio::process::Child;
 use tokio::process::Command;
 use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::sync::RwLock;
+use tokio::task::JoinHandle;
 use tracing::instrument;
 use tracing::Instrument;
 use uuid::Uuid;
@@ -154,6 +164,8 @@ impl ServerService {
 				id: uuid,
 				config: RwLock::new(server_config),
 				process: RwLock::new(ServerProcessState::Stopped),
+				console_lines: RwLock::new(VecDeque::new()),
+				next_line_num: AtomicU64::new(0),
 			});
 
 			servers.insert(uuid, server);
@@ -267,9 +279,9 @@ impl ServerService {
 			.spawn()
 			.map_err(|e| ServerError::StartError(e.to_string()))?;
 
-		// TODO: Watch stdout/stderr
-
 		let stdin = child.stdin.take();
+		let stdout = child.stdout.take();
+		let stderr = child.stderr.take();
 
 		let (command_tx, command_rx) = mpsc::channel::<ProcessCommand>(64);
 		let (running_tx, running_rx) = watch::channel(true);
@@ -283,7 +295,19 @@ impl ServerService {
 		*process_guard = ServerProcessState::Running(runtime.clone());
 		drop(process_guard);
 
-		Self::start_watcher(server, child, running_tx.clone(), command_rx, stdin);
+		// Reset console buffer and line number
+		server.next_line_num.store(0, Ordering::Relaxed);
+		server.console_lines.write().await.clear();
+
+		Self::start_watcher(
+			server,
+			child,
+			running_tx.clone(),
+			command_rx,
+			stdin,
+			stdout,
+			stderr,
+		);
 
 		Ok(())
 	}
@@ -379,6 +403,8 @@ impl ServerService {
 			id: server_id,
 			config: RwLock::new(server_config),
 			process: RwLock::new(ServerProcessState::Stopped),
+			console_lines: RwLock::new(VecDeque::new()),
+			next_line_num: AtomicU64::new(0),
 		});
 
 		tracing::info!("Creating new server instance: name='{}'", name);
@@ -388,6 +414,28 @@ impl ServerService {
 		Ok(server_id)
 	}
 
+	/// Internal: Generic reader task for stdout/stderr of a server process
+	fn reader_task<R: AsyncRead + Unpin + Send + 'static>(
+		server: Arc<Server>,
+		reader: R,
+		stream: ConsoleStreamType,
+	) -> JoinHandle<()> {
+		tokio::spawn(async move {
+			let mut lines = BufReader::new(reader).lines();
+			while let Ok(Some(line)) = lines.next_line().await {
+				// Push line to console buffer and increase line number
+				let num = server.next_line_num.fetch_add(1, Ordering::Relaxed);
+				let mut buf = server.console_lines.write().await;
+
+				if buf.len() >= SERVER_CONSOLE_MAX_LINES {
+					buf.pop_front();
+				}
+
+				buf.push_back(ConsoleLine { num, stream, line });
+			}
+		})
+	}
+
 	/// Internal: Spawns a watcher task for a server process.
 	fn start_watcher(
 		server: &Arc<Server>,
@@ -395,12 +443,25 @@ impl ServerService {
 		running_tx: watch::Sender<bool>,
 		command_rx: mpsc::Receiver<ProcessCommand>,
 		stdin: Option<tokio::process::ChildStdin>,
+		stdout: Option<tokio::process::ChildStdout>,
+		stderr: Option<tokio::process::ChildStderr>,
 	) {
-		let server_for_task = server.clone();
+		let stdout_reader =
+			Self::reader_task(server.clone(), stdout.unwrap(), ConsoleStreamType::Stdout);
+		let stderr_reader =
+			Self::reader_task(server.clone(), stderr.unwrap(), ConsoleStreamType::Stderr);
+
+		let server_for_watcher = server.clone();
 		let watcher = async move {
 			Self::watcher_loop(child, command_rx, stdin).await;
+
+			// End readers once the process has exited
+			stdout_reader.abort();
+			stderr_reader.abort();
+
+			// Update state to stopped
 			let _ = running_tx.send(false);
-			let mut guard = server_for_task.process.write().await;
+			let mut guard = server_for_watcher.process.write().await;
 			*guard = ServerProcessState::Stopped;
 		};
 
@@ -416,7 +477,7 @@ impl ServerService {
 		mut command_rx: mpsc::Receiver<ProcessCommand>,
 		mut stdin: Option<tokio::process::ChildStdin>,
 	) {
-		let mut ticker = tokio::time::interval(Duration::from_millis(200));
+		let mut ticker = tokio::time::interval(SERVER_WATCHER_TICK);
 
 		loop {
 			tokio::select! {
