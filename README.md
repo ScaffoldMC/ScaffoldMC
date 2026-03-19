@@ -2,7 +2,7 @@
 	<img src="./logo.svg" height="256">
 </p>
 
-<p align="center">A self-hosted Minecraft server platform for Minecraft.</p>
+<p align="center">A self-hosted server platform for Minecraft.</p>
 
 > [!NOTE]  
 > This project is under heavy development, and is **not ready for use**.
@@ -24,11 +24,6 @@ intends to go beyond generic server management, providing easy mod management,
 one-click loader installation, and more - bringing the seamless experience of
 third-party client launchers to the server.
 
-### Scope
-
-This project is intended to be a server manager for Minecraft Java Servers and
-Proxies. No other services are intended to be supported.
-
 ## Building
 
 ### Prerequisites
@@ -36,11 +31,13 @@ Proxies. No other services are intended to be supported.
 You will need the following programs installed globally:
 
 - Cargo
-- Node.js 22
+- Node.js 24
 - [pnpm](https://pnpm.io/)
 - [nx](https://www.npmjs.com/package/nx)
-- [just](https://just.systems/) (Optional)
 
 ### Build
 
 Run `nx build` to build both the frontend and backend.
+
+To start the project in dev mode, `nx run-many -t dev` will start both the
+frontend and backend.
