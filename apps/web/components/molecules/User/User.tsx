@@ -32,7 +32,7 @@ export function User() {
 			<div className={styles.details}>
 				<b>{user.fullname}</b>
 			</div>
-			<Button size="icon" level="secondary" onClick={() => logout()}>
+			<Button level="secondary" onClick={() => logout()}>
 				<LogOut size={18} />
 			</Button>
 		</div>

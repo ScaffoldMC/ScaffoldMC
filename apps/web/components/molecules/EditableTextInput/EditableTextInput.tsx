@@ -43,16 +43,16 @@ export function EditableTextInput({
 				onChange={(e) => setInternalValue(e.target.value)}
 			/>
 			{!editMode && editable && (
-				<Button size="icon" onClick={() => setEditMode(true)}>
+				<Button onClick={() => setEditMode(true)}>
 					<Edit size={18} />
 				</Button>
 			)}
 			{editMode && (
 				<>
-					<Button size="icon" level="primary" onClick={handleConfirm}>
+					<Button level="primary" onClick={handleConfirm}>
 						<Check size={18} />
 					</Button>
-					<Button size="icon" onClick={handleCancel}>
+					<Button onClick={handleCancel}>
 						<X size={18} />
 					</Button>
 				</>
