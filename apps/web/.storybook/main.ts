@@ -4,7 +4,7 @@ import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
 	stories: ["../**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
-	addons: [getAbsolutePath("@storybook/addon-themes")],
+	addons: [],
 	framework: {
 		name: getAbsolutePath("@storybook/nextjs-vite"),
 		options: {},
