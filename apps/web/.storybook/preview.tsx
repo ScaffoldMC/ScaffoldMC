@@ -1,5 +1,5 @@
-import type { Preview } from "@storybook/nextjs-vite";
 import localFont from "next/font/local";
+import "../app/globals.css";
 
 import "@/app/globals.css";
 
@@ -8,7 +8,7 @@ const manropeFont = localFont({
 	variable: "--font-manrope",
 });
 
-const preview: Preview = {
+const preview = {
 	parameters: {},
 	decorators: [
 		(Story) => (

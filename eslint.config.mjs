@@ -1,3 +1,4 @@
+import storybook from "eslint-plugin-storybook";
 import pluginTypeScript from "@typescript-eslint/eslint-plugin";
 import parserTypescript from "@typescript-eslint/parser";
 import pluginNext from "@next/eslint-plugin-next";
@@ -66,4 +67,5 @@ export default defineConfig([
 			},
 		},
 	},
+	...storybook.configs["flat/recommended"],
 ]);
