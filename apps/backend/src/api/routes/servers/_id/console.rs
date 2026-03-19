@@ -1,10 +1,14 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use axum::{
 	extract::{Path, Query, State},
-	response::IntoResponse,
+	response::{
+		sse::{Event, KeepAlive},
+		IntoResponse, Sse,
+	},
 	routing, Json, Router,
 };
+use futures_util::{stream, Stream};
 use reqwest::StatusCode;
 use uuid::Uuid;
 
@@ -24,20 +28,64 @@ async fn get(
 	State(state): State<Arc<AppState>>,
 	Path(id): Path<Uuid>,
 	Query(query): Query<ConsoleQueryParams>,
-) -> impl IntoResponse {
-	let console_lines = match state
-		.server_service
-		.get_console_snapshot(id, query.since)
-		.await
-	{
-		Ok(lines) => lines,
-		Err(err) => {
-			tracing::error!("Error getting console lines for server {}: {}", id, err);
-			return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-		}
-	};
+) -> Sse<impl Stream<Item = Result<Event, String>>> {
+	let stream = stream::unfold(
+		(state, id, query.since),
+		|(state, id, mut since)| async move {
+			loop {
+				// Get the next snapshot of console lines
+				let snapshot = match state.server_service.get_console_snapshot(id, since).await {
+					Ok(snapshot) => snapshot,
+					Err(ServerError::NoSuchServer(_)) => {
+						tracing::warn!("Console stream requested for unknown server {}", id);
+						let event = Event::default().event("error").data("Server not found");
+						return Some((Ok(event), (state, id, since)));
+					}
+					Err(err) => {
+						tracing::error!("Error getting console stream for server {}: {}", id, err);
+						tokio::time::sleep(Duration::from_millis(500)).await;
+						continue;
+					}
+				};
 
-	(StatusCode::OK, Json(console_lines)).into_response()
+				if snapshot.is_empty() {
+					tokio::time::sleep(Duration::from_millis(250)).await;
+					continue;
+				}
+
+				// Update the "since" parameter to the last line number in the snapshot
+				let last_num = snapshot.last().map(|line| line.num).unwrap_or_default();
+				since = Some(last_num);
+
+				// Serialize the snapshot to JSON
+				let payload = match serde_json::to_string(&snapshot) {
+					Ok(payload) => payload,
+					Err(err) => {
+						tracing::error!(
+							"Failed to serialize console snapshot for server {}: {}",
+							id,
+							err
+						);
+
+						let event = Event::default()
+							.event("error")
+							.data("Failed to serialize console snapshot");
+
+						return Some((Ok(event), (state, id, since)));
+					}
+				};
+
+				let event = Event::default()
+					.event("console")
+					.id(last_num.to_string())
+					.data(payload);
+
+				return Some((Ok(event), (state, id, since)));
+			}
+		},
+	);
+
+	Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
 async fn post(
