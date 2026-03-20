@@ -10,7 +10,7 @@ const preview = {
 	parameters: {},
 	decorators: [
 		(Story) => (
-			<div className={manropeFont.className}>
+			<div className={manropeFont.variable}>
 				<Story />
 			</div>
 		),
