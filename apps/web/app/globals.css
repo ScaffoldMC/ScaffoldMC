@@ -2,6 +2,7 @@
 
 @theme {
 	--color-primary: #59b800;
+	--font-sans: var(--font-manrope), sans-serif;
 }
 
 /*============================= Global Variables =============================*/
@@ -26,9 +27,7 @@
 	--border-radius: 6px;
 	background-color: var(--color-background);
 	color: var(--color-text);
-
 	font-size: var(--font-size-medium);
-	font-family: var(--font-manrope);
 }
 
 @media (prefers-color-scheme: dark) {

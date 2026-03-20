@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={manropeFont.className}>
+			<body className={manropeFont.variable}>
 				<Providers>{children}</Providers>
 			</body>
 		</html>
