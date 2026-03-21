@@ -32,14 +32,14 @@ export function SidebarFooter({ children }: { children: React.ReactNode }) {
 
 const activeClassName = cva(
 	cn(
-		"flex items-center justify-start gap-2 rounded-md p-2 text-text no-underline",
+		"flex items-center justify-start gap-2 rounded-md p-2 no-underline",
 		"transition-[background-color] duration-100 ease-in-out",
-		"hover:bg-primary-hover",
+		"hover:bg-hover",
 	),
 	{
 		variants: {
 			active: {
-				true: "bg-primary-background text-primary hover:bg-primary-hover",
+				true: "bg-primary-background text-primary hover:bg-primary-background",
 				false: "",
 			},
 		},
