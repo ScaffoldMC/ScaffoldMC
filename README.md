@@ -1,8 +1,7 @@
 <p align="center">
 	<img src="./logo.svg" height="256">
+	A self-hosted server platform for Minecraft.
 </p>
-
-<p align="center">A self-hosted server platform for Minecraft.</p>
 
 > [!NOTE]  
 > This project is under heavy development, and is **not ready for use**.
