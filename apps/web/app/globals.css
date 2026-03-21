@@ -1,21 +1,54 @@
 @import "tailwindcss";
 
-@theme {
+/*============================= Global Variables =============================*/
+
+:root {
 	--color-primary: #59b800;
 	--font-sans: var(--font-manrope), sans-serif;
 
 	--color-primary-background: #59b8001a;
-	--color-primary-hover: #59b8000f;
+	--color-hover: #f8f8f8;
 
 	--color-secondary: #f1f1f1;
+	--color-secondary-hover: #e6e6e6;
 	--color-foreground: #ffffff;
 	--color-background: #fbfbfb;
 	--color-text: #000000;
 	--color-border: #e6e6e6;
 	--color-border-hover: #bfbfbf;
-	--color-error: #ff3d3d;
 
 	--foreground-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+	background-color: var(--color-background);
+	color: var(--color-text);
+	font-size: var(--font-size-medium);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-primary-background: #9fff461a;
+		--color-hover: #333333;
+		--color-secondary: #1a1a1a;
+		--color-secondary-hover: #333333;
+		--color-foreground: #101010;
+		--color-background: #0d0d0d;
+		--color-text: #ffffff;
+		--color-border: #1f1f1f;
+		--color-border-hover: #555555;
+		--foreground-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	}
+}
+
+@theme inline {
+	--color-primary: var(--color-primary);
+	--color-primary-background: var(--color-primary-background);
+	--color-hover: var(--color-hover);
+	--color-secondary: var(--color-secondary);
+	--color-secondary-hover: var(--color-secondary-hover);
+	--color-foreground: var(--color-foreground);
+	--color-background: var(--color-background);
+	--color-border: var(--color-border);
+	--color-border-hover: var(--color-border-hover);
 }
 
 @layer base {
@@ -37,121 +70,4 @@
 	h6 {
 		@apply text-sm font-medium;
 	}
-
-	.dark {
-		--color-primary-background: #9fff461a;
-		--color-primary-hover: #9fff460f;
-
-		--color-secondary: #1a1a1a;
-		--color-foreground: #101010;
-		--color-background: #0d0d0d;
-		--color-text: #ffffff;
-		--color-border: #1f1f1f;
-		--color-border-hover: #555555;
-		--foreground-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-	}
-}
-
-/*============================= Global Variables =============================*/
-
-:root {
-	background-color: var(--color-background);
-	color: var(--color-text);
-	font-size: var(--font-size-medium);
-}
-
-/*================================ CSS Reset ================================*/
-
-/* Sourced from https://piccalil.li/blog/a-more-modern-css-reset/ */
-
-/* Box sizing rules */
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
-
-/* Prevent font size inflation */
-html {
-	-moz-text-size-adjust: none;
-	-webkit-text-size-adjust: none;
-	text-size-adjust: none;
-}
-
-/* Remove default margin in favour of better control in authored CSS */
-body,
-h1,
-h2,
-h3,
-h4,
-p,
-figure,
-blockquote,
-dl,
-dd {
-	margin: 0;
-	margin-block-end: 0;
-}
-
-/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
-ul[role="list"],
-ol[role="list"] {
-	list-style: none;
-}
-
-/* Set core body defaults */
-body {
-	min-height: 100vh;
-	line-height: 1.5;
-}
-
-/* Set shorter line heights on headings and interactive elements */
-h1,
-h2,
-h3,
-h4,
-button,
-input,
-label {
-	line-height: 1.1;
-}
-
-/* Balance text wrapping on headings */
-h1,
-h2,
-h3,
-h4 {
-	text-wrap: balance;
-}
-
-/* A elements that don't have a class get default styles */
-a:not([class]) {
-	color: currentColor;
-	text-decoration-skip-ink: auto;
-}
-
-/* Make images easier to work with */
-img,
-picture {
-	display: block;
-	max-width: 100%;
-}
-
-/* Inherit fonts for inputs and buttons */
-input,
-button,
-textarea,
-select {
-	font-size: inherit;
-	font-family: inherit;
-}
-
-/* Make sure textareas without a rows attribute are not tiny */
-textarea:not([rows]) {
-	min-height: 10em;
-}
-
-/* Anything that has been anchored to should have extra scroll margin */
-:target {
-	scroll-margin-block: 5ex;
 }
