@@ -22,10 +22,7 @@ const buttonStyles = cva(
 			level: {
 				primary:
 					"bg-primary text-white enabled:hover:bg-[hsl(from_var(--color-primary)_h_s_calc(l-10))]",
-				secondary: cn(
-					"bg-gray-100 enabled:hover:bg-gray-200",
-					"dark:bg-gray-900 dark:enabled:hover:bg-gray-800",
-				),
+				secondary: "bg-secondary hover:enabled:bg-secondary-hover",
 				destructive: cn(
 					"bg-red-200  text-red-900 hover:enabled:bg-red-300",
 					"dark:bg-red-900 dark:text-red-300 dark:hover:enabled:bg-red-800",
