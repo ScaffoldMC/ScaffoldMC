@@ -3,12 +3,10 @@
 @theme {
 	--color-primary: #59b800;
 	--font-sans: var(--font-manrope), sans-serif;
-}
 
-/*============================= Global Variables =============================*/
+	--color-primary-background: #59b8001a;
+	--color-primary-hover: #59b8000f;
 
-:root {
-	--color-primary-background: #59b80010;
 	--color-secondary: #f1f1f1;
 	--color-foreground: #ffffff;
 	--color-background: #fbfbfb;
@@ -18,21 +16,32 @@
 	--color-error: #ff3d3d;
 
 	--foreground-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-
-	--font-size-xl: 28px;
-	--font-size-large: 24px;
-	--font-size-medium: 18px;
-	--font-size-small: 16px;
-
-	--border-radius: 6px;
-	background-color: var(--color-background);
-	color: var(--color-text);
-	font-size: var(--font-size-medium);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--color-primary-background: #9fff4610;
+@layer base {
+	h1 {
+		@apply text-3xl;
+	}
+	h2 {
+		@apply text-2xl;
+	}
+	h3 {
+		@apply text-xl;
+	}
+	h4 {
+		@apply text-lg;
+	}
+	h5 {
+		@apply text-base font-medium;
+	}
+	h6 {
+		@apply text-sm font-medium;
+	}
+
+	.dark {
+		--color-primary-background: #9fff461a;
+		--color-primary-hover: #9fff460f;
+
 		--color-secondary: #1a1a1a;
 		--color-foreground: #101010;
 		--color-background: #0d0d0d;
@@ -41,6 +50,14 @@
 		--color-border-hover: #555555;
 		--foreground-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 	}
+}
+
+/*============================= Global Variables =============================*/
+
+:root {
+	background-color: var(--color-background);
+	color: var(--color-text);
+	font-size: var(--font-size-medium);
 }
 
 /*================================ CSS Reset ================================*/
