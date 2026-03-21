@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/atoms/Avatar/Avatar";
-import styles from "./User.module.css";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
 import { useAuth, useLogout } from "@/hooks/auth";
@@ -25,11 +24,11 @@ export function User() {
 	}
 
 	return (
-		<div className={styles.root}>
+		<div className="flex w-full flex-row items-center gap-2.5 [&>*:last-child]:ml-auto">
 			<Avatar size={40}>
 				<AvatarFallback>{makeInitials(user.fullname)}</AvatarFallback>
 			</Avatar>
-			<div className={styles.details}>
+			<div className="flex flex-col items-start justify-start">
 				<b>{user.fullname}</b>
 			</div>
 			<Button level="secondary" onClick={() => logout()}>

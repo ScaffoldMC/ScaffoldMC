@@ -4,13 +4,22 @@ import {
 	CheckboxProps,
 } from "@radix-ui/react-checkbox";
 
-import styles from "./Checkbox.module.css";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/util";
 
-export function Checkbox({ ...props }: CheckboxProps) {
+export function Checkbox({ className, ...props }: CheckboxProps) {
 	return (
-		<Root className={styles.checkboxRoot} {...props}>
-			<CheckboxIndicator className={styles.checkboxIndicator}>
+		<Root
+			className={cn(
+				"inline-flex size-6 items-center justify-center rounded border border-border",
+				"bg-transparent transition-[background-color,border-color] duration-100 ease-in-out",
+				"hover:border-border-hover data-[state=checked]:border-text data-[state=checked]:bg-text",
+				"disabled:cursor-not-allowed",
+				className,
+			)}
+			{...props}
+		>
+			<CheckboxIndicator className="flex h-full w-full items-center justify-center text-background">
 				<Check />
 			</CheckboxIndicator>
 		</Root>

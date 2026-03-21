@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import styles from "./List.module.css";
-import { singularOrPlural } from "@/lib/util";
+import { cn, singularOrPlural } from "@/lib/util";
 
 interface ListProps {
 	children: React.ReactNode;
@@ -26,22 +25,37 @@ export function List({ children, names }: ListProps) {
 	}, [children]);
 
 	return (
-		<div className={styles.root}>
-			<div className={styles.header}>
+		<div className="overflow-hidden rounded-md border border-border bg-foreground">
+			<div className="flex flex-row border-b border-secondary p-2">
 				<b>
 					{numItems}{" "}
 					{singularOrPlural(numItems, names.singular, names.plural)}
 				</b>
 			</div>
-			<div className={styles.content} ref={contentRef}>
+			<div
+				className="flex w-full flex-col [&>*:last-child]:border-b-0"
+				ref={contentRef}
+			>
 				{children}
 			</div>
 		</div>
 	);
 }
 
-export function ListItem({ children }: { children: React.ReactNode }) {
-	return <div className={styles.item}>{children}</div>;
+export function ListItem({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<div
+			className={cn("border-b border-secondary bg-foreground", className)}
+		>
+			{children}
+		</div>
+	);
 }
 
 List.Item = ListItem;

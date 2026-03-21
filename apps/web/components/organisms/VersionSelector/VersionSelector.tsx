@@ -1,5 +1,4 @@
 import { Dropdown } from "@/components/atoms/Dropdown/Dropdown";
-import styles from "./VersionSelector.module.css";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useState, useMemo, useEffect } from "react";
@@ -106,7 +105,7 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 	};
 
 	return (
-		<div className={styles.container}>
+		<div className="flex w-full flex-row items-center justify-start gap-1 *:w-36">
 			{levels.map((levelIndex) => (
 				<Dropdown
 					key={levelIndex}

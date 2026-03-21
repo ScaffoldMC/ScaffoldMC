@@ -1,7 +1,6 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Check, Edit, X } from "lucide-react";
-import styles from "./EditableTextInput.module.css";
 import { useState } from "react";
 
 interface EditableTextInputProps {
@@ -31,7 +30,7 @@ export function EditableTextInput({
 	};
 
 	return (
-		<div className={styles.container}>
+		<div className="flex flex-row gap-1">
 			<TextInput
 				style={{
 					minWidth: 0,
