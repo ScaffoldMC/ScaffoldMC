@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import styles from "./ServerList.module.css";
 import Link from "next/link";
 import {
 	Indicator,
@@ -60,9 +59,12 @@ function ServerListItem({ uuid }: { uuid: string }) {
 
 	return (
 		<ListItem>
-			<Link href={`/servers/${uuid}`} className={styles.link}>
-				<div className={styles.item}>
-					<div className={styles.statusCluster}>
+			<Link
+				href={`/servers/${uuid}`}
+				className="font-medium text-text no-underline"
+			>
+				<div className="flex flex-row items-center justify-between bg-foreground p-2.5 transition-[background-color] duration-100 ease-in-out hover:bg-secondary">
+					<div className="flex w-fit flex-row items-center gap-2">
 						<Avatar size={28} shape="square-small">
 							<AvatarFallback>?</AvatarFallback>
 							<AvatarImage src="/images/server-default.png" />
@@ -71,7 +73,7 @@ function ServerListItem({ uuid }: { uuid: string }) {
 						<p>{serverInfo.data?.name || "Server name"}</p>
 					</div>
 
-					<div className={styles.statusCluster}>
+					<div className="flex w-fit flex-row items-center gap-2">
 						<Indicator state={indicatorState} />
 						<p>{serverInfo.data?.state || "Unknown"}</p>
 					</div>

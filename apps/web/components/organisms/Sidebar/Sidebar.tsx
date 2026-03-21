@@ -1,38 +1,53 @@
 "use client";
 
 import Link, { LinkProps } from "next/link";
-import styles from "./Sidebar.module.css";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cva } from "class-variance-authority";
+import { cn } from "@/lib/util";
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
-	return <div className={styles.sidebar}>{children}</div>;
+	return (
+		<div className="flex h-screen w-62.5 flex-col bg-foreground shadow-sm">
+			{children}
+		</div>
+	);
 }
 
 export function SidebarHeader({ children }: { children: React.ReactNode }) {
-	return <div className={styles.sidebarHeader}>{children}</div>;
+	return <div className="sticky top-0 flex flex-col p-3">{children}</div>;
 }
 
 export function SidebarContent({ children }: { children?: React.ReactNode }) {
-	return <div className={styles.sidebarContent}>{children}</div>;
+	return (
+		<div className="flex w-full grow flex-col gap-1 overflow-y-auto p-2">
+			{children}
+		</div>
+	);
 }
 
 export function SidebarFooter({ children }: { children: React.ReactNode }) {
-	return <div className={styles.sidebarFooter}>{children}</div>;
+	return <div className="sticky bottom-0 mt-auto p-3">{children}</div>;
 }
 
-const activeClassName = cva(styles.sidebarLink, {
-	variants: {
-		active: {
-			true: styles.sidebarLinkActive,
-			false: "",
+const activeClassName = cva(
+	cn(
+		"flex items-center justify-start gap-2 rounded-md p-2 text-text no-underline",
+		"transition-[background-color] duration-100 ease-in-out",
+		"hover:bg-primary-hover",
+	),
+	{
+		variants: {
+			active: {
+				true: "bg-primary-background text-primary hover:bg-primary-hover",
+				false: "",
+			},
+		},
+		defaultVariants: {
+			active: false,
 		},
 	},
-	defaultVariants: {
-		active: false,
-	},
-});
+);
 
 export function SidebarLink({
 	children,
@@ -70,8 +85,8 @@ export function SublinkGroup({
 	}, [pathname, baseUrl]);
 
 	return isActive ? (
-		<div className={styles.sublinkGroup}>
-			<div className={styles.sublinkChildren}>{children}</div>
+		<div className="flex flex-row gap-0.5 pl-4 [&_a]:text-sm">
+			<div className="flex flex-col gap-0.5">{children}</div>
 		</div>
 	) : null;
 }

@@ -3,7 +3,6 @@
 import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Button } from "@/components/atoms/Button/Button";
-import styles from "./Login.module.css";
 import { useState } from "react";
 
 interface LoginProps {
@@ -25,10 +24,13 @@ export function Login({ onLogin }: LoginProps) {
 	};
 
 	return (
-		<div className={styles.login}>
-			<h3>Sign in to continue</h3>
-			<form className={styles.form} onSubmit={handleSubmit}>
-				<div className={styles.field}>
+		<div className="flex w-100 flex-col items-center justify-center gap-6 rounded-lg bg-foreground p-12 shadow-sm">
+			<h3 className="text-xl">Sign in to continue</h3>
+			<form
+				className="flex w-full flex-col items-center justify-center gap-6 [&_button]:w-full [&_input]:w-full"
+				onSubmit={handleSubmit}
+			>
+				<div className="flex w-full flex-col items-start justify-start gap-1">
 					<Label htmlFor="username">Username</Label>
 					<TextInput
 						type="text"
@@ -38,7 +40,7 @@ export function Login({ onLogin }: LoginProps) {
 						required
 					/>
 				</div>
-				<div className={styles.field}>
+				<div className="flex w-full flex-col items-start justify-start gap-1">
 					<Label htmlFor="password">Password</Label>
 					<TextInput
 						type="password"

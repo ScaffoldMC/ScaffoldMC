@@ -4,7 +4,6 @@ import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { Button } from "@/components/atoms/Button/Button";
 import { useState } from "react";
-import styles from "./PasswordDialog.module.css";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { DialogContent, DialogOverlay, DialogPortal } from "../Dialog/Dialog";
 
@@ -18,7 +17,7 @@ export function PasswordDialogPortal({
 }: PasswordDialogPortalProps) {
 	const [isError, setIsError] = useState(false);
 
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
 		const password = formData.get("password") as string;
@@ -31,15 +30,18 @@ export function PasswordDialogPortal({
 	return (
 		<DialogPortal>
 			<DialogOverlay />
-			<DialogContent>
-				<DialogPrimitive.Title>
+			<DialogContent className="gap-2">
+				<DialogPrimitive.Title className="text-center">
 					Authenticate to continue
 				</DialogPrimitive.Title>
-				<DialogPrimitive.Description>
+				<DialogPrimitive.Description className="text-center">
 					Your password is required to change certain settings.
 				</DialogPrimitive.Description>
-				<form className={styles.form} onSubmit={handleSubmit}>
-					<div className={styles.field}>
+				<form
+					className="flex w-full flex-col items-center justify-center mt-4 gap-6 [&_button]:w-full [&_input]:w-full"
+					onSubmit={handleSubmit}
+				>
+					<div className="flex w-full flex-col items-start justify-start gap-1">
 						<Label htmlFor="password">Password</Label>
 						<TextInput
 							type="password"
@@ -49,14 +51,16 @@ export function PasswordDialogPortal({
 							required
 						/>
 					</div>
-					<Button type="submit" level="primary">
-						Continue
-					</Button>
-					<DialogPrimitive.Close asChild>
-						<Button type="button" level="secondary">
-							Cancel
+					<div className="flex w-full flex-col items-center justify-center gap-3">
+						<Button type="submit" level="primary">
+							Continue
 						</Button>
-					</DialogPrimitive.Close>
+						<DialogPrimitive.Close asChild>
+							<Button type="button" level="secondary">
+								Cancel
+							</Button>
+						</DialogPrimitive.Close>
+					</div>
 				</form>
 			</DialogContent>
 		</DialogPortal>

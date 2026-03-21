@@ -2,32 +2,38 @@
 
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import styles from "./Avatar.module.css";
 import { cva } from "class-variance-authority";
+import { cn } from "@/lib/util";
 
 type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
 	shape?: "circle" | "square-small" | "square-medium";
 	size: number;
 };
 
-const avatarStyles = cva(styles.base, {
-	variants: {
-		shape: {
-			circle: styles.circle,
-			"square-small": styles.squareSmall,
-			"square-medium": styles.squareMedium,
+const avatarStyles = cva(
+	cn(
+		"inline-flex items-center justify-center align-middle",
+		"h-full w-full overflow-hidden bg-secondary select-none",
+	),
+	{
+		variants: {
+			shape: {
+				circle: "rounded-full",
+				"square-small": "rounded-md",
+				"square-medium": "rounded-[10px]",
+			},
+		},
+		defaultVariants: {
+			shape: "circle",
 		},
 	},
-	defaultVariants: {
-		shape: "circle",
-	},
-});
+);
 
-export function Avatar({ size, shape, ...props }: AvatarProps) {
+export function Avatar({ size, shape, className, ...props }: AvatarProps) {
 	return (
 		<AvatarPrimitive.Root
 			style={{ width: size, height: size }}
-			className={avatarStyles({ shape })}
+			className={avatarStyles({ shape, className })}
 			{...props}
 		/>
 	);
@@ -36,17 +42,29 @@ export function Avatar({ size, shape, ...props }: AvatarProps) {
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
 export function AvatarImage({
+	className,
 	...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-	return <AvatarPrimitive.Image {...props} />;
+	return (
+		<AvatarPrimitive.Image
+			className={cn("h-full w-full object-cover", className)}
+			{...props}
+		/>
+	);
 }
 
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 export function AvatarFallback({
+	className,
 	...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-	return <AvatarPrimitive.Fallback {...props} />;
+	return (
+		<AvatarPrimitive.Fallback
+			className={cn("h-full w-full", className)}
+			{...props}
+		/>
+	);
 }
 
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
