@@ -5,7 +5,7 @@
 :root {
 	/* Brand colors */
 	--color-brand: #f8df00;
-	--color-accent-lighest: #d0f5f0;
+	--color-accent-lightest: #d0f5f0;
 	--color-accent-light: #7fe0d4;
 	--color-accent-base: #00b4a0;
 	--color-accent-dark: #007a6e;
@@ -51,7 +51,7 @@
 
 	/* Brand colors */
 	--color-brand: var(--color-brand);
-	--color-accent-lighest: var(--color-accent-lighest);
+	--color-accent-lightest: var(--color-accent-lightest);
 	--color-accent-light: var(--color-accent-light);
 	--color-accent-base: var(--color-accent-base);
 	--color-accent-dark: var(--color-accent-dark);
