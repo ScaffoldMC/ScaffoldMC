@@ -12,25 +12,27 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const buttonStyles = cva(
 	cn(
 		"inline-flex items-center justify-center font-semibold cursor-pointer",
-		"h-9 w-fit gap-2 px-2 border-0 rounded-sm",
-		"transition-[background-color] duration-100 ease-in-out",
-		"text-base text-black dark:text-white",
+		"h-9 w-fit gap-2 rounded-sm border px-2",
+		"transition-[background-color,border-color,color] duration-100 ease-in-out",
+		"text-base",
 		"[&_svg]:inline-block disabled:cursor-not-allowed disabled:opacity-50",
 	),
 	{
 		variants: {
 			level: {
-				primary:
-					"bg-primary text-white enabled:hover:bg-[hsl(from_var(--color-primary)_h_s_calc(l-10))]",
-				secondary: "bg-secondary hover:enabled:bg-secondary-hover",
+				primary: cn(
+					"border-transparent bg-accent-base text-surface-raised",
+					"enabled:hover:bg-accent-dark",
+				),
+				secondary: cn(
+					"border-border-static bg-surface-overlay text-text-primary",
+					"enabled:hover:bg-surface",
+				),
 				destructive: cn(
-					"bg-red-200  text-red-900 hover:enabled:bg-red-300",
-					"dark:bg-red-900 dark:text-red-300 dark:hover:enabled:bg-red-800",
+					"border-red-400 bg-red-200 text-red-900",
+					"enabled:hover:bg-red-300",
 				),
-				ghost: cn(
-					"bg-transparent enabled:hover:bg-[hsl(from_var(--color-secondary)_h_s_calc(l-10))]",
-					"dark:enabled:hover:bg-[hsl(from_var(--color-secondary)_h_s_calc(l+10))]",
-				),
+				ghost: "border-border-static bg-transparent text-text-secondary enabled:hover:bg-surface-overlay",
 			},
 			size: {
 				default: "h-9 min-w-9",

@@ -61,9 +61,9 @@ function ServerListItem({ uuid }: { uuid: string }) {
 		<ListItem>
 			<Link
 				href={`/servers/${uuid}`}
-				className="font-medium text-text no-underline"
+				className="font-medium text-text-primary no-underline"
 			>
-				<div className="flex flex-row items-center justify-between bg-foreground p-2.5 transition-[background-color] duration-100 ease-in-out hover:bg-secondary">
+				<div className="flex flex-row items-center justify-between bg-surface-raised p-2.5 transition-[background-color] duration-100 ease-in-out hover:bg-surface-overlay">
 					<div className="flex w-fit flex-row items-center gap-2">
 						<Avatar size={28} shape="square-small">
 							<AvatarFallback>?</AvatarFallback>

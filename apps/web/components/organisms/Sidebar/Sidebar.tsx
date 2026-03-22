@@ -8,7 +8,7 @@ import { cn } from "@/lib/util";
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="flex h-screen w-62.5 flex-col bg-foreground shadow-sm">
+		<div className="flex h-screen w-62.5 flex-col border-r border-border-static bg-surface">
 			{children}
 		</div>
 	);
@@ -32,15 +32,17 @@ export function SidebarFooter({ children }: { children: React.ReactNode }) {
 
 const activeClassName = cva(
 	cn(
-		"flex items-center justify-start gap-2 rounded-md p-2 no-underline",
-		"transition-[background-color] duration-100 ease-in-out",
-		"hover:bg-hover",
+		"flex items-center justify-start gap-2 rounded-md border border-transparent p-2 no-underline",
+		"transition-[background-color,border-color,color] duration-100 ease-in-out",
 	),
 	{
 		variants: {
 			active: {
-				true: "bg-primary-background text-primary hover:bg-primary-background",
-				false: "",
+				true: cn(
+					"bg-accent-lightest text-accent-darkest hover:bg-accent-lightest",
+					"dark:bg-accent-darkest dark:text-accent-lightest dark:hover:bg-accent-darkest",
+				),
+				false: "hover:bg-surface-overlay text-text-primary",
 			},
 		},
 		defaultVariants: {

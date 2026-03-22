@@ -8,9 +8,9 @@ export function Dropdown({
 	return (
 		<select
 			className={cn(
-				"rounded-lg border border-border bg-foreground p-1.5 text-sm text-text",
+				"rounded-lg border border-border-static bg-surface-raised p-1.5 text-sm text-text-primary",
 				"transition-[background-color,border-color] duration-100 ease-in-out",
-				"hover:border-border-hover",
+				"hover:border-border-hover focus:border-border-active focus:outline-none",
 				className,
 			)}
 			{...props}

@@ -24,7 +24,7 @@ export function Login({ onLogin }: LoginProps) {
 	};
 
 	return (
-		<div className="flex w-100 flex-col items-center justify-center gap-6 rounded-lg bg-foreground p-12 shadow-sm">
+		<div className="flex w-100 flex-col items-center justify-center gap-6 rounded-lg border border-border-static bg-surface-raised p-12 text-text-primary">
 			<h3 className="text-xl">Sign in to continue</h3>
 			<form
 				className="flex w-full flex-col items-center justify-center gap-6 [&_button]:w-full [&_input]:w-full"
