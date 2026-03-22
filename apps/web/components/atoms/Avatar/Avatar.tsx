@@ -13,7 +13,7 @@ type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
 const avatarStyles = cva(
 	cn(
 		"inline-flex items-center justify-center align-middle",
-		"h-full w-full overflow-hidden bg-secondary select-none",
+		"h-full w-full overflow-hidden bg-surface-overlay select-none",
 	),
 	{
 		variants: {

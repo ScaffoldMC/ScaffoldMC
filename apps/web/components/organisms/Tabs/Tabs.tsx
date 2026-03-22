@@ -24,7 +24,7 @@ export function TabsList({
 	return (
 		<TabsPrimitive.List
 			className={cn(
-				"flex w-full items-center justify-between gap-2 rounded-[10px] bg-foreground p-1 shadow-sm",
+				"flex w-full items-center justify-between gap-2 p-1",
 				className,
 			)}
 			{...props}
@@ -36,16 +36,15 @@ export function TabsList({
 
 export function TabsTrigger({
 	children,
-	className,
 	...props
 }: TabsPrimitive.TabsTriggerProps) {
 	return (
 		<TabsPrimitive.Trigger
 			className={cn(
-				"flex grow items-center justify-center rounded-md border border-transparent bg-transparent px-4 py-2 text-text",
-				"transition-[background-color] duration-100 ease-in-out hover:cursor-pointer",
-				"data-[state=active]:bg-primary-background data-[state=active]:text-primary",
-				className,
+				"h-8 flex grow items-center justify-center border-b-2 border-transparent bg-transparent px-4 py-2 text-text-secondary",
+				"transition-[background-color,border-color,color] duration-100 ease-in-out hover:cursor-pointer",
+				"hover:bg-surface-overlay hover:text-text-primary",
+				"data-[state=active]:text-accent-base data-[state=active]:rounded-none data-[state=active]:border-accent-base",
 			)}
 			{...props}
 		>

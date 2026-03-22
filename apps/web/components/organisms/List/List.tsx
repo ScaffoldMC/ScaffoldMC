@@ -25,8 +25,8 @@ export function List({ children, names }: ListProps) {
 	}, [children]);
 
 	return (
-		<div className="overflow-hidden rounded-md border border-border bg-foreground">
-			<div className="flex flex-row border-b border-secondary p-2">
+		<div className="overflow-hidden rounded-md border border-border-static bg-surface">
+			<div className="flex flex-row border-b border-border-static bg-surface-overlay p-2 text-text-primary">
 				<b>
 					{numItems}{" "}
 					{singularOrPlural(numItems, names.singular, names.plural)}
@@ -51,7 +51,10 @@ export function ListItem({
 }) {
 	return (
 		<div
-			className={cn("border-b border-secondary bg-foreground", className)}
+			className={cn(
+				"border-b border-border-static bg-surface-raised",
+				className,
+			)}
 		>
 			{children}
 		</div>
