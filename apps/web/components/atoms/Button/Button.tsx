@@ -32,7 +32,7 @@ const buttonStyles = cva(
 					"border-red-400 bg-red-200 text-red-900",
 					"enabled:hover:bg-red-300",
 				),
-				ghost: "border-border-static bg-transparent text-text-secondary enabled:hover:bg-surface-overlay",
+				ghost: "border-transparent bg-transparent text-text-primary enabled:hover:bg-surface-overlay",
 			},
 			size: {
 				default: "h-9 min-w-9",
