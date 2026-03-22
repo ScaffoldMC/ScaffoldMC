@@ -5,11 +5,11 @@ import {
 	SidebarFooter,
 	SidebarLink,
 } from "@/components/organisms/Sidebar/Sidebar";
-import styles from "./layout.module.css";
 import { User } from "@/components/molecules/User/User";
 import { Home, PlusCircle, Server, Settings } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function DashboardLayout({
 	children,
@@ -27,27 +27,31 @@ export default async function DashboardLayout({
 	}
 
 	return (
-		<div className={styles.dashboard}>
+		<div className="flex flex-row">
 			<Sidebar>
 				<SidebarHeader>
-					<h1 className={styles.logo}>App Name</h1>
-					<p className={styles.tagline}>Some other info, probably.</p>
+					<Image
+						src="./images/logo.svg"
+						alt="ScaffoldMC Logo"
+						width={300}
+						height={64}
+					/>
 				</SidebarHeader>
 				<SidebarContent>
 					<SidebarLink href="/home">
-						<Home size={18} className={styles.icon} />
+						<Home size={18} />
 						Dashboard
 					</SidebarLink>
 					<SidebarLink href="/servers">
-						<Server size={18} className={styles.icon} />
+						<Server size={18} />
 						Servers
 					</SidebarLink>
 					<SidebarLink href="/create-server">
-						<PlusCircle size={18} className={styles.icon} />
+						<PlusCircle size={18} />
 						Create Server
 					</SidebarLink>
 					<SidebarLink href="/settings">
-						<Settings size={18} className={styles.icon} />
+						<Settings size={18} />
 						Settings
 					</SidebarLink>
 				</SidebarContent>
@@ -55,7 +59,9 @@ export default async function DashboardLayout({
 					<User />
 				</SidebarFooter>
 			</Sidebar>
-			<div className={styles.content}>{children}</div>
+			<div className="flex flex-col flex-1 m-0 p-8 h-screen overflow-auto">
+				{children}
+			</div>
 		</div>
 	);
 }
