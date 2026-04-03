@@ -6,9 +6,7 @@ import {
 	SidebarLink,
 } from "@/components/organisms/Sidebar/Sidebar";
 import { User } from "@/components/molecules/User/User";
-import { Home, PlusCircle, Server, Settings } from "lucide-react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { Home, Server, Settings } from "lucide-react";
 import Image from "next/image";
 
 export default async function DashboardLayout({
@@ -16,16 +14,6 @@ export default async function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	// Redirect if the user doesn't have a refresh token.
-	// This isn't an actual auth check, but a cleaner way to redirect without a
-	// flash of web content.
-
-	const refresh_token = (await cookies()).get("ref_token")?.value;
-
-	if (!refresh_token) {
-		redirect("/login");
-	}
-
 	return (
 		<div className="flex flex-row">
 			<Sidebar>
