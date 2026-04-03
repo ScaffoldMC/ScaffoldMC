@@ -46,10 +46,6 @@ export default async function DashboardLayout({
 						<Server size={18} />
 						Servers
 					</SidebarLink>
-					<SidebarLink href="/create-server">
-						<PlusCircle size={18} />
-						Create Server
-					</SidebarLink>
 					<SidebarLink href="/settings">
 						<Settings size={18} />
 						Settings
