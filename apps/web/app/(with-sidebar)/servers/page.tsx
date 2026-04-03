@@ -16,8 +16,14 @@ export default function Servers() {
 	};
 
 	return (
-		<div>
-			<h1>Servers</h1>
+		<div className="flex flex-col gap-2">
+			<div className="flex justify-between">
+				<h1>Servers</h1>
+				<Button onClick={() => setCreateDialogOpen(true)}>
+					Create Server
+				</Button>
+			</div>
+
 			<DialogRoot
 				open={createDialogOpen}
 				modal={true}
@@ -26,9 +32,6 @@ export default function Servers() {
 				<ServerCreateDialog onServerCreate={handleServerCreate} />
 			</DialogRoot>
 
-			<Button onClick={() => setCreateDialogOpen(true)}>
-				Create Server
-			</Button>
 			<ServerList />
 		</div>
 	);
