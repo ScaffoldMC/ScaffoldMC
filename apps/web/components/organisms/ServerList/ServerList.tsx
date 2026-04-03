@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
 import Link from "next/link";
-import { IndicatorState } from "@/components/atoms/Indicator/Indicator";
 import { List, ListItem } from "@/components/organisms/List/List";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
@@ -10,8 +8,6 @@ import Image from "next/image";
 import { cn, gameString } from "@/lib/util";
 import { EthernetPort, Play, Square } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
-
-// TODO: Make brief & detailed view of server list
 
 export function ServerList() {
 	const serverIds = useQuery({
@@ -41,21 +37,7 @@ function ServerListItem({ uuid }: { uuid: string }) {
 		retry: false,
 	});
 
-	let indicatorState: IndicatorState = "error";
-
-	switch (serverInfo.data?.state) {
-		case "Running":
-			indicatorState = "success";
-			break;
-		case "Stopped":
-		default:
-			indicatorState = "error";
-			break;
-	}
-
-	useEffect(() => {
-		console.log(serverInfo.data);
-	}, [serverInfo.data]);
+	// TODO: Get port for server
 
 	return (
 		<ListItem>
