@@ -31,7 +31,7 @@ export default async function DashboardLayout({
 			<Sidebar>
 				<SidebarHeader>
 					<Image
-						src="./images/logo.svg"
+						src="/images/logo.svg"
 						alt="ScaffoldMC Logo"
 						width={300}
 						height={64}
