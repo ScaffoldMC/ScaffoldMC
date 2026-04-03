@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import styles from "./styles.module.css";
 import { Login } from "@/components/organisms/Login/Login";
 import { useLogin } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
@@ -16,7 +14,7 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className={styles.root}>
+		<div className="flex flex-col gap-2 h-lvh w-full items-center justify-center">
 			<Login onLogin={handleLogin} />
 		</div>
 	);
