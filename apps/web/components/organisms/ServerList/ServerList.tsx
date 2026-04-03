@@ -1,16 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import {
-	Indicator,
-	IndicatorState,
-} from "@/components/atoms/Indicator/Indicator";
+import { IndicatorState } from "@/components/atoms/Indicator/Indicator";
 import { List, ListItem } from "@/components/organisms/List/List";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import Image from "next/image";
-import { cn } from "@/lib/util";
+import { cn, gameString } from "@/lib/util";
 import { Play, SquareStop } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
 
@@ -56,6 +53,10 @@ function ServerListItem({ uuid }: { uuid: string }) {
 			break;
 	}
 
+	useEffect(() => {
+		console.log(serverInfo.data);
+	}, [serverInfo.data]);
+
 	return (
 		<ListItem>
 			<Link
@@ -77,7 +78,13 @@ function ServerListItem({ uuid }: { uuid: string }) {
 							className="rounded-lg"
 						/>
 
-						<p>{serverInfo.data?.name || "Server name"}</p>
+						<div>
+							<p>{serverInfo.data?.name || "Server name"}</p>
+							<p className="text-text-secondary text-xs">
+								{serverInfo.data &&
+									gameString(serverInfo.data.game)}
+							</p>
+						</div>
 					</div>
 
 					<div className="flex w-fit flex-row items-center gap-2">
