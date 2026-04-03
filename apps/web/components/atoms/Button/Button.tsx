@@ -54,7 +54,10 @@ export function Button({
 	...props
 }: ButtonProps) {
 	return (
-		<button className={buttonStyles({ level, size, className })} {...props}>
+		<button
+			className={cn(buttonStyles({ level, size }), className)}
+			{...props}
+		>
 			{children}
 		</button>
 	);
