@@ -19,10 +19,18 @@ export default async function DashboardLayout({
 			<Sidebar>
 				<SidebarHeader>
 					<Image
-						src="/images/logo.svg"
+						src="/images/logo-light.svg"
 						alt="ScaffoldMC Logo"
 						width={300}
 						height={64}
+						className="block dark:hidden"
+					/>
+					<Image
+						src="/images/logo-dark.svg"
+						alt="ScaffoldMC Logo"
+						width={300}
+						height={64}
+						className="hidden dark:block"
 					/>
 				</SidebarHeader>
 				<SidebarContent>
