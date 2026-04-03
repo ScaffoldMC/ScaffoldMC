@@ -7,6 +7,7 @@ import {
 	Game,
 	OptionsResponse,
 } from "@/lib/servertypes";
+import { Check, Info, LoaderCircle } from "lucide-react";
 
 type VersionResponse = CompleteVersionResponse | OptionsResponse;
 
@@ -19,6 +20,7 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 	const [levelCache, setLevelCache] = useState<
 		Record<number, OptionsResponse>
 	>({});
+	const [gameFound, setGameFound] = useState(false);
 
 	const currentRoute =
 		path.length > 0 ? `/game-versions/${path.join("/")}` : "/game-versions";
@@ -35,7 +37,10 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 	useEffect(() => {
 		// Reached complete version response
 		if (currentLevel.data && "game" in currentLevel.data) {
+			setGameFound(true);
 			onGame(currentLevel.data.game);
+		} else {
+			setGameFound(false);
 		}
 
 		// Cache options for each selection level
@@ -105,23 +110,35 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 	};
 
 	return (
-		<div className="flex w-full flex-row items-center justify-start gap-1 *:w-36">
-			{levels.map((levelIndex) => (
-				<Dropdown
-					key={levelIndex}
-					onChange={(e) =>
-						handleSelectChange(levelIndex, e.target.value)
-					}
-					value={path[levelIndex] || ""}
-				>
-					<option value="">{getLevelMessage(levelIndex)}</option>
-					{getLevelOptions(levelIndex)?.map((option: string) => (
-						<option key={option} value={option}>
-							{option}
-						</option>
-					))}
-				</Dropdown>
-			))}
+		<div className="flex flex-col gap-2">
+			<div className="flex w-full flex-row gap-1 items-center justify-start">
+				{levels.map((levelIndex) => (
+					<Dropdown
+						className="w-32"
+						key={levelIndex}
+						onChange={(e) =>
+							handleSelectChange(levelIndex, e.target.value)
+						}
+						value={path[levelIndex] || ""}
+					>
+						<option value="">{getLevelMessage(levelIndex)}</option>
+						{getLevelOptions(levelIndex)?.map((option: string) => (
+							<option key={option} value={option}>
+								{option}
+							</option>
+						))}
+					</Dropdown>
+				))}
+				{currentLevel.isLoading && (
+					<LoaderCircle className="animate-spin" size={16} />
+				)}
+			</div>
+			<div className="flex flex-row gap-2 items-center">
+				{gameFound ? <Check size={14} /> : <Info size={14} />}
+				<span className="text-sm">
+					{gameFound ? "Game found" : "Select a game"}
+				</span>
+			</div>
 		</div>
 	);
 }
