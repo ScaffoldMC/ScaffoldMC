@@ -6,12 +6,13 @@ import { DialogRoot } from "@/components/organisms/Dialog/Dialog";
 import { PasswordDialogPortal } from "@/components/organisms/PasswordDialog/PasswordDialog";
 import { useSudo } from "@/hooks/auth";
 import { useCurrentUser } from "@/hooks/user";
-import { LockIcon } from "lucide-react";
 import { useState } from "react";
-import styles from "./page.module.css";
 import { Alert } from "@/components/molecules/Alert/Alert";
 import { EditableTextInput } from "@/components/molecules/EditableTextInput/EditableTextInput";
 import { PasswordResetPortal } from "@/components/organisms/PasswordResetDialog/PasswordResetDialog";
+import PageLayout from "@/components/atoms/PageLayout/PageLayout";
+import FormField from "@/components/atoms/FormField/FormField";
+import { LockIcon, UnlockIcon } from "lucide-react";
 
 export default function Settings() {
 	let { sudo, mutateSudo } = useSudo();
@@ -21,22 +22,29 @@ export default function Settings() {
 	const [passwordResetOpen, setPasswordResetOpen] = useState(false);
 
 	return (
-		<div className={styles.layout}>
-			<h1>Settings</h1>
-			{!sudo.data && (
-				<Alert type="warning">
-					<div className={styles.alertContent}>
-						<LockIcon size={18} />
-						<b>Limited Access</b>
-						<Button
-							level="ghost"
-							onClick={() => setPasswordEntryOpen(true)}
-						>
-							Unlock
-						</Button>
-					</div>
-				</Alert>
-			)}
+		<PageLayout>
+			<div className="flex flex-row justify-between items-center">
+				<h1>Settings</h1>
+				<div className="flex flex-row gap-4 items-center text-sm">
+					{!sudo.data && (
+						<span className="text-text-secondary">
+							Unlock to make changes
+						</span>
+					)}
+
+					<Button
+						disabled={sudo.data}
+						level="secondary"
+						onClick={() => setPasswordEntryOpen(true)}
+					>
+						{sudo.data ? (
+							<UnlockIcon size={18} />
+						) : (
+							<LockIcon size={18} />
+						)}
+					</Button>
+				</div>
+			</div>
 
 			<DialogRoot
 				open={passwordEntryOpen}
@@ -67,10 +75,10 @@ export default function Settings() {
 				/>
 			</DialogRoot>
 
-			<h2>Account Settings</h2>
-			<div className={styles.field}>
-				<Label htmlFor="username">Username</Label>
-				<div className={styles.textInput}>
+			<h2>Your Account</h2>
+			<div className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static">
+				<FormField>
+					<Label htmlFor="username">Username</Label>
 					<EditableTextInput
 						editable={sudo.data}
 						value={user.data?.username || ""}
@@ -78,11 +86,9 @@ export default function Settings() {
 							await mutateUser({ username: value });
 						}}
 					/>
-				</div>
-			</div>
-			<div className={styles.field}>
-				<Label htmlFor="name">Name</Label>
-				<div className={styles.textInput}>
+				</FormField>
+				<FormField>
+					<Label htmlFor="name">Name</Label>
 					<EditableTextInput
 						editable={sudo.data}
 						value={user.data?.fullname || ""}
@@ -90,18 +96,17 @@ export default function Settings() {
 							await mutateUser({ fullname: value });
 						}}
 					/>
-				</div>
+				</FormField>
+				<FormField>
+					<Label htmlFor="editpassword">Password</Label>
+					<Button
+						id="editpassword"
+						onClick={() => setPasswordResetOpen(true)}
+					>
+						Change Password
+					</Button>
+				</FormField>
 			</div>
-			<div className={styles.field}>
-				<Label htmlFor="editpassword">Password</Label>
-				<Button
-					id="editpassword"
-					disabled={!sudo.data}
-					onClick={() => setPasswordResetOpen(true)}
-				>
-					Change Password
-				</Button>
-			</div>
-		</div>
+		</PageLayout>
 	);
 }
