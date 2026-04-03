@@ -13,7 +13,6 @@ import {
 	TabsTrigger,
 } from "@/components/organisms/Tabs/Tabs";
 
-import styles from "./page.module.css";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
@@ -41,26 +40,28 @@ export default function Page() {
 	}
 
 	return (
-		<div className={styles.page}>
-			<div className={styles.title}>
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center gap-4">
 				<Avatar size={64} shape="square-medium">
 					<AvatarFallback>?</AvatarFallback>
 					<AvatarImage src="/images/server-default.png" />
 				</Avatar>
-				<div className={styles.titleInfo}>
+				<div className="flex flex-col">
 					<h1>{server.data.name}</h1>
 					<p>{server.data.state}</p>
 				</div>
 			</div>
 
-			<Tabs defaultValue="console">
+			<Tabs defaultValue="console" className="gap-2">
 				<TabsList>
 					<TabsTrigger value="console">Console</TabsTrigger>
 					<TabsTrigger value="settings">Settings</TabsTrigger>
 					<TabsTrigger value="backups">Backups</TabsTrigger>
 				</TabsList>
 				<TabsContent value="console">
-					<b>Console</b>
+					<div className="bg-surface p-2 min-h-100 w-full rounded-md border border-border-static">
+						<p>hello</p>
+					</div>
 				</TabsContent>
 				<TabsContent value="settings">
 					<b>Settings</b>

@@ -24,7 +24,7 @@ export function TabsList({
 	return (
 		<TabsPrimitive.List
 			className={cn(
-				"flex w-full items-center justify-between gap-2 p-1",
+				"flex w-full items-center justify-between gap-2 p-1 bg-surface rounded-lg border border-border-static",
 				className,
 			)}
 			{...props}
@@ -41,10 +41,10 @@ export function TabsTrigger({
 	return (
 		<TabsPrimitive.Trigger
 			className={cn(
-				"h-8 flex grow items-center justify-center border-b-2 border-transparent bg-transparent px-4 py-2 text-text-secondary",
-				"transition-[background-color,border-color,color] duration-100 ease-in-out hover:cursor-pointer",
-				"hover:bg-surface-overlay hover:text-text-primary",
-				"data-[state=active]:text-accent-base data-[state=active]:rounded-none data-[state=active]:border-accent-base",
+				"h-8 flex grow items-center justify-center rounded-md bg-transparent px-4 py-2",
+				"transition-[background-color,border-color,color] duration-100 ease-in-out",
+				"hover:cursor-pointer hover:bg-surface-overlay",
+				"data-[state=active]:bg-accent-lightest",
 			)}
 			{...props}
 		>
@@ -57,5 +57,9 @@ export function TabsContent({
 	children,
 	...props
 }: TabsPrimitive.TabsContentProps) {
-	return <TabsPrimitive.Content {...props}>{children}</TabsPrimitive.Content>;
+	return (
+		<TabsPrimitive.Content {...props} className="w-full">
+			{children}
+		</TabsPrimitive.Content>
+	);
 }
