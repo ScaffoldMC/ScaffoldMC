@@ -133,7 +133,7 @@ export function VersionSelector({ onGame }: VersionSelectorProps) {
 					<LoaderCircle className="animate-spin" size={16} />
 				)}
 			</div>
-			<div className="flex flex-row gap-2 items-center">
+			<div className="flex flex-row gap-2 items-center text-text-secondary">
 				{gameFound ? <Check size={14} /> : <Info size={14} />}
 				<span className="text-sm">
 					{gameFound ? "Game found" : "Select a game"}
