@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import PageLayout from "@/components/atoms/PageLayout/PageLayout";
 import { DialogRoot } from "@/components/organisms/Dialog/Dialog";
 import { ServerCreateDialog } from "@/components/organisms/ServerCreateDialog/ServerCreateDialog";
 import { ServerList } from "@/components/organisms/ServerList/ServerList";
@@ -16,7 +17,7 @@ export default function Servers() {
 	};
 
 	return (
-		<div className="flex flex-col gap-2">
+		<PageLayout>
 			<div className="flex justify-between">
 				<h1>Servers</h1>
 				<Button onClick={() => setCreateDialogOpen(true)}>
@@ -33,6 +34,6 @@ export default function Servers() {
 			</DialogRoot>
 
 			<ServerList />
-		</div>
+		</PageLayout>
 	);
 }
