@@ -6,14 +6,13 @@ import {
 	Indicator,
 	IndicatorState,
 } from "@/components/atoms/Indicator/Indicator";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@/components/atoms/Avatar/Avatar";
 import { List, ListItem } from "@/components/organisms/List/List";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import Image from "next/image";
+import { cn } from "@/lib/util";
+import { Play, SquareStop } from "lucide-react";
+import { Button } from "@/components/atoms/Button/Button";
 
 // TODO: Make brief & detailed view of server list
 
@@ -63,19 +62,34 @@ function ServerListItem({ uuid }: { uuid: string }) {
 				href={`/servers/${uuid}`}
 				className="font-medium text-text-primary no-underline"
 			>
-				<div className="flex flex-row items-center justify-between bg-surface-raised p-2.5 transition-[background-color] duration-100 ease-in-out hover:bg-surface-overlay">
+				<div
+					className={cn(
+						"flex flex-row items-center justify-between p-2",
+						"transition-[background-color] duration-100 ease-in-out hover:bg-surface-raised",
+					)}
+				>
 					<div className="flex w-fit flex-row items-center gap-2">
-						<Avatar size={28} shape="square-small">
-							<AvatarFallback>?</AvatarFallback>
-							<AvatarImage src="/images/server-default.png" />
-						</Avatar>
+						<Image
+							src="/images/server-default.png"
+							alt="Server image"
+							width={48}
+							height={48}
+							className="rounded-lg"
+						/>
 
 						<p>{serverInfo.data?.name || "Server name"}</p>
 					</div>
 
 					<div className="flex w-fit flex-row items-center gap-2">
-						<Indicator state={indicatorState} />
-						<p>{serverInfo.data?.state || "Unknown"}</p>
+						{serverInfo.data?.state === "Running" ? (
+							<Button level="secondary">
+								<SquareStop size={18} /> Stop
+							</Button>
+						) : (
+							<Button level="secondary">
+								<Play size={18} /> Start
+							</Button>
+						)}
 					</div>
 				</div>
 			</Link>
