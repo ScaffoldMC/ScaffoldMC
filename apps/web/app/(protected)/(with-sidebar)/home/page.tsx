@@ -18,8 +18,11 @@ export default function Dashboard() {
 				<InfoNugget title="RAM Usage" value="4302 MB" />
 				<InfoNugget title="Disk Usage" value="15 GB" />
 			</div>
-			<h2>Recent Servers</h2>
-			<ServerListPreview />
+
+			<div className="flex flex-col gap-2 max-w-md">
+				<h2>Recent Servers</h2>
+				<ServerListPreview />
+			</div>
 		</PageLayout>
 	);
 }
