@@ -10,6 +10,7 @@ import { useServers } from "@/hooks/servers";
 import { Label } from "@/components/atoms/Label/Label";
 import { VersionSelector } from "../VersionSelector/VersionSelector";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ServerCreateDialogProps extends DialogPrimitive.DialogPortalProps {
 	onServerCreate: () => void;
@@ -55,6 +56,11 @@ export function ServerCreateDialog({
 						</Button>
 					</DialogPrimitive.Close>
 				</div>
+				<VisuallyHidden>
+					<DialogPrimitive.Description>
+						Create a new server from scratch.
+					</DialogPrimitive.Description>
+				</VisuallyHidden>
 				<form
 					onSubmit={handleSubmit}
 					className="flex flex-col gap-2 *:flex *:flex-col *:gap-1 w-full"
