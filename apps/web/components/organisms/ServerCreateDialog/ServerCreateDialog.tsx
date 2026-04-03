@@ -4,7 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { DialogContent, DialogOverlay, DialogPortal } from "../Dialog/Dialog";
 import { Button } from "@/components/atoms/Button/Button";
 import { LoaderCircle, X } from "lucide-react";
-import { FormEvent, SubmitEventHandler, useState } from "react";
+import { SubmitEventHandler, useState } from "react";
 import { Game } from "@/lib/servertypes";
 import { useServers } from "@/hooks/servers";
 import { Label } from "@/components/atoms/Label/Label";
