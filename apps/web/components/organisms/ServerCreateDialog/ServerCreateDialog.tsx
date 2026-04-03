@@ -22,7 +22,6 @@ export function ServerCreateDialog({
 	const [game, setGame] = useState<Game | null>(null);
 	const { mutateServers } = useServers();
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
 		event.preventDefault();
@@ -37,6 +36,8 @@ export function ServerCreateDialog({
 			if (res.status === 201) {
 				onServerCreate();
 			}
+
+			// TODO: Show errors
 		});
 	};
 

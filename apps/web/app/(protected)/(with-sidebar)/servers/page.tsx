@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Servers() {
-	const router = useRouter();
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
 	const handleServerCreate = () => {
