@@ -61,7 +61,10 @@ export function AvatarFallback({
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
 	return (
 		<AvatarPrimitive.Fallback
-			className={cn("h-full w-full", className)}
+			className={cn(
+				"flex h-full w-full text-center justify-center items-center",
+				className,
+			)}
 			{...props}
 		/>
 	);
