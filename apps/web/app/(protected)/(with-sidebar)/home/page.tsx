@@ -2,6 +2,7 @@
 
 import { InfoNugget } from "@/components/atoms/InfoNugget/InfoNugget";
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
+import { ServerListPreview } from "@/components/organisms/ServerListPreview/ServerListPreview";
 import { useCurrentUser } from "@/hooks/user";
 
 export default function Dashboard() {
@@ -18,6 +19,7 @@ export default function Dashboard() {
 				<InfoNugget title="Disk Usage" value="15 GB" />
 			</div>
 			<h2>Recent Servers</h2>
+			<ServerListPreview />
 		</PageLayout>
 	);
 }

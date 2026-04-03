@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { cn, singularOrPlural } from "@/lib/util";
 
 interface ListProps {
+	hideHeader?: boolean;
 	children: React.ReactNode;
-	names: {
+	names?: {
 		singular: string;
 		plural: string;
 	};
 }
 
-export function List({ children, names }: ListProps) {
+export function List({ hideHeader, children, names }: ListProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const [numItems, setNumItems] = useState<number>(0);
 
@@ -26,12 +27,18 @@ export function List({ children, names }: ListProps) {
 
 	return (
 		<div className="overflow-hidden rounded-md border border-border-static bg-surface">
-			<div className="flex flex-row border-b border-border-static p-2 text-text-primary">
-				<b>
-					{numItems}{" "}
-					{singularOrPlural(numItems, names.singular, names.plural)}
-				</b>
-			</div>
+			{!hideHeader && (
+				<div className="flex flex-row border-b border-border-static p-2 text-text-primary">
+					<b>
+						{numItems}{" "}
+						{singularOrPlural(
+							numItems,
+							names?.singular || "Item",
+							names?.plural || "Items",
+						)}
+					</b>
+				</div>
+			)}
 			<div
 				className="flex w-full flex-col [&>*:last-child]:border-b-0"
 				ref={contentRef}
