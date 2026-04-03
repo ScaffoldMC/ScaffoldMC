@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import Image from "next/image";
 import { cn, gameString } from "@/lib/util";
-import { Play, SquareStop } from "lucide-react";
+import { EthernetPort, Play, Square } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
 
 // TODO: Make brief & detailed view of server list
@@ -87,10 +87,17 @@ function ServerListItem({ uuid }: { uuid: string }) {
 						</div>
 					</div>
 
-					<div className="flex w-fit flex-row items-center gap-2">
+					<div className="flex w-fit flex-row items-center gap-3">
+						{serverInfo.data?.state === "Running" && (
+							<div className="flex flex-row items-center gap-1 text-text-secondary">
+								<EthernetPort size={14} />
+								<p className="text-sm">25565</p>
+							</div>
+						)}
+
 						{serverInfo.data?.state === "Running" ? (
 							<Button level="secondary">
-								<SquareStop size={18} /> Stop
+								<Square size={18} /> Stop
 							</Button>
 						) : (
 							<Button level="secondary">
