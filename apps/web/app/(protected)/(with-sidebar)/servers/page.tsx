@@ -5,7 +5,6 @@ import PageLayout from "@/components/atoms/PageLayout/PageLayout";
 import { DialogRoot } from "@/components/organisms/Dialog/Dialog";
 import { ServerCreateDialog } from "@/components/organisms/ServerCreateDialog/ServerCreateDialog";
 import { ServerList } from "@/components/organisms/ServerList/ServerList";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Servers() {
