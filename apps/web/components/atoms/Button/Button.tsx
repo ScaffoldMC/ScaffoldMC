@@ -12,7 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const buttonStyles = cva(
 	cn(
 		"inline-flex items-center justify-center font-semibold cursor-pointer",
-		"h-9 w-fit gap-2 rounded-sm border px-2",
+		"h-9 w-fit gap-2 rounded-md border px-2",
 		"transition-[background-color,border-color,color] duration-100 ease-in-out",
 		"text-base",
 		"[&_svg]:inline-block disabled:cursor-not-allowed disabled:opacity-50",
