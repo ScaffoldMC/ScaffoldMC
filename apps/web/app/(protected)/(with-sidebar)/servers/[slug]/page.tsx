@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
 import { ServerInfo } from "@/lib/servertypes";
+import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsole";
 
 export default function Page() {
 	const { slug } = useParams();
@@ -59,9 +60,7 @@ export default function Page() {
 					<TabsTrigger value="backups">Backups</TabsTrigger>
 				</TabsList>
 				<TabsContent value="console">
-					<div className="bg-surface p-2 min-h-100 w-full rounded-md border border-border-static">
-						<p>hello</p>
-					</div>
+					<ServerConsole serverId={slug.toString()} />
 				</TabsContent>
 				<TabsContent value="settings">
 					<b>Settings</b>
