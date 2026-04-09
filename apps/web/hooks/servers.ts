@@ -21,3 +21,17 @@ export function useServers() {
 
 	return { servers, mutateServers };
 }
+
+export function useServer(serverId: string) {
+	const server = useQuery({
+		queryKey: ["server", serverId],
+		queryFn: () => api.get(`/servers/${serverId}`).then((res) => res.data),
+		retry: false,
+	});
+
+	const isRunning = server.data?.state === "Running";
+
+	// TODO: Mutate server
+
+	return { server, isRunning };
+}
