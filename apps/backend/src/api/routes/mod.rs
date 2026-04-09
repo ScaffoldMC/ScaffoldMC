@@ -26,7 +26,11 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 			http::Method::PATCH,
 			http::Method::DELETE,
 		])
-		.allow_headers([http::header::CONTENT_TYPE])
+		.allow_headers([
+			http::header::CONTENT_TYPE,
+			http::header::ACCEPT,
+			http::header::CACHE_CONTROL,
+		])
 		.allow_credentials(true);
 
 	Router::new()
