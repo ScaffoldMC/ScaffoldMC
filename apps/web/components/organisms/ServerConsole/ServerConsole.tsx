@@ -42,11 +42,10 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 			eventSource = new EventSource(endpoint, { withCredentials: true });
 
 			eventSource.onopen = () => {
-				console.log("Server SSE connection established");
+				console.log("Console SSE connection established");
 			};
 
 			eventSource.addEventListener("console", (event) => {
-				console.log("Server SSE console event:", event.data.toString());
 				setConsoleData((prev) => [
 					...prev,
 					...(JSON.parse(event.data) as ConsoleLine[]),
@@ -54,7 +53,6 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 			});
 
 			eventSource.onerror = (error) => {
-				console.error("Server SSE error:", error);
 				if (eventSource?.readyState === EventSource.CLOSED) {
 					console.warn(
 						"Connection closed, attempting reconnect in 3s...",
