@@ -2,7 +2,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { useServer } from "@/hooks/servers";
 import { cn } from "@/lib/util";
-import { ArrowDown, SendHorizonal } from "lucide-react";
+import { ArrowDown, LoaderCircle, SendHorizonal } from "lucide-react";
 import { SubmitEventHandler, useEffect, useRef, useState } from "react";
 import { ConsoleLine } from "../../../../backend/bindings/ConsoleLine";
 
@@ -12,7 +12,9 @@ interface ServerConsoleProps {
 
 export function ServerConsole({ serverId }: ServerConsoleProps) {
 	const [consoleData, setConsoleData] = useState<ConsoleLine[]>([]);
-	const { server, isRunning } = useServer(serverId);
+	const [commandLoading, setCommandLoading] = useState(false);
+	const { server, isRunning, sendCommand } = useServer(serverId);
+	const commandBoxRef = useRef<HTMLInputElement>(null);
 
 	const handleCommandSubmit: SubmitEventHandler<HTMLFormElement> = (
 		event,
@@ -20,7 +22,16 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 		event.preventDefault();
 
 		const command = event.currentTarget.command.value;
-		console.log(command);
+		setCommandLoading(true);
+
+		// TODO: Error feedback
+		sendCommand(command)
+			.then(() => {
+				setCommandLoading(false);
+			})
+			.finally(() => {
+				commandBoxRef.current.value = "";
+			});
 	};
 
 	if (!server.data) return null;
@@ -132,13 +143,24 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 				onSubmit={handleCommandSubmit}
 			>
 				<TextInput
+					ref={commandBoxRef}
 					disabled={!isRunning}
 					name="command"
 					placeholder="Enter command"
 					className="flex-1"
 				/>
-				<Button level="primary" type="submit" disabled={!isRunning}>
-					<SendHorizonal size={18} />
+				<Button
+					level="primary"
+					type="submit"
+					disabled={!isRunning || commandLoading}
+				>
+					{commandLoading ? (
+						<div className="animate-spin w-full h-full flex items-center justify-center">
+							<LoaderCircle size={18} />
+						</div>
+					) : (
+						<SendHorizonal size={18} />
+					)}
 				</Button>
 			</form>
 		</div>

@@ -26,12 +26,17 @@ export function useServer(serverId: string) {
 	const server = useQuery({
 		queryKey: ["server", serverId],
 		queryFn: () => api.get(`/servers/${serverId}`).then((res) => res.data),
+		refetchInterval: 5000,
 		retry: false,
 	});
 
 	const isRunning = server.data?.state === "Running";
 
+	const sendCommand = async (command: string) => {
+		await api.post(`/servers/${serverId}/console`, { command });
+	};
+
 	// TODO: Mutate server
 
-	return { server, isRunning };
+	return { server, isRunning, sendCommand };
 }
