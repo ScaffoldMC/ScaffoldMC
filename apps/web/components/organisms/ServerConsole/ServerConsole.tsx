@@ -103,7 +103,7 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 	return (
 		<div
 			className={cn(
-				"bg-surface p-2 h-100 w-full rounded-md border border-border-static",
+				"bg-surface p-2 h-120 w-full rounded-md border border-border-static",
 				"flex flex-col gap-2",
 			)}
 		>
