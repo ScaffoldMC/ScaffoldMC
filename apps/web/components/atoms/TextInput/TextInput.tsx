@@ -22,13 +22,11 @@ const inputVariants = cva(
 	},
 );
 
-export type TextInputProps = Omit<
-	React.InputHTMLAttributes<HTMLInputElement>,
-	"type"
-> & {
+export interface TextInputProps
+	extends Omit<React.ComponentPropsWithRef<"input">, "type"> {
 	type?: "text" | "email" | "password" | "search" | "tel" | "url";
 	invalid?: boolean;
-};
+}
 
 export function TextInput({
 	type,
