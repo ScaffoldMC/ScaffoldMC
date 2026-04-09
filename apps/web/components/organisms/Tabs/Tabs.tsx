@@ -44,7 +44,7 @@ export function TabsTrigger({
 				"h-8 flex grow items-center justify-center rounded-md bg-transparent px-4 py-2",
 				"transition-[background-color,border-color,color] duration-100 ease-in-out",
 				"hover:cursor-pointer hover:bg-surface-overlay",
-				"data-[state=active]:bg-accent-lightest",
+				"data-[state=active]:bg-accent-lightest dark:data-[state=active]:bg-accent-darkest",
 			)}
 			{...props}
 		>
