@@ -23,6 +23,8 @@ export function useServers() {
 }
 
 export function useServer(serverId: string) {
+	const queryClient = useQueryClient();
+
 	const server = useQuery({
 		queryKey: ["server", serverId],
 		queryFn: () => api.get(`/servers/${serverId}`).then((res) => res.data),
@@ -38,10 +40,14 @@ export function useServer(serverId: string) {
 
 	const startServer = async () => {
 		await api.post(`/servers/${serverId}/start`);
+		await queryClient.invalidateQueries({ queryKey: ["server", serverId] });
+		await queryClient.invalidateQueries({ queryKey: ["servers"] });
 	};
 
 	const stopServer = async () => {
 		await api.post(`/servers/${serverId}/stop`);
+		await queryClient.invalidateQueries({ queryKey: ["server", serverId] });
+		await queryClient.invalidateQueries({ queryKey: ["servers"] });
 	};
 
 	// TODO: Mutate server
