@@ -36,7 +36,15 @@ export function useServer(serverId: string) {
 		await api.post(`/servers/${serverId}/console`, { command });
 	};
 
+	const startServer = async () => {
+		await api.post(`/servers/${serverId}/start`);
+	};
+
+	const stopServer = async () => {
+		await api.post(`/servers/${serverId}/stop`);
+	};
+
 	// TODO: Mutate server
 
-	return { server, isRunning, sendCommand };
+	return { server, isRunning, sendCommand, startServer, stopServer };
 }

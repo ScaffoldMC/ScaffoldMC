@@ -18,6 +18,8 @@ import api from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
 import { ServerInfo } from "@/lib/servertypes";
 import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsole";
+import { ServerStartStopButton } from "@/components/organisms/ServerStartStopButton/ServerStartStopButton";
+import PageLayout from "@/components/atoms/PageLayout/PageLayout";
 
 export default function Page() {
 	const { slug } = useParams();
@@ -41,8 +43,8 @@ export default function Page() {
 	}
 
 	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex items-center gap-4">
+		<PageLayout>
+			<div className="relative flex items-center gap-4">
 				<Avatar size={64} shape="square-medium">
 					<AvatarFallback>?</AvatarFallback>
 					<AvatarImage src="/images/server-default.png" />
@@ -50,6 +52,9 @@ export default function Page() {
 				<div className="flex flex-col">
 					<h1>{server.data.name}</h1>
 					<p>{server.data.state}</p>
+				</div>
+				<div className="absolute right-0">
+					<ServerStartStopButton serverId={slug.toString()} />
 				</div>
 			</div>
 
@@ -69,6 +74,6 @@ export default function Page() {
 					<b>Backups</b>
 				</TabsContent>
 			</Tabs>
-		</div>
+		</PageLayout>
 	);
 }

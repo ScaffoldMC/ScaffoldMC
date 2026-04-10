@@ -8,6 +8,7 @@ import Image from "next/image";
 import { cn, gameString } from "@/lib/util";
 import { EthernetPort, Play, Square } from "lucide-react";
 import { Button } from "@/components/atoms/Button/Button";
+import { ServerStartStopButton } from "../ServerStartStopButton/ServerStartStopButton";
 
 export function ServerList() {
 	const serverIds = useQuery({
@@ -77,15 +78,7 @@ function ServerListItem({ uuid }: { uuid: string }) {
 							</div>
 						)}
 
-						{serverInfo.data?.state === "Running" ? (
-							<Button level="secondary">
-								<Square size={18} /> Stop
-							</Button>
-						) : (
-							<Button level="secondary">
-								<Play size={18} /> Start
-							</Button>
-						)}
+						<ServerStartStopButton serverId={uuid} />
 					</div>
 				</div>
 			</Link>
