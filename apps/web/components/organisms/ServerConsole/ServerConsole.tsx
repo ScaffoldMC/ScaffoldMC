@@ -54,6 +54,7 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 
 			eventSource.onopen = () => {
 				console.log("Console SSE connection established");
+				setConsoleData([]);
 			};
 
 			eventSource.addEventListener("console", (event) => {
