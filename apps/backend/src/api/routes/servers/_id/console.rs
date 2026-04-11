@@ -14,6 +14,7 @@ use uuid::Uuid;
 
 use crate::{
 	api::types::server::{ConsoleQueryParams, ServerCommandRequest},
+	core::server::ServerStateInfo,
 	services::server::ServerError,
 	AppState,
 };
@@ -32,7 +33,29 @@ async fn get(
 	let stream = stream::unfold(
 		(state, id, query.since),
 		|(state, id, mut since)| async move {
+			let mut prev_server_state: Option<ServerStateInfo> = None;
 			loop {
+				let server_info = match state.server_service.get_server_info(id).await {
+					Ok(server_info) => server_info,
+					Err(err) => {
+						tracing::error!("Error getting server info for server {}: {}", id, err);
+						tokio::time::sleep(Duration::from_millis(500)).await;
+						continue;
+					}
+				};
+
+				if prev_server_state.is_none() {
+					prev_server_state.replace(server_info.state.clone());
+				} else if prev_server_state == Some(ServerStateInfo::Stopped)
+					&& server_info.state != ServerStateInfo::Stopped
+				{
+					// If state has changed since from stop to start, end the stream
+					tracing::info!("Server {} has restarted, ending console stream", id);
+					return None;
+				}
+
+				prev_server_state.replace(server_info.state.clone());
+
 				// Get the next snapshot of console lines
 				let snapshot = match state.server_service.get_console_snapshot(id, since).await {
 					Ok(snapshot) => snapshot,
