@@ -20,6 +20,7 @@ import { ServerInfo } from "@/lib/servertypes";
 import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsole";
 import { ServerStartStopButton } from "@/components/organisms/ServerStartStopButton/ServerStartStopButton";
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
+import { CloudBackup, Settings, Terminal } from "lucide-react";
 
 export default function Page() {
 	const { slug } = useParams();
@@ -60,9 +61,17 @@ export default function Page() {
 
 			<Tabs defaultValue="console" className="gap-2">
 				<TabsList>
-					<TabsTrigger value="console">Console</TabsTrigger>
-					<TabsTrigger value="settings">Settings</TabsTrigger>
-					<TabsTrigger value="backups">Backups</TabsTrigger>
+					<TabsTrigger value="console">
+						<Terminal size={18} /> Console
+					</TabsTrigger>
+					<TabsTrigger value="settings">
+						<Settings size={18} />
+						Settings
+					</TabsTrigger>
+					<TabsTrigger value="backups">
+						<CloudBackup size={18} />
+						Backups
+					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="console">
 					<ServerConsole serverId={slug.toString()} />

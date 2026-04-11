@@ -41,7 +41,8 @@ export function TabsTrigger({
 	return (
 		<TabsPrimitive.Trigger
 			className={cn(
-				"h-8 flex grow items-center justify-center rounded-md bg-transparent px-4 py-2",
+				"h-8 flex-1 items-center justify-center rounded-md bg-transparent px-4 py-2",
+				"flex flex-row gap-2 items-center justify-center",
 				"transition-[background-color,border-color,color] duration-100 ease-in-out",
 				"hover:cursor-pointer hover:bg-surface-overlay",
 				"data-[state=active]:bg-accent-lightest dark:data-[state=active]:bg-accent-darkest",
