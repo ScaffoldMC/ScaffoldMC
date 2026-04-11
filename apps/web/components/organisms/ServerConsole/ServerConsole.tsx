@@ -66,12 +66,9 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 
 			eventSource.onerror = (error) => {
 				if (eventSource?.readyState === EventSource.CLOSED) {
-					console.warn(
-						"Connection closed, attempting reconnect in 3s...",
-					);
 					eventSource.close();
 					if (!isCancelled) {
-						setTimeout(connect, 3000);
+						setTimeout(connect, 1000);
 					}
 				}
 			};
