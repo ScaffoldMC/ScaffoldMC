@@ -84,7 +84,7 @@ impl ServerProcessState {
 }
 
 /// Information about the current state of a server
-#[derive(Clone, Serialize, Deserialize, TS)]
+#[derive(Clone, Serialize, Deserialize, TS, PartialEq)]
 #[ts(export)]
 pub enum ServerStateInfo {
 	Stopped,
