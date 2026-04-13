@@ -58,7 +58,7 @@ function ServerListPreviewItem({ uuid }: { uuid: string }) {
 							className="rounded-md"
 						/>
 
-						<p>{serverInfo.data?.name || "Server name"}</p>
+						<p>{serverInfo.data?.config.name || "Server name"}</p>
 					</div>
 				</div>
 			</Link>
