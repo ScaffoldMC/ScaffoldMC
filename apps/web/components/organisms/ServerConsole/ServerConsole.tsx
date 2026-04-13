@@ -86,9 +86,11 @@ function FormattedConsoleLine({ line }: { line: ConsoleLine }) {
 }
 
 export function ServerConsole({ serverId }: ServerConsoleProps) {
+	const { server, isRunning, sendCommand } = useServer(serverId);
 	const [consoleData, setConsoleData] = useState<ConsoleLine[]>([]);
 	const [commandLoading, setCommandLoading] = useState(false);
-	const { server, isRunning, sendCommand } = useServer(serverId);
+	const [hasUserScrolled, setHasUserScrolled] = useState(false);
+	const consoleTextRef = useRef(null);
 	const commandBoxRef = useRef<HTMLInputElement>(null);
 
 	const handleCommandSubmit: SubmitEventHandler<HTMLFormElement> = (
@@ -109,8 +111,17 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 			});
 	};
 
-	if (!server.data) return null;
-	if (server.isLoading) return <div>Loading...</div>;
+	const scrollHandler = () => {
+		const scrollPosition = consoleTextRef.current.scrollTop;
+		const scrollHeight = consoleTextRef.current.scrollHeight;
+		const clientHeight = consoleTextRef.current.clientHeight;
+
+		if (scrollPosition < scrollHeight - clientHeight - 10) {
+			setHasUserScrolled(true);
+		} else {
+			setHasUserScrolled(false);
+		}
+	};
 
 	useEffect(() => {
 		const base = process.env.NEXT_PUBLIC_API_BASE_URL?.endsWith("/")
@@ -139,7 +150,7 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 				]);
 			});
 
-			eventSource.onerror = (error) => {
+			eventSource.onerror = () => {
 				if (eventSource?.readyState === EventSource.CLOSED) {
 					eventSource.close();
 					if (!isCancelled) {
@@ -158,9 +169,6 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 		};
 	}, [serverId, setConsoleData]);
 
-	const consoleTextRef = useRef(null);
-	const [hasUserScrolled, setHasUserScrolled] = useState(false);
-
 	useEffect(() => {
 		if (!consoleTextRef.current) return;
 
@@ -172,17 +180,8 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 		}
 	}, [consoleTextRef, consoleData, hasUserScrolled]);
 
-	const scrollHandler = () => {
-		const scrollPosition = consoleTextRef.current.scrollTop;
-		const scrollHeight = consoleTextRef.current.scrollHeight;
-		const clientHeight = consoleTextRef.current.clientHeight;
-
-		if (scrollPosition < scrollHeight - clientHeight - 10) {
-			setHasUserScrolled(true);
-		} else {
-			setHasUserScrolled(false);
-		}
-	};
+	if (!server.data) return null;
+	if (server.isLoading) return <div>Loading...</div>;
 
 	return (
 		<div
