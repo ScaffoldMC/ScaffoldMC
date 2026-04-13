@@ -365,18 +365,6 @@ impl ServerService {
 		}
 	}
 
-	/// Get a server's config
-	#[instrument(name = "ServerService.GetConfig", skip(self))]
-	pub async fn get_config(&self, server_id: Uuid) -> Result<ServerConfig, ServerError> {
-		let servers_guard = self.servers.read().await;
-		let server = servers_guard
-			.get(&server_id)
-			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
-
-		let config_guard = server.config.read().await;
-		Ok(config_guard.clone())
-	}
-
 	/// Update a server's config
 	#[instrument(name = "ServerService.UpdateConfig", skip(self))]
 	pub async fn update_config(

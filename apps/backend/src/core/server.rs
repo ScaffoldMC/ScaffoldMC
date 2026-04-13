@@ -8,7 +8,7 @@ use tokio::sync::{mpsc, watch, RwLock};
 use ts_rs::TS;
 use uuid::Uuid;
 
-use crate::core::{files::server_config::ServerConfig, game::Game};
+use crate::core::files::server_config::ServerConfig;
 
 #[derive(Clone, Serialize, Deserialize, ts_rs::TS)]
 #[ts(export)]
@@ -96,22 +96,18 @@ pub enum ServerStateInfo {
 #[ts(export)]
 pub struct ServerInfo {
 	pub id: Uuid,
-	pub name: String,
-	pub game: Game,
+	pub config: ServerConfig,
 	pub state: ServerStateInfo,
 }
 
 impl Server {
 	pub async fn info(&self) -> ServerInfo {
 		let config = self.config.read().await;
-		let name = config.name.clone();
-		let game = config.game.clone();
 		let state = self.process.read().await.info();
 
 		ServerInfo {
 			id: self.id,
-			name,
-			game,
+			config: config.clone(),
 			state,
 		}
 	}

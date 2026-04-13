@@ -51,7 +51,7 @@ export default function Page() {
 					<AvatarImage src="/images/server-default.png" />
 				</Avatar>
 				<div className="flex flex-col">
-					<h1>{server.data.name}</h1>
+					<h1>{server.data.config.name}</h1>
 					<p>{server.data.state}</p>
 				</div>
 				<div className="absolute right-0">

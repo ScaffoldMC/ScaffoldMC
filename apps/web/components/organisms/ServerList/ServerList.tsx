@@ -61,10 +61,12 @@ function ServerListItem({ uuid }: { uuid: string }) {
 						/>
 
 						<div>
-							<p>{serverInfo.data?.name || "Server name"}</p>
+							<p>
+								{serverInfo.data?.config.name || "Server name"}
+							</p>
 							<p className="text-text-secondary text-xs">
 								{serverInfo.data &&
-									gameString(serverInfo.data.game)}
+									gameString(serverInfo.data.config.game)}
 							</p>
 						</div>
 					</div>
