@@ -8,7 +8,9 @@ use axum::{
 use reqwest::StatusCode;
 use uuid::Uuid;
 
-use crate::{services::server::ServerError, AppState};
+use crate::{
+	core::files::server_config::PartialServerConfig, services::server::ServerError, AppState,
+};
 
 mod console;
 mod files;
@@ -22,9 +24,36 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/start", routing::post(start_post))
 		.route("/stop", routing::post(stop_post))
 		.route("/kill", routing::post(kill_post))
+		.route("/config", routing::get(config_get))
+		.route("/config", routing::patch(config_patch))
 		.nest("/status", status::create_router())
 		.nest("/files", files::create_router())
 		.nest("/console", console::create_router())
+}
+
+async fn config_get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	let config = state.server_service.get_config(id).await;
+
+	if let Err(err) = config {
+		tracing::error!("Error retrieving server config: {}", err);
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+	}
+
+	(StatusCode::OK, Json(config.unwrap())).into_response()
+}
+
+async fn config_patch(
+	State(state): State<Arc<AppState>>,
+	Path(id): Path<Uuid>,
+	Json(config): Json<PartialServerConfig>,
+) -> impl IntoResponse {
+	match state.server_service.update_config(id, config).await {
+		Ok(()) => StatusCode::OK.into_response(),
+		Err(err) => {
+			tracing::error!("Error updating server config: {}", err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		}
+	}
 }
 
 async fn start_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {

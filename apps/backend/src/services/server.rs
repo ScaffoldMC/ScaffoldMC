@@ -3,6 +3,7 @@ use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
 use crate::core::bin_providers::DownloadInfo;
+use crate::core::files::server_config::PartialServerConfig;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
 use crate::core::server::ConsoleLine;
@@ -362,6 +363,51 @@ impl ServerService {
 			ServerProcessState::Running(runtime) => Ok(runtime.is_running()),
 			ServerProcessState::Stopped => Ok(false),
 		}
+	}
+
+	/// Get a server's config
+	#[instrument(name = "ServerService.GetConfig", skip(self))]
+	pub async fn get_config(&self, server_id: Uuid) -> Result<ServerConfig, ServerError> {
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let config_guard = server.config.read().await;
+		Ok(config_guard.clone())
+	}
+
+	/// Update a server's config
+	#[instrument(name = "ServerService.UpdateConfig", skip(self))]
+	pub async fn update_config(
+		&self,
+		server_id: Uuid,
+		new_config: PartialServerConfig,
+	) -> Result<(), ServerError> {
+		let servers_guard = self.servers.read().await;
+		let server = servers_guard
+			.get(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let mut config_guard = server.config.write().await;
+
+		if let Some(name) = new_config.name {
+			config_guard.name = name;
+		}
+
+		if let Some(game) = new_config.game {
+			config_guard.game = game;
+		}
+
+		if let Some(args) = new_config.args {
+			config_guard.args = args;
+		}
+
+		if let Some(stop_command) = new_config.stop_command {
+			config_guard.stop_command = stop_command;
+		}
+
+		Ok(())
 	}
 
 	/// Creates a new server instance with the given configuration.
