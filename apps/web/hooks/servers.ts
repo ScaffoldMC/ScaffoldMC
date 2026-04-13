@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { CreateServerRequest } from "@/lib/servertypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PartialServerConfig } from "../../backend/bindings/PartialServerConfig";
 
 export function useServers() {
 	const queryClient = useQueryClient();
@@ -50,7 +51,21 @@ export function useServer(serverId: string) {
 		await queryClient.invalidateQueries({ queryKey: ["servers"] });
 	};
 
-	// TODO: Mutate server
+	const mutateConfig = useMutation({
+		mutationFn: async (config: PartialServerConfig) =>
+			await api.patch(`/servers/${serverId}/config`, config),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["server", serverId] });
+			queryClient.invalidateQueries({ queryKey: ["servers"] });
+		},
+	}).mutateAsync;
 
-	return { server, isRunning, sendCommand, startServer, stopServer };
+	return {
+		server,
+		isRunning,
+		sendCommand,
+		startServer,
+		stopServer,
+		mutateConfig,
+	};
 }
