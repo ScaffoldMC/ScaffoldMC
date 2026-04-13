@@ -10,6 +10,81 @@ interface ServerConsoleProps {
 	serverId: string;
 }
 
+/// Helper to apply a class based on a regex
+function formatLine(
+	line: string,
+	patterns: { regex: RegExp; className: string }[],
+) {
+	const segments = [];
+	let pos = 0;
+
+	while (pos < line.length) {
+		let earliest = null;
+
+		for (const pattern of patterns) {
+			const match = pattern.regex.exec(line.slice(pos));
+			if (match) {
+				const absIndex = pos + match.index;
+				if (earliest === null || absIndex < earliest.absIndex) {
+					earliest = { match, pattern, absIndex };
+				}
+			}
+		}
+
+		if (!earliest) {
+			segments.push(<span key={pos}>{line.slice(pos)}</span>);
+			break;
+		}
+
+		const { match, pattern, absIndex } = earliest;
+
+		if (absIndex > pos) {
+			segments.push(<span key={pos}>{line.slice(pos, absIndex)}</span>);
+		}
+
+		segments.push(
+			<span key={absIndex} className={pattern.className}>
+				{match[0]}
+			</span>,
+		);
+
+		pos = absIndex + match[0].length;
+	}
+
+	return segments;
+}
+
+function FormattedConsoleLine({ line }: { line: ConsoleLine }) {
+	if (line.stream == "Stderr") {
+		return (
+			<span className="text-sm font-mono text-red-700 dark:text-red-300">
+				{line.line}
+			</span>
+		);
+	}
+
+	const patterns = [
+		{
+			regex: /^\[\d+:\d+:\d+\]/g,
+			className: "text-gray-600 dark:text-gray-400",
+		},
+		{
+			regex: /\[[\w\s]+[ /]INFO\]:/,
+			className: "text-blue-600 dark:text-blue-400",
+		},
+		{
+			regex: /\[[\w\s]+[ /]WARN\]:/,
+			className: "text-orange-600 dark:text-orange-400",
+		},
+	];
+
+	return (
+		<span className="text-sm font-mono">
+			{formatLine(line.line, patterns)}
+		</span>
+	);
+}
+
 export function ServerConsole({ serverId }: ServerConsoleProps) {
 	const [consoleData, setConsoleData] = useState<ConsoleLine[]>([]);
 	const [commandLoading, setCommandLoading] = useState(false);
@@ -119,13 +194,11 @@ export function ServerConsole({ serverId }: ServerConsoleProps) {
 			<div className="relative flex-1 min-h-0">
 				<div
 					ref={consoleTextRef}
-					className="flex flex-col gap-0.5 overflow-scroll max-h-full"
+					className="flex flex-col gap-0.5 overflow-y-scroll max-h-full"
 					onScroll={scrollHandler}
 				>
 					{consoleData.map((line, index) => (
-						<span className="text-sm font-mono" key={index}>
-							{line.line}
-						</span>
+						<FormattedConsoleLine key={index} line={line} />
 					))}
 					<Button
 						hidden={!hasUserScrolled}
