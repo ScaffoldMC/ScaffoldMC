@@ -55,7 +55,7 @@ export default defineConfig([
 		},
 		settings: {
 			react: {
-				version: "detect",
+				version: "19",
 			},
 			next: {
 				rootDir: path.join(__dirname, "apps/web"),
