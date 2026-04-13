@@ -6,8 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import Image from "next/image";
 import { cn, gameString } from "@/lib/util";
-import { EthernetPort, Play, Square } from "lucide-react";
-import { Button } from "@/components/atoms/Button/Button";
+import { EthernetPort } from "lucide-react";
 import { ServerStartStopButton } from "../ServerStartStopButton/ServerStartStopButton";
 
 export function ServerList() {
