@@ -1,6 +1,7 @@
 use crate::core::game::Game;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use ts_rs::TS;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
@@ -12,7 +13,19 @@ pub enum ConfigError {
 	Serialize(#[from] toml::ser::Error),
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+/// Partial type for updating a server's config.
+#[derive(TS, Debug, Clone, Deserialize, Serialize)]
+#[ts(export)]
+#[serde(rename_all = "snake_case")]
+pub struct PartialServerConfig {
+	pub name: Option<String>,
+	pub game: Option<Game>,
+	pub args: Option<Vec<String>>,
+	pub stop_command: Option<String>,
+}
+
+#[derive(TS, Debug, Clone, Deserialize, Serialize)]
+#[ts(export)]
 #[serde(rename_all = "snake_case")]
 pub struct ServerConfig {
 	pub name: String,
