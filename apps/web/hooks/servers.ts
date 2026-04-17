@@ -34,6 +34,7 @@ export function useServer(serverId: string) {
 	});
 
 	const isRunning = server.data?.state === "Running";
+	const isStarting = server.data?.state === "Starting";
 
 	const sendCommand = async (command: string) => {
 		await api.post(`/servers/${serverId}/console`, { command });
@@ -62,6 +63,7 @@ export function useServer(serverId: string) {
 
 	return {
 		server,
+		isStarting,
 		isRunning,
 		sendCommand,
 		startServer,
