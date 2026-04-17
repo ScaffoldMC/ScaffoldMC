@@ -3,20 +3,31 @@ import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { VersionSelector } from "../VersionSelector/VersionSelector";
 import { Button } from "@/components/atoms/Button/Button";
-import { SubmitEventHandler, useState } from "react";
 import { ListInput } from "@/components/atoms/ListInput/ListInput";
+import { Controller, useForm } from "react-hook-form";
+import { useServer } from "@/hooks/servers";
 
 export function ServerSettings({ serverId }: { serverId: string }) {
-	// TODO: Diff original values with current values to determine if form is modified
-	const [formModified, setFormModified] = useState(false);
+	const { server } = useServer(serverId);
 
-	const [newStopCommand, setNewStopCommand] = useState("shutdown");
-	const [args, setArgs] = useState<string[]>(["--no-gui"]);
+	const {
+		register,
+		handleSubmit,
+		formState: { touchedFields },
+	} = useForm({
+		defaultValues: {
+			name: server.data?.config.name,
+			stopCommand: server.data?.config.stopCommand,
+			args: server.data?.config.args,
+			game: server.data?.config.game,
+		},
+	});
 
-	const submitHandler: SubmitEventHandler<HTMLFormElement> = (event) => {
-		event.preventDefault();
+	const formModified = Object.keys(touchedFields).length > 0;
+
+	const onSubmit = handleSubmit((data) => {
 		console.log("Updated");
-	};
+	});
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -24,27 +35,39 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 
 			<form
 				className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static"
-				onSubmit={submitHandler}
+				onSubmit={onSubmit}
 			>
 				<FormField>
 					<Label htmlFor="name">Name</Label>
-					<TextInput name="name" />
+					<TextInput name="name" {...register("name")} />
 				</FormField>
 				<FormField>
-					<Label htmlFor="stopcommand">Stop Command</Label>
+					<Label htmlFor="stopCommand">Stop Command</Label>
 					<TextInput
-						name="stopcommand"
-						value={newStopCommand}
-						onChange={(e) => setNewStopCommand(e.target.value)}
+						name="stopCommand"
+						{...register("stopCommand")}
 					/>
 				</FormField>
 				<FormField>
 					<Label htmlFor="args">Args</Label>
-					<ListInput value={args} onChange={setArgs} />
+					<Controller
+						name="args"
+						render={({ field }) => (
+							<ListInput
+								value={field.value}
+								onChange={field.onChange}
+							/>
+						)}
+					/>
 				</FormField>
 				<FormField>
-					<Label>Game</Label>
-					<VersionSelector onGame={() => {}} />
+					<Label htmlFor="game">Game</Label>
+					<Controller
+						name="game"
+						render={({ field }) => (
+							<VersionSelector onGame={field.onChange} />
+						)}
+					/>
 				</FormField>
 
 				<div className="self-end flex flex-row gap-2">
