@@ -26,6 +26,9 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 		},
 	});
 
+	// TODO: Custom fields need proper change detection
+	// TODO: Game field needs to be rethought to allow for default value. Perhaps a wrapper component?
+
 	const onSubmit = handleSubmit((data) => {
 		console.log("Updated");
 	});
