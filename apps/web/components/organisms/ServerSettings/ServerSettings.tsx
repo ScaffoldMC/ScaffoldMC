@@ -1,11 +1,11 @@
 import FormField from "@/components/atoms/FormField/FormField";
 import { Label } from "@/components/atoms/Label/Label";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
-import { VersionSelector } from "../VersionSelector/VersionSelector";
 import { Button } from "@/components/atoms/Button/Button";
 import { ListInput } from "@/components/atoms/ListInput/ListInput";
 import { Controller, useForm } from "react-hook-form";
 import { useServer } from "@/hooks/servers";
+import { VersionChanger } from "../VersionChanger/VersionChanger";
 
 export function ServerSettings({ serverId }: { serverId: string }) {
 	const { server } = useServer(serverId);
@@ -73,7 +73,10 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 						name="game"
 						control={control}
 						render={({ field }) => (
-							<VersionSelector onGame={field.onChange} />
+							<VersionChanger
+								value={field.value}
+								onChange={field.onChange}
+							/>
 						)}
 					/>
 				</FormField>
