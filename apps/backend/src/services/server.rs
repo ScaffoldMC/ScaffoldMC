@@ -13,6 +13,7 @@ use crate::core::server::Server;
 use crate::core::server::ServerInfo;
 use crate::core::server::ServerProcessState;
 use crate::core::server::ServerRuntime;
+use crate::core::server::ServerStateInfo;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use std::collections::HashMap;
@@ -78,7 +79,7 @@ impl Service for ServerService {
 		let start = std::time::Instant::now();
 
 		for server_id in server_ids.clone() {
-			while let Ok(true) = self.is_running(server_id).await {
+			while let Ok(ServerStateInfo::Running) = self.get_server_state(server_id).await {
 				if start.elapsed() > timeout {
 					break;
 				}
@@ -88,7 +89,7 @@ impl Service for ServerService {
 
 		// If any servers are still running after the timeout, force kill them
 		for server_id in server_ids {
-			if let Ok(true) = self.is_running(server_id).await {
+			if let Ok(ServerStateInfo::Running) = self.get_server_state(server_id).await {
 				if let Err(e) = self.kill(server_id).await {
 					tracing::error!("Failed to force kill server {}: {}", server_id, e);
 				}
@@ -212,6 +213,7 @@ impl ServerService {
 		let process_guard = server.process.read().await;
 
 		match &*process_guard {
+			ServerProcessState::Starting => Err(ServerError::NotRunning),
 			ServerProcessState::Stopped => Err(ServerError::NotRunning),
 			ServerProcessState::Running(runtime) => runtime
 				.send_line(command.to_string())
@@ -231,10 +233,12 @@ impl ServerService {
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
 
 		let mut process_guard = server.process.write().await;
-
 		if let ServerProcessState::Running(_) = *process_guard {
 			return Err(ServerError::AlreadyRunning);
 		}
+
+		*process_guard = ServerProcessState::Starting;
+		drop(process_guard);
 
 		let config_guard = server.config.read().await;
 
@@ -293,6 +297,7 @@ impl ServerService {
 		});
 
 		// Set state to running
+		let mut process_guard = server.process.write().await;
 		*process_guard = ServerProcessState::Running(runtime.clone());
 		drop(process_guard);
 
@@ -345,24 +350,21 @@ impl ServerService {
 
 		match &*process_guard {
 			ServerProcessState::Stopped => Err(ServerError::NotRunning),
+			ServerProcessState::Starting => Err(ServerError::NotRunning),
 			ServerProcessState::Running(runtime) => {
 				runtime.kill().await.map_err(ServerError::StopError)
 			}
 		}
 	}
 
-	/// Checks if a server instance is currently running.
-	pub async fn is_running(&self, server_id: Uuid) -> Result<bool, ServerError> {
+	/// Gets a server's state
+	pub async fn get_server_state(&self, server_id: Uuid) -> Result<ServerStateInfo, ServerError> {
 		let servers_guard = self.servers.read().await;
 		let server = servers_guard
 			.get(&server_id)
 			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
-
-		let process_guard = server.process.read().await;
-		match &*process_guard {
-			ServerProcessState::Running(runtime) => Ok(runtime.is_running()),
-			ServerProcessState::Stopped => Ok(false),
-		}
+		let server_state = server.process.read().await;
+		Ok(server_state.info())
 	}
 
 	/// Update a server's config
