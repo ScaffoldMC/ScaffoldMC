@@ -6,9 +6,10 @@ import { ListInput } from "@/components/atoms/ListInput/ListInput";
 import { Controller, useForm } from "react-hook-form";
 import { useServer } from "@/hooks/servers";
 import { VersionChanger } from "../VersionChanger/VersionChanger";
+import { useEffect } from "react";
 
 export function ServerSettings({ serverId }: { serverId: string }) {
-	const { server } = useServer(serverId);
+	const { server, mutateConfig } = useServer(serverId);
 
 	const {
 		register,
@@ -20,20 +21,27 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 		mode: "onBlur",
 		defaultValues: {
 			name: server.data?.config.name,
-			stopCommand: server.data?.config.stop_command,
+			stop_command: server.data?.config.stop_command,
 			args: server.data?.config.args,
 			game: server.data?.config.game,
 		},
 	});
 
-	// TODO: Custom fields need proper change detection
-	// TODO: Game field needs to be rethought to allow for default value. Perhaps a wrapper component?
-
 	const onSubmit = handleSubmit((data) => {
-		console.log("Updated with ", data);
+		mutateConfig(data);
 	});
 
 	const formModified = Object.keys(touchedFields).length > 0;
+
+	// Used to reset form values when server config changes
+	useEffect(() => {
+		reset({
+			name: server.data.config.name,
+			stop_command: server.data.config.stop_command,
+			args: server.data.config.args,
+			game: server.data.config.game,
+		});
+	}, [server.data?.config, reset]);
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -45,10 +53,10 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 					<TextInput name="name" {...register("name")} />
 				</FormField>
 				<FormField>
-					<Label htmlFor="stopCommand">Stop Command</Label>
+					<Label htmlFor="stop_command">Stop Command</Label>
 					<TextInput
-						name="stopCommand"
-						{...register("stopCommand")}
+						name="stop_command"
+						{...register("stop_command")}
 					/>
 				</FormField>
 				<FormField>
