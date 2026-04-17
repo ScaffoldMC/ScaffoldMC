@@ -71,6 +71,7 @@ pub struct Server {
 /// TODO: Add more states (starting, stopping, etc.) to give more granular info
 pub enum ServerProcessState {
 	Stopped,
+	Starting,
 	Running(Arc<ServerRuntime>),
 }
 
@@ -78,6 +79,7 @@ impl ServerProcessState {
 	pub fn info(&self) -> ServerStateInfo {
 		match self {
 			ServerProcessState::Stopped => ServerStateInfo::Stopped,
+			ServerProcessState::Starting => ServerStateInfo::Starting,
 			ServerProcessState::Running(_) => ServerStateInfo::Running,
 		}
 	}
@@ -89,6 +91,7 @@ impl ServerProcessState {
 pub enum ServerStateInfo {
 	Stopped,
 	Running,
+	Starting,
 }
 
 /// Information about a server instance for listing purposes
