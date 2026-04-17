@@ -30,7 +30,7 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 	// TODO: Game field needs to be rethought to allow for default value. Perhaps a wrapper component?
 
 	const onSubmit = handleSubmit((data) => {
-		console.log("Updated");
+		console.log("Updated with ", data);
 	});
 
 	const formModified = Object.keys(touchedFields).length > 0;
@@ -39,10 +39,7 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 		<div className="flex flex-col gap-2">
 			<h2>Configuration</h2>
 
-			<form
-				className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static"
-				onSubmit={onSubmit}
-			>
+			<div className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static">
 				<FormField>
 					<Label htmlFor="name">Name</Label>
 					<TextInput name="name" {...register("name")} />
@@ -62,7 +59,10 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 						render={({ field }) => (
 							<ListInput
 								value={field.value}
-								onChange={field.onChange}
+								onChange={(value) => {
+									field.onBlur();
+									field.onChange(value);
+								}}
 							/>
 						)}
 					/>
@@ -75,7 +75,10 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 						render={({ field }) => (
 							<VersionChanger
 								value={field.value}
-								onChange={field.onChange}
+								onChange={(value) => {
+									field.onBlur();
+									field.onChange(value);
+								}}
 							/>
 						)}
 					/>
@@ -89,15 +92,11 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 					>
 						Revert
 					</Button>
-					<Button
-						disabled={!formModified}
-						type="submit"
-						level="primary"
-					>
+					<Button level="primary" onClick={onSubmit}>
 						Save
 					</Button>
 				</div>
-			</form>
+			</div>
 		</div>
 	);
 }
