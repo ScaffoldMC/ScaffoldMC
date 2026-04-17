@@ -13,21 +13,24 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 	const {
 		register,
 		handleSubmit,
+		control,
+		reset,
 		formState: { touchedFields },
 	} = useForm({
+		mode: "onBlur",
 		defaultValues: {
 			name: server.data?.config.name,
-			stopCommand: server.data?.config.stopCommand,
+			stopCommand: server.data?.config.stop_command,
 			args: server.data?.config.args,
 			game: server.data?.config.game,
 		},
 	});
 
-	const formModified = Object.keys(touchedFields).length > 0;
-
 	const onSubmit = handleSubmit((data) => {
 		console.log("Updated");
 	});
+
+	const formModified = Object.keys(touchedFields).length > 0;
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -52,6 +55,7 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 					<Label htmlFor="args">Args</Label>
 					<Controller
 						name="args"
+						control={control}
 						render={({ field }) => (
 							<ListInput
 								value={field.value}
@@ -64,6 +68,7 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 					<Label htmlFor="game">Game</Label>
 					<Controller
 						name="game"
+						control={control}
 						render={({ field }) => (
 							<VersionSelector onGame={field.onChange} />
 						)}
@@ -71,7 +76,11 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 				</FormField>
 
 				<div className="self-end flex flex-row gap-2">
-					<Button hidden={!formModified} level="secondary">
+					<Button
+						hidden={!formModified}
+						level="secondary"
+						onClick={() => reset()}
+					>
 						Revert
 					</Button>
 					<Button
