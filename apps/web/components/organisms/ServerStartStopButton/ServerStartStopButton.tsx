@@ -1,16 +1,12 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { useServer } from "@/hooks/servers";
 import { LoaderCircle, Play, Square } from "lucide-react";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 
 export function ServerStartStopButton({ serverId }: { serverId: string }) {
-	const { server, isRunning, startServer, stopServer } = useServer(serverId);
+	const { server, isRunning, isStarting, startServer, stopServer } =
+		useServer(serverId);
 	const [loading, setLoading] = useState(false);
-
-	if (server.isError) {
-		console.error(`Server ${serverId} could not be found: ${server.error}`);
-		return null;
-	}
 
 	const handleStartStop: MouseEventHandler = async (event) => {
 		event.stopPropagation();
@@ -29,6 +25,17 @@ export function ServerStartStopButton({ serverId }: { serverId: string }) {
 
 		setLoading(false);
 	};
+
+	useEffect(() => {
+		if (isStarting) {
+			setLoading(true);
+		}
+	}, [isStarting]);
+
+	if (server.isError) {
+		console.error(`Server ${serverId} could not be found: ${server.error}`);
+		return null;
+	}
 
 	return (
 		<Button level="secondary" onClick={handleStartStop} disabled={loading}>
