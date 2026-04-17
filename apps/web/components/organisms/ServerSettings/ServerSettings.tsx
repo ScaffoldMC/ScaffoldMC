@@ -100,7 +100,11 @@ export function ServerSettings({ serverId }: { serverId: string }) {
 					>
 						Revert
 					</Button>
-					<Button level="primary" onClick={onSubmit}>
+					<Button
+						disabled={!formModified}
+						level="primary"
+						onClick={onSubmit}
+					>
 						Save
 					</Button>
 				</div>
