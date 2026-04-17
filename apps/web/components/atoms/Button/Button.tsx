@@ -29,8 +29,9 @@ const buttonStyles = cva(
 					"enabled:hover:bg-surface",
 				),
 				destructive: cn(
-					"border-red-400 bg-red-200 text-red-900",
-					"enabled:hover:bg-red-300",
+					"border-red-200 bg-red-100 text-red-900",
+					"dark:border-red-900 dark:bg-red-950 dark:text-red-50",
+					"enabled:hover:bg-red-200 dark:enabled:hover:bg-red-800",
 				),
 				ghost: "border-transparent bg-transparent text-text-primary enabled:hover:bg-surface-overlay",
 			},
