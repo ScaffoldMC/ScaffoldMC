@@ -44,70 +44,63 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 	}, [server.data?.config, reset]);
 
 	return (
-		<div className="flex flex-col gap-2">
-			<h2>Configuration</h2>
+		<div className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static">
+			<FormField>
+				<Label htmlFor="name">Name</Label>
+				<TextInput name="name" {...register("name")} />
+			</FormField>
+			<FormField>
+				<Label htmlFor="stop_command">Stop Command</Label>
+				<TextInput name="stop_command" {...register("stop_command")} />
+			</FormField>
+			<FormField>
+				<Label htmlFor="args">Args</Label>
+				<Controller
+					name="args"
+					control={control}
+					render={({ field }) => (
+						<ListInput
+							value={field.value}
+							onChange={(value) => {
+								field.onBlur();
+								field.onChange(value);
+							}}
+						/>
+					)}
+				/>
+			</FormField>
+			<FormField>
+				<Label htmlFor="game">Game</Label>
+				<Controller
+					name="game"
+					control={control}
+					render={({ field }) => (
+						<VersionChanger
+							value={field.value}
+							onChange={(value) => {
+								field.onBlur();
+								field.onChange(value);
+							}}
+						/>
+					)}
+				/>
+			</FormField>
 
-			<div className="flex flex-col gap-4 p-4 bg-surface rounded-md border border-border-static">
-				<FormField>
-					<Label htmlFor="name">Name</Label>
-					<TextInput name="name" {...register("name")} />
-				</FormField>
-				<FormField>
-					<Label htmlFor="stop_command">Stop Command</Label>
-					<TextInput
-						name="stop_command"
-						{...register("stop_command")}
-					/>
-				</FormField>
-				<FormField>
-					<Label htmlFor="args">Args</Label>
-					<Controller
-						name="args"
-						control={control}
-						render={({ field }) => (
-							<ListInput
-								value={field.value}
-								onChange={(value) => {
-									field.onBlur();
-									field.onChange(value);
-								}}
-							/>
-						)}
-					/>
-				</FormField>
-				<FormField>
-					<Label htmlFor="game">Game</Label>
-					<Controller
-						name="game"
-						control={control}
-						render={({ field }) => (
-							<VersionChanger
-								value={field.value}
-								onChange={(value) => {
-									field.onBlur();
-									field.onChange(value);
-								}}
-							/>
-						)}
-					/>
-				</FormField>
-
-				<div className="self-end flex flex-row gap-2">
-					<Button
-						hidden={!formModified}
-						level="secondary"
-						onClick={() => reset()}
-					>
-						Revert
-					</Button>
-					<Button
-						disabled={!formModified}
-						level="primary"
-						onClick={onSubmit}
-					>
-						Save
-					</Button>
-				</div>
+			<div className="self-end flex flex-row gap-2">
+				<Button
+					hidden={!formModified}
+					level="secondary"
+					onClick={() => reset()}
+				>
+					Revert
+				</Button>
+				<Button
+					disabled={!formModified}
+					level="primary"
+					onClick={onSubmit}
+				>
+					Save
+				</Button>
 			</div>
 		</div>
 	);

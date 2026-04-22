@@ -77,7 +77,8 @@ export default function Page() {
 				<TabsContent value="console">
 					<ServerConsole serverId={slug.toString()} />
 				</TabsContent>
-				<TabsContent value="settings">
+				<TabsContent value="settings" className="flex flex-col gap-2">
+					<h2>Configuration</h2>
 					<ServerConfigForm serverId={slug.toString()} />
 				</TabsContent>
 				<TabsContent value="backups">
