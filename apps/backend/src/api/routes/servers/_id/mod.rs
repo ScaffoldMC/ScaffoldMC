@@ -93,7 +93,12 @@ async fn patch() -> impl IntoResponse {
 	StatusCode::OK.into_response()
 }
 
-async fn delete() -> impl IntoResponse {
-	// TODO: Move server to trash
-	StatusCode::OK.into_response()
+async fn delete(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
+	match state.server_service.delete(id).await {
+		Ok(()) => StatusCode::OK.into_response(),
+		Err(err) => {
+			tracing::error!("Error deleting server: {}", err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		}
+	}
 }
