@@ -56,10 +56,11 @@ export function TabsTrigger({
 
 export function TabsContent({
 	children,
+	className,
 	...props
 }: TabsPrimitive.TabsContentProps) {
 	return (
-		<TabsPrimitive.Content {...props} className="w-full">
+		<TabsPrimitive.Content {...props} className={cn("w-full", className)}>
 			{children}
 		</TabsPrimitive.Content>
 	);
