@@ -8,13 +8,20 @@ import {
 } from "../Dialog/Dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function ServerDangerActions({ serverId }: { serverId: string }) {
-	const { server } = useServer(serverId);
+	const router = useRouter();
+	const { server, deleteServer } = useServer(serverId);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 
-	// TODO: Add delete from backend
 	// TODO: Add countdown to confirm button
+	// FIXME: Unhandled axios errors from server query.
+
+	const handleServerDelete = () => {
+		deleteServer();
+		router.push("/servers");
+	};
 
 	if (!server.data) {
 		return null;
@@ -37,7 +44,11 @@ export function ServerDangerActions({ serverId }: { serverId: string }) {
 							action cannot be undone.
 						</DialogPrimitive.Description>
 						<div className="self-end flex flex-row gap-2">
-							<Button type="button" level="destructive">
+							<Button
+								type="button"
+								level="destructive"
+								onClick={handleServerDelete}
+							>
 								Delete Server
 							</Button>
 							<DialogPrimitive.Close asChild>

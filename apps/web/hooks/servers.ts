@@ -61,6 +61,12 @@ export function useServer(serverId: string) {
 		},
 	}).mutateAsync;
 
+	const deleteServer = async () => {
+		await api.delete(`/servers/${serverId}`);
+		await queryClient.invalidateQueries({ queryKey: ["server", serverId] });
+		await queryClient.invalidateQueries({ queryKey: ["servers"] });
+	};
+
 	return {
 		server,
 		isStarting,
@@ -68,6 +74,7 @@ export function useServer(serverId: string) {
 		sendCommand,
 		startServer,
 		stopServer,
+		deleteServer,
 		mutateConfig,
 	};
 }
