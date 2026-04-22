@@ -8,7 +8,7 @@ import { useServer } from "@/hooks/servers";
 import { VersionChanger } from "../VersionChanger/VersionChanger";
 import { useEffect } from "react";
 
-export function ServerSettings({ serverId }: { serverId: string }) {
+export function ServerConfigForm({ serverId }: { serverId: string }) {
 	const { server, mutateConfig } = useServer(serverId);
 
 	const {

@@ -21,7 +21,7 @@ import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsol
 import { ServerStartStopButton } from "@/components/organisms/ServerStartStopButton/ServerStartStopButton";
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
 import { CloudBackup, Settings, Terminal } from "lucide-react";
-import { ServerSettings } from "@/components/organisms/ServerSettings/ServerSettings";
+import { ServerConfigForm } from "@/components/organisms/ServerConfigForm/ServerConfigForm";
 
 export default function Page() {
 	const { slug } = useParams();
@@ -78,7 +78,7 @@ export default function Page() {
 					<ServerConsole serverId={slug.toString()} />
 				</TabsContent>
 				<TabsContent value="settings">
-					<ServerSettings serverId={slug.toString()} />
+					<ServerConfigForm serverId={slug.toString()} />
 				</TabsContent>
 				<TabsContent value="backups">
 					<b>Backups</b>
