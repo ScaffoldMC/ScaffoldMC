@@ -41,6 +41,8 @@ use uuid::Uuid;
 pub enum ServerError {
 	#[error("Server is already running")]
 	AlreadyRunning,
+	#[error("Failed to delete the server: {0}")]
+	DeleteError(String),
 	#[error("Failed to start server: {0}")]
 	StartError(String),
 	#[error("Failed to stop server: {0}")]
@@ -448,6 +450,30 @@ impl ServerService {
 		let mut servers_guard = self.servers.write().await;
 		servers_guard.insert(server_id, server);
 		Ok(server_id)
+	}
+
+	/// Deletes a server and removes its files
+	#[instrument(name = "ServerService.DeleteServer", skip(self))]
+	pub async fn delete(&self, server_id: Uuid) -> Result<(), ServerError> {
+		tracing::info!("Deleting server {}", server_id);
+
+		// Stop the server if it's running
+		if let Ok(ServerStateInfo::Running) = self.get_server_state(server_id).await {
+			self.stop(server_id).await?;
+		}
+
+		let mut servers_guard = self.servers.write().await;
+		servers_guard
+			.remove(&server_id)
+			.ok_or(ServerError::NoSuchServer(server_id.to_string()))?;
+
+		let server_dir = format!("{}/{}/", &self.servers_dir, server_id);
+		std::fs::remove_dir_all(&server_dir)
+			.map_err(|e| ServerError::DeleteError(format!("Failed to delete server files: {e}")))?;
+
+		tracing::info!("Server {} deleted successfully", server_id);
+
+		Ok(())
 	}
 
 	/// Get a snapshot of a server's console output
