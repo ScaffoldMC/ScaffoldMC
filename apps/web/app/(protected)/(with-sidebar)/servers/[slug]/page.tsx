@@ -22,6 +22,7 @@ import { ServerStartStopButton } from "@/components/organisms/ServerStartStopBut
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
 import { CloudBackup, Settings, Terminal } from "lucide-react";
 import { ServerConfigForm } from "@/components/organisms/ServerConfigForm/ServerConfigForm";
+import { ServerDangerActions } from "@/components/organisms/ServerDangerActions/ServerDangerActions";
 
 export default function Page() {
 	const { slug } = useParams();
@@ -80,6 +81,8 @@ export default function Page() {
 				<TabsContent value="settings" className="flex flex-col gap-2">
 					<h2>Configuration</h2>
 					<ServerConfigForm serverId={slug.toString()} />
+					<h2>Danger Zone</h2>
+					<ServerDangerActions serverId={slug.toString()} />
 				</TabsContent>
 				<TabsContent value="backups">
 					<b>Backups</b>
