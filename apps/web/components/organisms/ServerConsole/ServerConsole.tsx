@@ -76,6 +76,14 @@ function FormattedConsoleLine({ line }: { line: ConsoleLine }) {
 			regex: /\[[\w\s]+[ /]WARN\]:/,
 			className: "text-orange-600 dark:text-orange-400",
 		},
+		{
+			regex: /\[[\w\s]+[ /]ERROR\]:/,
+			className: "text-red-600 dark:text-red-400",
+		},
+		{
+			regex: /\[[\w\s]+[ /]FATAL\]:/,
+			className: "text-red-200 dark:text-red-800",
+		},
 	];
 
 	return (
