@@ -8,7 +8,6 @@ import {
 
 import {
 	HashTabs,
-	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
