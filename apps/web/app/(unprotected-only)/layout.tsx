@@ -15,7 +15,7 @@ export default function NoAuthLayout({
 
 	useEffect(() => {
 		if (authenticated && !isLoading) {
-			router.push("/home");
+			router.push("/servers");
 		}
 	}, [authenticated, isLoading, router]);
 

@@ -36,7 +36,7 @@ export function useLogin() {
 			await api.post("/auth/login", credentials),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["me"] });
-			router.push("/home");
+			router.push("/servers");
 		},
 	}).mutateAsync;
 }

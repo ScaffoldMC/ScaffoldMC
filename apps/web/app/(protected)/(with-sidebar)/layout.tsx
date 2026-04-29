@@ -6,7 +6,7 @@ import {
 	SidebarLink,
 } from "@/components/organisms/Sidebar/Sidebar";
 import { User } from "@/components/molecules/User/User";
-import { Home, Server, Settings } from "lucide-react";
+import { Server, Settings } from "lucide-react";
 import Image from "next/image";
 
 export default async function DashboardLayout({
@@ -34,10 +34,6 @@ export default async function DashboardLayout({
 					/>
 				</SidebarHeader>
 				<SidebarContent>
-					<SidebarLink href="/home">
-						<Home size={18} />
-						Dashboard
-					</SidebarLink>
 					<SidebarLink href="/servers">
 						<Server size={18} />
 						Servers
