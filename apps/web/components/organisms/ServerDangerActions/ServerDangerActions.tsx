@@ -7,15 +7,29 @@ import {
 	DialogRoot,
 } from "../Dialog/Dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function ServerDangerActions({ serverId }: { serverId: string }) {
 	const router = useRouter();
 	const { server, deleteServer } = useServer(serverId);
 	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [btnTimeout, setBtnTimeout] = useState(null);
+	const [confirmReady, setConfirmReady] = useState(false);
 
-	// TODO: Add countdown to confirm button
+	useEffect(() => {
+		if (confirmOpen && !btnTimeout) {
+			const btnCountdown = setTimeout(() => {
+				setConfirmReady(true);
+			}, 3000);
+
+			setBtnTimeout(btnCountdown);
+		} else if (!confirmOpen && btnTimeout) {
+			clearTimeout(btnTimeout);
+			setBtnTimeout(null);
+			setConfirmReady(false);
+		}
+	}, [confirmOpen, btnTimeout, setConfirmReady]);
 
 	const handleServerDelete = () => {
 		deleteServer();
@@ -44,6 +58,7 @@ export function ServerDangerActions({ serverId }: { serverId: string }) {
 						</DialogPrimitive.Description>
 						<div className="self-end flex flex-row gap-2">
 							<Button
+								disabled={!confirmReady}
 								type="button"
 								level="destructive"
 								onClick={handleServerDelete}
