@@ -47,6 +47,7 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode
+.zed
 target/
 
 .nx/cache
