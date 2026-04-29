@@ -22,6 +22,11 @@ export function ServerList() {
 				singular: "Server",
 				plural: "Servers",
 			}}
+			emptyView={
+				<span className="flex flex-col h-36 items-center justify-center text-sm text-text-secondary">
+					There&#39;s nothing here yet! Create a server to get started
+				</span>
+			}
 		>
 			{serverIds.data?.map((uuid: string) => (
 				<ServerListItem key={uuid} uuid={uuid} />
