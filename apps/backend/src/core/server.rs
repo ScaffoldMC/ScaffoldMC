@@ -68,7 +68,6 @@ pub struct Server {
 }
 
 /// Server process state
-/// TODO: Add more states (starting, stopping, etc.) to give more granular info
 pub enum ServerProcessState {
 	Stopped,
 	Starting,
