@@ -41,7 +41,7 @@ export default function Page() {
 		return null;
 	}
 
-	if (!server.data) {
+	if (!server.data || server.error) {
 		return <div>Loading...</div>;
 	}
 
