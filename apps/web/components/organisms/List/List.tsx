@@ -6,13 +6,14 @@ import { cn, singularOrPlural } from "@/lib/util";
 interface ListProps {
 	hideHeader?: boolean;
 	children: React.ReactNode;
+	emptyView?: React.ReactNode;
 	names?: {
 		singular: string;
 		plural: string;
 	};
 }
 
-export function List({ hideHeader, children, names }: ListProps) {
+export function List({ hideHeader, children, emptyView, names }: ListProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const [numItems, setNumItems] = useState<number>(0);
 
@@ -45,6 +46,8 @@ export function List({ hideHeader, children, names }: ListProps) {
 			>
 				{children}
 			</div>
+
+			{numItems === 0 && emptyView}
 		</div>
 	);
 }
