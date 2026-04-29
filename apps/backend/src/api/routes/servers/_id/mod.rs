@@ -19,7 +19,6 @@ mod status;
 pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new()
 		.route("/", routing::get(get))
-		.route("/", routing::patch(patch))
 		.route("/", routing::delete(delete))
 		.route("/start", routing::post(start_post))
 		.route("/stop", routing::post(stop_post))
@@ -86,11 +85,6 @@ async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl I
 	}
 
 	(StatusCode::OK, Json(server_info.unwrap())).into_response()
-}
-
-async fn patch() -> impl IntoResponse {
-	// TODO: Update server information
-	StatusCode::OK.into_response()
 }
 
 async fn delete(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
