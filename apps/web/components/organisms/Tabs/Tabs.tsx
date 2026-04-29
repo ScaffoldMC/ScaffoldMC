@@ -1,5 +1,43 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/util";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function HashTabs({
+	children,
+	className,
+	defaultValue,
+	...props
+}: TabsPrimitive.TabsProps) {
+	const router = useRouter();
+	const [activeTab, setActiveTab] = useState(defaultValue ?? "");
+
+	useEffect(() => {
+		const hash = window.location.hash.replace("#", "");
+		if (hash) setActiveTab(hash);
+
+		const onHashChange = () => {
+			setActiveTab(hash || defaultValue || "");
+		};
+
+		window.addEventListener("hashchange", onHashChange);
+		return () => window.removeEventListener("hashchange", onHashChange);
+	}, [defaultValue]);
+
+	return (
+		<TabsPrimitive.Root
+			className={cn("flex w-full flex-col items-center", className)}
+			value={activeTab}
+			onValueChange={(value) => {
+				setActiveTab(value);
+				router.push(`#${value}`, { scroll: false });
+			}}
+			{...props}
+		>
+			{children}
+		</TabsPrimitive.Root>
+	);
+}
 
 export function Tabs({
 	children,
