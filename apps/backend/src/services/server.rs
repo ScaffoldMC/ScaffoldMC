@@ -76,8 +76,8 @@ impl Service for ServerService {
 				.map_err(|e| format!("Failed to stop server {server_id}: {e}"))?;
 		}
 
-		// Wait up to 30 seconds for all servers to shut down
-		let timeout = std::time::Duration::from_secs(60);
+		// Wait 1 minute for all servers to shut down
+		let timeout = std::time::Duration::from_mins(1);
 		let start = std::time::Instant::now();
 
 		for server_id in server_ids.clone() {
