@@ -9,7 +9,7 @@ import { Server, Settings } from "lucide-react";
 import { User } from "@/components/molecules/User/User";
 import Image from "next/image";
 
-export function Navbar() {
+export function Navbar({ children }: { children: React.ReactNode }) {
 	return (
 		<nav className="flex h-16 flex-row border-b border-border-static bg-surface sticky top-0">
 			<div className="flex items-center w-16 mx-3 bg-orange">
@@ -21,14 +21,7 @@ export function Navbar() {
 				/>
 			</div>
 			<div className="flex w-full gap-2 overflow-y-auto py-2">
-				<SidebarLink href="/servers">
-					<Server size={18} />
-					Servers
-				</SidebarLink>
-				<SidebarLink href="/settings">
-					<Settings size={18} />
-					Settings
-				</SidebarLink>
+				{children}
 			</div>
 			<div className="flex h-full w-72 items-center gap-4 p-2 border-l border-border-static">
 				<User />
@@ -58,7 +51,7 @@ const activeClassName = cva(
 	},
 );
 
-export function SidebarLink({
+export function NavbarLink({
 	children,
 	...props
 }: {
@@ -77,25 +70,4 @@ export function SidebarLink({
 			{children}
 		</Link>
 	);
-}
-
-export function SublinkGroup({
-	children,
-	baseUrl,
-}: {
-	children: React.ReactNode;
-	baseUrl: string;
-}) {
-	const pathname = usePathname();
-	const [isActive, setIsActive] = useState(false);
-
-	useEffect(() => {
-		setIsActive(pathname.startsWith(baseUrl));
-	}, [pathname, baseUrl]);
-
-	return isActive ? (
-		<div className="flex flex-row gap-0.5 pl-4 [&_a]:text-sm">
-			<div className="flex flex-col gap-0.5">{children}</div>
-		</div>
-	) : null;
 }
