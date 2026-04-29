@@ -16,14 +16,13 @@ export function ServerDangerActions({ serverId }: { serverId: string }) {
 	const [confirmOpen, setConfirmOpen] = useState(false);
 
 	// TODO: Add countdown to confirm button
-	// FIXME: Unhandled axios errors from server query.
 
 	const handleServerDelete = () => {
 		deleteServer();
 		router.push("/servers");
 	};
 
-	if (!server.data) {
+	if (!server.data || server.isError) {
 		return null;
 	}
 

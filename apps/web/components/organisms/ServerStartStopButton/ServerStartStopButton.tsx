@@ -33,7 +33,6 @@ export function ServerStartStopButton({ serverId }: { serverId: string }) {
 	}, [isStarting]);
 
 	if (server.isError) {
-		console.error(`Server ${serverId} could not be found: ${server.error}`);
 		return null;
 	}
 
