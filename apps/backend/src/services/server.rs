@@ -215,8 +215,9 @@ impl ServerService {
 		let process_guard = server.process.read().await;
 
 		match &*process_guard {
-			ServerProcessState::Starting => Err(ServerError::NotRunning),
-			ServerProcessState::Stopped => Err(ServerError::NotRunning),
+			ServerProcessState::Starting | ServerProcessState::Stopped => {
+				Err(ServerError::NotRunning)
+			}
 			ServerProcessState::Running(runtime) => runtime
 				.send_line(command.to_string())
 				.await
@@ -351,8 +352,9 @@ impl ServerService {
 		let process_guard = server.process.read().await;
 
 		match &*process_guard {
-			ServerProcessState::Stopped => Err(ServerError::NotRunning),
-			ServerProcessState::Starting => Err(ServerError::NotRunning),
+			ServerProcessState::Stopped | ServerProcessState::Starting => {
+				Err(ServerError::NotRunning)
+			}
 			ServerProcessState::Running(runtime) => {
 				runtime.kill().await.map_err(ServerError::StopError)
 			}
