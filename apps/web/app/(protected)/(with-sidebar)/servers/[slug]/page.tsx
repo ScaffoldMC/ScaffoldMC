@@ -7,6 +7,7 @@ import {
 } from "@/components/atoms/Avatar/Avatar";
 
 import {
+	HashTabs,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -61,7 +62,7 @@ export default function Page() {
 				</div>
 			</div>
 
-			<Tabs defaultValue="console" className="gap-2">
+			<HashTabs defaultValue="console" className="gap-2">
 				<TabsList>
 					<TabsTrigger value="console">
 						<Terminal size={18} /> Console
@@ -87,7 +88,7 @@ export default function Page() {
 				<TabsContent value="backups">
 					<b>Backups</b>
 				</TabsContent>
-			</Tabs>
+			</HashTabs>
 		</PageLayout>
 	);
 }
