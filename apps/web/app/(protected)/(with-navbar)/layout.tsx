@@ -10,11 +10,11 @@ export default async function DashboardLayout({
 		<div className="flex flex-col">
 			<Navbar>
 				<NavbarLink href="/servers">
-					<Server size={22} />
+					<Server size={18} />
 					Servers
 				</NavbarLink>
 				<NavbarLink href="/settings">
-					<Settings size={22} />
+					<Settings size={18} />
 					Settings
 				</NavbarLink>
 			</Navbar>
