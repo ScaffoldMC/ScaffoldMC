@@ -31,13 +31,16 @@ export function Navbar({ children }: { children: React.ReactNode }) {
 
 const buttonClassName = cva(
 	cn(
-		"flex flex-row items-center justify-start gap-1.5 p-2 no-underline",
+		"flex flex-row items-center justify-start gap-1.5 p-2 no-underline rounded-md",
 		"transition-[background-color,border-color,color] duration-100 ease-in-out",
 	),
 	{
 		variants: {
 			active: {
-				true: "text-brand",
+				true: cn(
+					"bg-accent-lightest text-primary hover:bg-accent-lightest",
+					"dark:bg-accent-darkest dark:text-accent-lightest dark:hover:bg-accent-darkest",
+				),
 				false: "hover:text-text-primary text-text-secondary border-transparent",
 			},
 		},
