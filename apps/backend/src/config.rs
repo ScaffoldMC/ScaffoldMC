@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::LazyLock};
 
 use time::Duration;
 use tokio::time::Duration as TokioDuration;
@@ -21,9 +21,14 @@ pub static CLIENT_USER_AGENT: &str = "ScaffoldMC/0.0.0 (https://github.com/Scaff
 pub static SERVER_WATCHER_TICK: TokioDuration = TokioDuration::from_millis(200);
 pub static SERVER_CONSOLE_MAX_LINES: usize = 500;
 
-// Helper methods
+// Generated variables
+
+pub static SERVERS_DIRECTORY: LazyLock<String> =
+	LazyLock::new(|| format!("{}/servers", DATA_FOLDER));
+
+// Helper functions
 
 /// Get the canonical directory for a server
 pub fn canonical_server_dir(server_id: Uuid) -> PathBuf {
-	format!("{}/server/{}", DATA_FOLDER, server_id).into()
+	format!("{}/{}", SERVERS_DIRECTORY.clone(), server_id).into()
 }
