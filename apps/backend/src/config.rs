@@ -1,5 +1,8 @@
+use std::path::PathBuf;
+
 use time::Duration;
 use tokio::time::Duration as TokioDuration;
+use uuid::Uuid;
 
 // File system
 pub const DATA_FOLDER: &str = "data";
@@ -17,3 +20,10 @@ pub static CLIENT_USER_AGENT: &str = "ScaffoldMC/0.0.0 (https://github.com/Scaff
 // Server runtime
 pub static SERVER_WATCHER_TICK: TokioDuration = TokioDuration::from_millis(200);
 pub static SERVER_CONSOLE_MAX_LINES: usize = 500;
+
+// Helper methods
+
+/// Get the canonical directory for a server
+pub fn canonical_server_dir(server_id: Uuid) -> PathBuf {
+	format!("{}/server/{}", DATA_FOLDER, server_id).into()
+}
