@@ -8,11 +8,11 @@ use std::sync::Arc;
 
 mod _id;
 
-pub fn create_router() -> Router<Arc<AppState>> {
+pub fn create_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
 		.route("/", routing::get(get))
 		.route("/", routing::post(post))
-		.nest("/{id}", _id::create_router())
+		.nest("/{id}", _id::create_router(state))
 }
 
 async fn get(State(state): State<Arc<AppState>>) -> impl IntoResponse {

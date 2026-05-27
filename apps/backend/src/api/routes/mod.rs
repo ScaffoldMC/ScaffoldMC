@@ -35,7 +35,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 
 	Router::new()
 		.nest("/game-versions", versions::create_router())
-		.nest("/servers", servers::create_router())
+		.nest("/servers", servers::create_router(&state))
 		.nest("/binaries", binaries::create_router())
 		.nest("/me", me::create_router(&state))
 		.nest("/jvms", jvms::create_router())

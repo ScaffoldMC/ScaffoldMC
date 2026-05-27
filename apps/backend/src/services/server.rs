@@ -224,7 +224,11 @@ impl ServerService {
 
 		// Stop the server if it's running
 		if let Ok(ServerStateInfo::Running) = server.get_server_state().await {
-			server.stop().await;
+			// FIXME: Error handling here doesn't feel right
+			server
+				.stop()
+				.await
+				.map_err(|err| ServerServiceError::DeleteError(err.to_string()))?;
 		}
 
 		let mut servers_guard = self.servers.write().await;
