@@ -1,23 +1,19 @@
-use std::{sync::Arc, time::Duration};
-
+use crate::{
+	api::types::server::{ConsoleQueryParams, ServerCommandRequest},
+	core::server::{Server, ServerStateInfo},
+	AppState,
+};
 use axum::{
-	extract::{Path, Query, State},
+	extract::{Query, State},
 	response::{
 		sse::{Event, KeepAlive},
 		IntoResponse, Sse,
 	},
-	routing, Json, Router,
+	routing, Extension, Json, Router,
 };
 use futures_util::{stream, Stream};
 use reqwest::StatusCode;
-use uuid::Uuid;
-
-use crate::{
-	api::types::server::{ConsoleQueryParams, ServerCommandRequest},
-	core::server::ServerStateInfo,
-	services::server::ServerError,
-	AppState,
-};
+use std::{sync::Arc, time::Duration};
 
 pub fn create_router() -> Router<Arc<AppState>> {
 	Router::new()
@@ -27,22 +23,16 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 async fn get(
 	State(state): State<Arc<AppState>>,
-	Path(id): Path<Uuid>,
+	Extension(server): Extension<Arc<Server>>,
 	Query(query): Query<ConsoleQueryParams>,
 ) -> Sse<impl Stream<Item = Result<Event, String>>> {
 	let stream = stream::unfold(
-		(state, id, query.since),
-		|(state, id, mut since)| async move {
+		(state, server.clone(), query.since),
+		|(state, server, mut since)| async move {
 			let mut prev_server_state: Option<ServerStateInfo> = None;
+
 			loop {
-				let server_info = match state.server_service.get_server_info(id).await {
-					Ok(server_info) => server_info,
-					Err(err) => {
-						tracing::error!("Error getting server info for server {}: {}", id, err);
-						tokio::time::sleep(Duration::from_millis(500)).await;
-						continue;
-					}
-				};
+				let server_info = server.get_server_info().await;
 
 				if prev_server_state.is_none() {
 					prev_server_state.replace(server_info.state.clone());
@@ -50,22 +40,21 @@ async fn get(
 					&& server_info.state != ServerStateInfo::Stopped
 				{
 					// If state has changed since from stop to start, end the stream
-					tracing::info!("Server {} has restarted, ending console stream", id);
+					tracing::info!("Server {} has restarted, ending console stream", server.id);
 					return None;
 				}
 
 				prev_server_state.replace(server_info.state.clone());
 
 				// Get the next snapshot of console lines
-				let snapshot = match state.server_service.get_console_snapshot(id, since).await {
+				let snapshot = match server.get_console_snapshot(since).await {
 					Ok(snapshot) => snapshot,
-					Err(ServerError::NoSuchServer(_)) => {
-						tracing::warn!("Console stream requested for unknown server {}", id);
-						let event = Event::default().event("error").data("Server not found");
-						return Some((Ok(event), (state, id, since)));
-					}
 					Err(err) => {
-						tracing::error!("Error getting console stream for server {}: {}", id, err);
+						tracing::error!(
+							"Error getting console stream for server {}: {}",
+							server.id,
+							err
+						);
 						tokio::time::sleep(Duration::from_millis(500)).await;
 						continue;
 					}
@@ -86,7 +75,7 @@ async fn get(
 					Err(err) => {
 						tracing::error!(
 							"Failed to serialize console snapshot for server {}: {}",
-							id,
+							server.id,
 							err
 						);
 
@@ -94,7 +83,7 @@ async fn get(
 							.event("error")
 							.data("Failed to serialize console snapshot");
 
-						return Some((Ok(event), (state, id, since)));
+						return Some((Ok(event), (state, server, since)));
 					}
 				};
 
@@ -103,7 +92,7 @@ async fn get(
 					.id(last_num.to_string())
 					.data(payload);
 
-				return Some((Ok(event), (state, id, since)));
+				return Some((Ok(event), (state, server, since)));
 			}
 		},
 	);
@@ -112,24 +101,14 @@ async fn get(
 }
 
 async fn post(
-	State(state): State<Arc<AppState>>,
-	Path(id): Path<Uuid>,
+	Extension(server): Extension<Arc<Server>>,
 	Json(request): Json<ServerCommandRequest>,
 ) -> impl IntoResponse {
-	match state
-		.server_service
-		.send_command(id, &request.command)
-		.await
-	{
+	match server.send_command(&request.command).await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
-			if let ServerError::NoSuchServer(_) = err {
-				tracing::error!("Server not found: {}", id);
-				StatusCode::NOT_FOUND.into_response()
-			} else {
-				tracing::error!("Error sending command to server {}: {}", id, err);
-				StatusCode::INTERNAL_SERVER_ERROR.into_response()
-			}
+			tracing::error!("Error sending command to server {}: {}", server.id, err);
+			StatusCode::INTERNAL_SERVER_ERROR.into_response()
 		}
 	}
 }

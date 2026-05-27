@@ -1,22 +1,23 @@
-use std::sync::Arc;
-
+use crate::{
+	api::middleware::server::require_server,
+	core::{files::server_config::PartialServerConfig, server::Server},
+	AppState,
+};
 use axum::{
 	extract::{Path, State},
+	middleware,
 	response::IntoResponse,
-	routing, Json, Router,
+	routing, Extension, Json, Router,
 };
 use reqwest::StatusCode;
+use std::sync::Arc;
 use uuid::Uuid;
-
-use crate::{
-	core::files::server_config::PartialServerConfig, services::server::ServerError, AppState,
-};
 
 mod console;
 mod files;
 mod status;
 
-pub fn create_router() -> Router<Arc<AppState>> {
+pub fn create_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
 	Router::new()
 		.route("/", routing::get(get))
 		.route("/", routing::delete(delete))
@@ -27,14 +28,17 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.nest("/status", status::create_router())
 		.nest("/files", files::create_router())
 		.nest("/console", console::create_router())
+		.route_layer(middleware::from_fn_with_state(
+			state.clone(),
+			require_server,
+		))
 }
 
 async fn config_patch(
-	State(state): State<Arc<AppState>>,
-	Path(id): Path<Uuid>,
+	Extension(server): Extension<Arc<Server>>,
 	Json(config): Json<PartialServerConfig>,
 ) -> impl IntoResponse {
-	match state.server_service.update_config(id, config).await {
+	match server.update_config(config).await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
 			tracing::error!("Error updating server config: {}", err);
@@ -43,18 +47,20 @@ async fn config_patch(
 	}
 }
 
-async fn start_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
-	match state.server_service.start(id).await {
-		Ok(()) => StatusCode::OK.into_response(),
-		Err(err) => {
-			tracing::error!("Error starting server: {}", err);
-			StatusCode::INTERNAL_SERVER_ERROR.into_response()
-		}
+async fn start_post(
+	State(state): State<Arc<AppState>>,
+	Extension(server): Extension<Arc<Server>>,
+) -> impl IntoResponse {
+	if let Err(err) = server.start(state.binary_service.clone()).await {
+		tracing::error!("Error starting server: {}", err);
+		StatusCode::INTERNAL_SERVER_ERROR.into_response()
+	} else {
+		StatusCode::OK.into_response()
 	}
 }
 
-async fn stop_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
-	match state.server_service.stop(id).await {
+async fn stop_post(Extension(server): Extension<Arc<Server>>) -> impl IntoResponse {
+	match server.stop().await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
 			tracing::error!("Error stopping server: {}", err);
@@ -63,8 +69,8 @@ async fn stop_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> 
 	}
 }
 
-async fn kill_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
-	match state.server_service.kill(id).await {
+async fn kill_post(Extension(server): Extension<Arc<Server>>) -> impl IntoResponse {
+	match server.kill().await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
 			tracing::error!("Error killing server: {}", err);
@@ -73,18 +79,10 @@ async fn kill_post(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> 
 	}
 }
 
-async fn get(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
-	let server_info = state.server_service.get_server_info(id).await;
+async fn get(Extension(server): Extension<Arc<Server>>) -> impl IntoResponse {
+	let server_info = server.get_server_info().await;
 
-	if let Err(err) = server_info {
-		if let ServerError::NoSuchServer(_) = err {
-			return (StatusCode::NOT_FOUND, err.to_string()).into_response();
-		}
-		tracing::error!("Error retrieving server info: {}", err);
-		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-	}
-
-	(StatusCode::OK, Json(server_info.unwrap())).into_response()
+	(StatusCode::OK, Json(server_info)).into_response()
 }
 
 async fn delete(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
