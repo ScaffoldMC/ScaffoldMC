@@ -1,5 +1,8 @@
 use crate::{
-	core::{api_clients::paper_meta::PaperDownloadsAPIClient, bin_providers::MCJEDownloadInfo},
+	core::{
+		api_clients::paper_meta::PaperDownloadsAPIClient,
+		bin_providers::{DownloadDependency, DownloadInfo, JavaDependency},
+	},
 	util::hash::HashAlgorithm,
 };
 use reqwest::Url;
@@ -13,7 +16,7 @@ impl PaperBinaryProvider {
 		Self { api_client }
 	}
 
-	pub async fn get_latest(&self) -> Result<MCJEDownloadInfo, String> {
+	pub async fn get_latest(&self) -> Result<DownloadInfo, String> {
 		let versions = self.api_client.get_versions().await?;
 
 		let latest_version = versions.versions.first().ok_or("No versions found")?;
@@ -22,7 +25,7 @@ impl PaperBinaryProvider {
 			.await
 	}
 
-	pub async fn get(&self, game_version: &str, build: u16) -> Result<MCJEDownloadInfo, String> {
+	pub async fn get(&self, game_version: &str, build: u16) -> Result<DownloadInfo, String> {
 		let response = self.api_client.get_version(game_version).await?;
 		let java_version = response.version.java.version.minimum;
 		let java_args = response.version.java.flags.recommended;
@@ -34,12 +37,16 @@ impl PaperBinaryProvider {
 
 		let hash = build.downloads.server_default.checksums.sha256;
 
-		let download_info = MCJEDownloadInfo {
+		let java_dep = DownloadDependency::Java(JavaDependency {
+			version: java_version,
+			args: Some(java_args),
+		});
+
+		let download_info = DownloadInfo {
 			download_url,
 			file_name: "server.jar".to_string(),
 			hash: Some((hash, HashAlgorithm::Sha256)),
-			java_version,
-			java_args,
+			dependencies: vec![java_dep],
 		};
 
 		Ok(download_info)
