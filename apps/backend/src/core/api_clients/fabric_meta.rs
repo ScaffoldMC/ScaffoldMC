@@ -1,8 +1,7 @@
+use crate::config::FABRIC_API_URL;
 use crate::util::request::get_and_format;
 use reqwest::Url;
 use serde::Deserialize;
-
-static FABRIC_API_URL: &str = "https://meta.fabricmc.net/v2";
 
 // API Types
 

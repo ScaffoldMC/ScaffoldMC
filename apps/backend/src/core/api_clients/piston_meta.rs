@@ -1,7 +1,6 @@
+use crate::config::MOJANG_API_URL;
 use crate::util::request::get_and_format;
 use serde::Deserialize;
-
-static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
 #[derive(Debug, Deserialize)]
 pub struct MojangManifest {
