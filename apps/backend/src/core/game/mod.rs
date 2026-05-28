@@ -18,18 +18,12 @@ impl Game {
 		}
 	}
 
-	pub fn version_identifier(&self) -> String {
+	pub fn version_string(&self) -> String {
 		match self {
 			Game::MinecraftJava(minecraft_java) => format!(
 				"{}-{}",
 				minecraft_java.version,
-				match &minecraft_java.loader {
-					java::MinecraftJavaLoader::Vanilla => "vanilla".to_string(),
-					java::MinecraftJavaLoader::Fabric { loader, launcher } => {
-						format!("fabric-{loader}-{launcher}")
-					}
-					java::MinecraftJavaLoader::Paper { build } => format!("paper-{build}"),
-				}
+				minecraft_java.loader.version_string()
 			),
 		}
 	}
