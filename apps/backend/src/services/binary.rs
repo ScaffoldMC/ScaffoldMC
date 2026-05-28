@@ -157,7 +157,7 @@ impl BinaryService {
 	fn binary_dir(&self, game: &Game) -> PathBuf {
 		PathBuf::from(&self.binaries_dir)
 			.join(game.identifier())
-			.join(game.version_identifier())
+			.join(game.version_string())
 	}
 
 	/// Internal: Load the binary lockfile.

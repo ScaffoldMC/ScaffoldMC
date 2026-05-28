@@ -10,6 +10,18 @@ pub enum MinecraftJavaLoader {
 	Paper { build: u16 },
 }
 
+impl MinecraftJavaLoader {
+	pub fn version_string(&self) -> String {
+		match self {
+			MinecraftJavaLoader::Vanilla => "vanilla".to_string(),
+			MinecraftJavaLoader::Fabric { loader, launcher } => {
+				format!("fabric-{loader}-{launcher}")
+			}
+			MinecraftJavaLoader::Paper { build } => format!("paper-{build}"),
+		}
+	}
+}
+
 #[derive(TS, Debug, Clone, Deserialize, Serialize)]
 #[ts(export)]
 pub struct MinecraftJava {
