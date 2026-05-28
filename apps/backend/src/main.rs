@@ -2,8 +2,9 @@
 #![warn(clippy::pedantic)]
 
 mod api;
+mod api_clients;
+mod bin_providers;
 mod config;
-mod core;
 mod db;
 mod models;
 mod services;
