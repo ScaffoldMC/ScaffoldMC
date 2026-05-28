@@ -1,6 +1,6 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
-use crate::core::bin_providers::DownloadInfo;
+use crate::core::bin_providers::DownloadDependency;
 use crate::core::files::server_config::ServerConfig;
 use crate::core::game::Game;
 use crate::core::server::Server;
@@ -186,9 +186,18 @@ impl ServerService {
 
 		let bin_info = self.binary_service.get_bin_info(&server_type).await?;
 
-		let java_args = match &bin_info {
-			DownloadInfo::MinecraftJava(info) => info.java_rec_args(),
-		};
+		// Extract dependency info
+		let mut java_args: Vec<String> = vec![];
+
+		for dep in bin_info.dependencies {
+			match dep {
+				DownloadDependency::Java(java_dependency) => {
+					if let Some(args) = java_dependency.args {
+						java_args = args;
+					}
+				}
+			}
+		}
 
 		let server_config = ServerConfig {
 			name: name.to_string(),
