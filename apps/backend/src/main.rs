@@ -17,6 +17,7 @@ use std::sync::Arc;
 use std::{env, net::SocketAddr};
 
 use crate::services::auth::AuthService;
+use crate::services::java::JavaService;
 use crate::services::user::UserService;
 
 #[derive(Clone)]
@@ -25,6 +26,7 @@ struct AppState {
 	pub auth_service: Arc<AuthService>,
 	pub binary_service: Arc<BinaryService>,
 	pub user_service: Arc<UserService>,
+	pub java_service: Arc<JavaService>,
 	pub reqwest_client: reqwest::Client,
 }
 
@@ -60,12 +62,14 @@ impl AppState {
 
 		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
 		let user_service = Arc::new(UserService::new(db.clone()));
+		let java_service = Arc::new(JavaService::new());
 
 		AppState {
 			server_service: Arc::new(ServerService::new(binary_service.clone())),
 			auth_service: Arc::new(AuthService::new(db, secrets)),
 			binary_service,
 			user_service,
+			java_service,
 			reqwest_client,
 		}
 	}
