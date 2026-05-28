@@ -8,7 +8,7 @@ use rsa::{
 	RsaPrivateKey, RsaPublicKey,
 };
 
-static RSA_KEY_SIZE: usize = 3072;
+use crate::config::RSA_KEY_SIZE;
 
 #[derive(Clone)]
 pub struct Secrets {

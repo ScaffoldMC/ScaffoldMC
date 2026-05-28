@@ -1,8 +1,6 @@
-use serde::Deserialize;
-
+use crate::config::PAPER_API_URL;
 use crate::util::request::get_and_format;
-
-static PAPER_API_URL: &str = "https://fill.papermc.io/v3/projects/paper";
+use serde::Deserialize;
 
 // API Types
 
