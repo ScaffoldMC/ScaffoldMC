@@ -1,4 +1,4 @@
-use crate::core::{
+use crate::{
 	api_clients::{fabric_meta::FabricMetaAPIClient, piston_meta::PistonMetaAPIClient},
 	bin_providers::{DownloadDependency, DownloadInfo, JavaDependency},
 };

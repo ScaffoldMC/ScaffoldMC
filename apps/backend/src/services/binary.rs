@@ -1,9 +1,9 @@
-use crate::core::api_clients::fabric_meta::FabricMetaAPIClient;
-use crate::core::api_clients::paper_meta::PaperDownloadsAPIClient;
-use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
-use crate::core::bin_providers::paper::PaperBinaryProvider;
-use crate::core::bin_providers::DownloadInfo;
-use crate::core::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider};
+use crate::api_clients::fabric_meta::FabricMetaAPIClient;
+use crate::api_clients::paper_meta::PaperDownloadsAPIClient;
+use crate::api_clients::piston_meta::PistonMetaAPIClient;
+use crate::bin_providers::paper::PaperBinaryProvider;
+use crate::bin_providers::DownloadInfo;
+use crate::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider};
 use crate::models::files::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
 };

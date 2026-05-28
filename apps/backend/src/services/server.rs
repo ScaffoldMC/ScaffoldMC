@@ -1,6 +1,6 @@
+use crate::bin_providers::DownloadDependency;
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
-use crate::core::bin_providers::DownloadDependency;
 use crate::models::files::server_config::ServerConfig;
 use crate::models::game::Game;
 use crate::models::server::Server;
