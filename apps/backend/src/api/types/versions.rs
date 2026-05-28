@@ -1,4 +1,4 @@
-use crate::core::game::Game;
+use crate::models::game::Game;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 

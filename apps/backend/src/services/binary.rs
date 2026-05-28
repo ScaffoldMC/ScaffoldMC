@@ -4,11 +4,11 @@ use crate::core::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::core::bin_providers::paper::PaperBinaryProvider;
 use crate::core::bin_providers::DownloadInfo;
 use crate::core::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider};
-use crate::core::files::binaries_lockfile::{
+use crate::models::files::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
 };
-use crate::core::game::java::MinecraftJavaLoader;
-use crate::core::game::Game;
+use crate::models::game::java::MinecraftJavaLoader;
+use crate::models::game::Game;
 use crate::services::Service;
 use crate::util::download::download_file;
 use crate::util::hash::compute_file_hash;

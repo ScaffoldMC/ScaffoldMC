@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use uuid::Uuid;
 
-use crate::core::game::Game;
+use crate::models::game::Game;
 
 #[derive(TS, Debug, Clone, Serialize, Deserialize)]
 #[ts(export)]

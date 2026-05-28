@@ -1,11 +1,11 @@
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::core::bin_providers::DownloadDependency;
-use crate::core::files::server_config::ServerConfig;
-use crate::core::game::Game;
-use crate::core::server::Server;
-use crate::core::server::ServerProcessState;
-use crate::core::server::ServerStateInfo;
+use crate::models::files::server_config::ServerConfig;
+use crate::models::game::Game;
+use crate::models::server::Server;
+use crate::models::server::ServerProcessState;
+use crate::models::server::ServerStateInfo;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use std::collections::HashMap;

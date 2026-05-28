@@ -1,6 +1,6 @@
 use crate::{
 	api::types::versions::{CompleteVersionResponse, OptionsResponse},
-	core::game::{
+	models::game::{
 		java::{MinecraftJava, MinecraftJavaLoader},
 		Game,
 	},

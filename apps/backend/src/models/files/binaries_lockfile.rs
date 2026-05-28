@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{core::game::Game, util::hash::HashAlgorithm};
+use crate::{models::game::Game, util::hash::HashAlgorithm};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BinaryLockfile {
