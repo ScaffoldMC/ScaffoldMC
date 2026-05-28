@@ -1,4 +1,4 @@
-use crate::core::game::Game;
+use crate::models::game::Game;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use ts_rs::TS;

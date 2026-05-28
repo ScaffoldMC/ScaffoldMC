@@ -1,6 +1,6 @@
 use crate::{
 	api::types::server::{ConsoleQueryParams, ServerCommandRequest},
-	core::server::{Server, ServerStateInfo},
+	models::server::{Server, ServerStateInfo},
 	AppState,
 };
 use axum::{

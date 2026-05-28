@@ -1,9 +1,9 @@
 use crate::config;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
-use crate::core::files::server_config::PartialServerConfig;
-use crate::core::files::server_config::ServerConfig;
-use crate::core::game::Game;
+use crate::models::files::server_config::PartialServerConfig;
+use crate::models::files::server_config::ServerConfig;
+use crate::models::game::Game;
 use crate::services::binary::BinaryService;
 use serde::Deserialize;
 use serde::Serialize;

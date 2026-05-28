@@ -5,12 +5,13 @@ mod api;
 mod config;
 mod core;
 mod db;
+mod models;
 mod services;
 mod util;
 
 use config::CLIENT_USER_AGENT;
-use core::secrets::Secrets;
 use db::Database;
+use models::secrets::Secrets;
 use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
