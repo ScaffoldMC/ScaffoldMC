@@ -26,7 +26,7 @@ impl Service for JavaService {}
 pub struct JavaService {}
 
 impl JavaService {
-	/// Create JavaService
+	/// Create `JavaService`
 	pub fn new() -> Self {
 		JavaService {}
 	}
@@ -45,59 +45,6 @@ impl JavaService {
 		suitable.ok_or(JavaServiceError::NotFound(format!(
 			"No suitable Java version found for major version {major_version}"
 		)))
-	}
-
-	/// Parses the Java properties output to extract Java version information.
-	fn parse_java_output(&self, output: &str) -> JavaVersion {
-		let mut major_version: Option<u8> = None;
-		let mut version_string: Option<String> = None;
-		let mut vendor: Option<String> = None;
-		let mut arch: Option<String> = None;
-
-		for line in output.lines() {
-			let line = line.trim();
-
-			if let Some(rest) = line.strip_prefix("java.specification.version =") {
-				let trimmed = rest.trim();
-
-				// Handle legacy version strings by stripping "1." prefix
-				let version_part = if trimmed.starts_with("1.") {
-					trimmed.trim_start_matches("1.")
-				} else {
-					trimmed
-				};
-
-				let parsed_version = version_part.parse::<u8>();
-
-				if let Ok(version) = parsed_version {
-					major_version = Some(version);
-				} else {
-					tracing::warn!(
-						"Failed to parse major version from JVM output: {}",
-						rest.trim()
-					);
-				}
-			}
-
-			if let Some(rest) = line.strip_prefix("java.vm.version =") {
-				version_string = Some(rest.trim().to_string());
-			}
-
-			if let Some(rest) = line.strip_prefix("java.vm.name =") {
-				vendor = Some(rest.trim().to_string());
-			}
-
-			if let Some(rest) = line.strip_prefix("os.arch =") {
-				arch = Some(rest.trim().to_string());
-			}
-		}
-
-		JavaVersion {
-			major_version: major_version.unwrap_or(0),
-			version_string: version_string.unwrap_or_else(|| "Unknown".into()),
-			vendor: vendor.unwrap_or_else(|| "Unknown".into()),
-			arch: arch.unwrap_or_else(|| "Unknown".into()),
-		}
 	}
 
 	/// Retrieves all available Java versions installed on the system.
@@ -180,10 +127,63 @@ impl JavaService {
 
 			let probe_output = command_output.unwrap();
 			let output = String::from_utf8_lossy(&probe_output.stderr); // Java version info is printed to stderr
-			let version = self.parse_java_output(&output);
+			let version = Self::parse_java_output(&output);
 			javas.push(version);
 		}
 
 		Ok(javas)
+	}
+
+	/// Parses the Java properties output to extract Java version information.
+	fn parse_java_output(output: &str) -> JavaVersion {
+		let mut major_version: Option<u8> = None;
+		let mut version_string: Option<String> = None;
+		let mut vendor: Option<String> = None;
+		let mut arch: Option<String> = None;
+
+		for line in output.lines() {
+			let line = line.trim();
+
+			if let Some(rest) = line.strip_prefix("java.specification.version =") {
+				let trimmed = rest.trim();
+
+				// Handle legacy version strings by stripping "1." prefix
+				let version_part = if trimmed.starts_with("1.") {
+					trimmed.trim_start_matches("1.")
+				} else {
+					trimmed
+				};
+
+				let parsed_version = version_part.parse::<u8>();
+
+				if let Ok(version) = parsed_version {
+					major_version = Some(version);
+				} else {
+					tracing::warn!(
+						"Failed to parse major version from JVM output: {}",
+						rest.trim()
+					);
+				}
+			}
+
+			if let Some(rest) = line.strip_prefix("java.vm.version =") {
+				version_string = Some(rest.trim().to_string());
+			}
+
+			if let Some(rest) = line.strip_prefix("java.vm.name =") {
+				vendor = Some(rest.trim().to_string());
+			}
+
+			if let Some(rest) = line.strip_prefix("os.arch =") {
+				arch = Some(rest.trim().to_string());
+			}
+		}
+
+		JavaVersion {
+			major_version: major_version.unwrap_or(0),
+			version_string: version_string.unwrap_or_else(|| "Unknown".into()),
+			vendor: vendor.unwrap_or_else(|| "Unknown".into()),
+			arch: arch.unwrap_or_else(|| "Unknown".into()),
+		}
 	}
 }
