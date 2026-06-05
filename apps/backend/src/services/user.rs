@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-	db::{user::User, Database},
+	db::{models::user::User, repositories::user::UserRepository},
 	services::Service,
 };
 
@@ -17,19 +17,19 @@ pub enum UserServiceError {
 }
 
 pub struct UserService {
-	db: Arc<Database>,
+	user_repo: Arc<dyn UserRepository>,
 }
 
 impl Service for UserService {}
 
 impl UserService {
-	pub fn new(db: Arc<Database>) -> Self {
-		Self { db }
+	pub fn new(user_repo: Arc<dyn UserRepository>) -> Self {
+		Self { user_repo }
 	}
 
 	/// Retrieve a user by their ID.
 	pub async fn get_user_by_id(&self, user_id: uuid::Uuid) -> Result<User, UserServiceError> {
-		match self.db.get_user_by_id(user_id).await {
+		match self.user_repo.get_user_by_id(user_id).await {
 			Ok(user) => Ok(user),
 			Err(err) => Err(UserServiceError::ServerError(err.to_string())),
 		}
@@ -41,11 +41,20 @@ impl UserService {
 		user: &User,
 		new_username: &str,
 	) -> Result<(), UserServiceError> {
-		if self.db.get_user_by_username(new_username).await.is_ok() {
+		if self
+			.user_repo
+			.get_user_by_username(new_username)
+			.await
+			.is_ok()
+		{
 			return Err(UserServiceError::UsernameTaken);
 		}
 
-		if let Err(err) = self.db.update_user_username(user.id, new_username).await {
+		if let Err(err) = self
+			.user_repo
+			.update_user_username(user.id, new_username)
+			.await
+		{
 			return Err(UserServiceError::ServerError(err.to_string()));
 		}
 
@@ -58,7 +67,11 @@ impl UserService {
 		user: &User,
 		new_full_name: &str,
 	) -> Result<(), UserServiceError> {
-		if let Err(err) = self.db.update_user_fullname(user.id, new_full_name).await {
+		if let Err(err) = self
+			.user_repo
+			.update_user_fullname(user.id, new_full_name)
+			.await
+		{
 			return Err(UserServiceError::ServerError(err.to_string()));
 		}
 
@@ -82,7 +95,7 @@ impl UserService {
 		let new_password_hash = new_password_hash.unwrap();
 
 		if let Err(err) = self
-			.db
+			.user_repo
 			.update_user_password_hash(user.id, &new_password_hash)
 			.await
 		{

@@ -1,5 +1,5 @@
 use crate::AppState;
-use crate::{api::middleware::auth::require_sudo, db::user::User};
+use crate::{api::middleware::auth::require_sudo, db::models::user::User};
 use axum::extract::State;
 use axum::middleware;
 use axum::{http::StatusCode, response::IntoResponse, routing, Extension, Json, Router};

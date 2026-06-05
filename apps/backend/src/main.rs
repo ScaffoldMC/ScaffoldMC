@@ -11,13 +11,14 @@ mod services;
 mod util;
 
 use config::CLIENT_USER_AGENT;
-use db::Database;
 use models::secrets::Secrets;
 use services::binary::BinaryService;
 use services::server::ServerService;
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
 
+use crate::db::repositories::refresh_token::SqlxRefreshTokenRepository;
+use crate::db::repositories::user::SqlxUserRepository;
 use crate::services::auth::AuthService;
 use crate::services::java::JavaService;
 use crate::services::user::UserService;
@@ -49,11 +50,23 @@ impl AppState {
 			std::fs::create_dir_all(&base_dir).expect("Unable to create base data directory.");
 		}
 
-		let db = Arc::new(
-			Database::new(&base_dir.join("db.sqlite"))
-				.await
-				.expect("Failed to start DB"),
-		);
+		let db_path = base_dir.join("db.sqlite");
+
+		tracing::info!("Connecting to database at {}", db_path.display());
+
+		let options = sqlx::sqlite::SqliteConnectOptions::new()
+			.filename(db_path)
+			.create_if_missing(true);
+
+		let db_pool = sqlx::SqlitePool::connect_with(options)
+			.await
+			.expect("Failed to connect to database");
+
+		tracing::info!("Running database migrations");
+		sqlx::migrate!("./migrations")
+			.run(&db_pool)
+			.await
+			.expect("Failed to run migrations");
 
 		let secrets = Secrets::new(&base_dir);
 
@@ -62,13 +75,16 @@ impl AppState {
 			.build()
 			.expect("Failed to create reqwest client");
 
+		let user_repo = Arc::new(SqlxUserRepository::new(db_pool.clone()));
+		let refresh_token_repo = Arc::new(SqlxRefreshTokenRepository::new(db_pool.clone()));
+
 		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
-		let user_service = Arc::new(UserService::new(db.clone()));
+		let user_service = Arc::new(UserService::new(user_repo.clone()));
 		let java_service = Arc::new(JavaService::new());
 
 		AppState {
 			server_service: Arc::new(ServerService::new(binary_service.clone())),
-			auth_service: Arc::new(AuthService::new(db, secrets)),
+			auth_service: Arc::new(AuthService::new(user_repo, refresh_token_repo, secrets)),
 			binary_service,
 			user_service,
 			java_service,
