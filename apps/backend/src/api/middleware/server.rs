@@ -26,7 +26,8 @@ pub async fn require_server(
 			ServerServiceError::NoSuchServer(_) => {
 				return Err(StatusCode::NOT_FOUND);
 			}
-			err => {
+			// This error shouldn't ever happen
+			ServerServiceError::DeleteError(err) => {
 				tracing::error!("Error getting server: {}", err);
 				return Err(StatusCode::INTERNAL_SERVER_ERROR);
 			}

@@ -29,8 +29,7 @@ pub static MOJANG_API_URL: &str = "https://piston-meta.mojang.com";
 
 // Generated variables
 
-pub static SERVERS_DIRECTORY: LazyLock<String> =
-	LazyLock::new(|| format!("{}/servers", DATA_FOLDER));
+pub static SERVERS_DIRECTORY: LazyLock<String> = LazyLock::new(|| format!("{DATA_FOLDER}/servers"));
 
 // Helper functions
 

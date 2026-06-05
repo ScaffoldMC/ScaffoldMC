@@ -24,7 +24,7 @@ pub trait UserRepository: Send + Sync {
 	async fn delete_user(&self, user_id: Uuid) -> Result<(), sqlx::Error>;
 }
 
-/// Sqlx implementation of the UserRepository trait.
+/// Sqlx implementation of the `UserRepository` trait.
 pub struct SqlxUserRepository {
 	pool: sqlx::SqlitePool,
 }

@@ -11,7 +11,7 @@ pub trait RefreshTokenRepository: Send + Sync {
 	async fn purge_refresh_tokens(&self) -> Result<(), sqlx::Error>;
 }
 
-/// Sqlx implementation of the RefreshTokenRepository trait.
+/// Sqlx implementation of the `RefreshTokenRepository` trait.
 pub struct SqlxRefreshTokenRepository {
 	pool: sqlx::SqlitePool,
 }
