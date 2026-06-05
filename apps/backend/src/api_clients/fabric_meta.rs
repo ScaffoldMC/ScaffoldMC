@@ -1,5 +1,4 @@
-use crate::config::FABRIC_API_URL;
-use crate::util::request::get_and_format;
+use crate::{api_clients::get_and_format, config::FABRIC_API_URL};
 use reqwest::Url;
 use serde::Deserialize;
 

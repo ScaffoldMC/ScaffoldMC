@@ -8,7 +8,6 @@ mod config;
 mod db;
 mod models;
 mod services;
-mod util;
 
 use config::CLIENT_USER_AGENT;
 use models::secrets::Secrets;

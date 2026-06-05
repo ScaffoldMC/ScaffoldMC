@@ -1,7 +1,7 @@
 use crate::{
 	api_clients::piston_meta::PistonMetaAPIClient,
 	bin_providers::{DownloadDependency, DownloadInfo, JavaDependency},
-	util::hash::HashAlgorithm,
+	models::hash::HashAlgorithm,
 };
 use reqwest::Url;
 
