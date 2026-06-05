@@ -9,9 +9,9 @@ use crate::models::files::binaries_lockfile::{
 };
 use crate::models::game::java::MinecraftJavaLoader;
 use crate::models::game::Game;
+use crate::models::hash::compute_file_hash;
 use crate::services::Service;
-use crate::util::download::download_file;
-use crate::util::hash::compute_file_hash;
+use reqwest::Url;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -81,7 +81,7 @@ impl BinaryService {
 		let download_info = self.get_bin_info(game).await?;
 		let binary_path = binary_dir.join(download_info.file_name);
 
-		download_file(
+		Self::download_file(
 			self.reqwest_client.clone(),
 			&download_info.download_url,
 			binary_path.clone(),
@@ -158,6 +158,36 @@ impl BinaryService {
 		PathBuf::from(&self.binaries_dir)
 			.join(game.identifier())
 			.join(game.version_string())
+	}
+
+	/// Download a file from a URL.
+	pub async fn download_file(
+		reqwest_client: reqwest::Client,
+		url: &Url,
+		path: PathBuf,
+	) -> Result<(), String> {
+		let response = reqwest_client
+			.get(url.clone())
+			.send()
+			.await
+			.map_err(|e| format!("Failed to download: {e}"))?;
+
+		if !response.status().is_success() {
+			return Err(format!(
+				"Failed to download file from {}: {}",
+				url,
+				response.status()
+			));
+		}
+
+		let bytes = response
+			.bytes()
+			.await
+			.map_err(|e| format!("Failed to read response: {e}"))?;
+
+		std::fs::write(path, bytes).map_err(|e| format!("Failed to save file: {e}"))?;
+
+		Ok(())
 	}
 
 	/// Internal: Load the binary lockfile.

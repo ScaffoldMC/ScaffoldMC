@@ -1,5 +1,4 @@
-use crate::config::MOJANG_API_URL;
-use crate::util::request::get_and_format;
+use crate::{api_clients::get_and_format, config::MOJANG_API_URL};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]

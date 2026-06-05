@@ -1,6 +1,6 @@
 use reqwest::Url;
 
-use crate::util::hash::HashAlgorithm;
+use crate::models::hash::HashAlgorithm;
 
 pub mod fabric;
 pub mod paper;
