@@ -7,7 +7,7 @@ use tower_cookies::Cookies;
 
 use crate::api::types::auth::{SudoCheckResponse, SudoRequest};
 use crate::config::AUTH_COOKIE_NAME;
-use crate::db::user::User;
+use crate::db::models::user::User;
 use crate::services::auth::AuthServiceError;
 use crate::AppState;
 

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use uuid::Uuid;
 
-use crate::db::user::User;
+use crate::db::models::user::User;
 
 #[derive(TS, Debug, Clone, Serialize, Deserialize)]
 #[ts(export)]

@@ -1,6 +1,11 @@
+use std::sync::Arc;
+
 use crate::{
 	config::{AUTH_TOKEN_LENGTH, REFRESH_TOKEN_LENGTH},
-	db::{user::User, Database},
+	db::{
+		models::user::User,
+		repositories::{refresh_token::RefreshTokenRepository, user::UserRepository},
+	},
 	models::secrets::Secrets,
 	services::Service,
 };
@@ -9,7 +14,6 @@ use jsonwebtoken::{Algorithm, Validation};
 use password_auth::{verify_password, VerifyError};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use thiserror;
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
@@ -35,15 +39,24 @@ pub struct AuthTokenClaims {
 }
 
 pub struct AuthService {
-	db: Arc<Database>,
+	user_repo: Arc<dyn UserRepository>,
+	token_repo: Arc<dyn RefreshTokenRepository>,
 	secrets: Secrets,
 }
 
 impl Service for AuthService {}
 
 impl AuthService {
-	pub fn new(db: Arc<Database>, secrets: Secrets) -> Self {
-		Self { db, secrets }
+	pub fn new(
+		user_repo: Arc<dyn UserRepository>,
+		token_repo: Arc<dyn RefreshTokenRepository>,
+		secrets: Secrets,
+	) -> Self {
+		Self {
+			user_repo,
+			token_repo,
+			secrets,
+		}
 	}
 
 	fn create_auth_token(&self, user_id: String, sudo: bool) -> String {
@@ -102,7 +115,7 @@ impl AuthService {
 		username: &str,
 		password: &str,
 	) -> Result<(String, String), AuthServiceError> {
-		let user = self.db.get_user_by_username(username).await;
+		let user = self.user_repo.get_user_by_username(username).await;
 
 		if user.is_err() {
 			return Err(AuthServiceError::InvalidCredentials);
@@ -115,7 +128,7 @@ impl AuthService {
 		let auth_token = self.create_auth_token(user.id.to_string(), false);
 		let ref_token = Self::create_refresh_token();
 
-		self.db
+		self.token_repo
 			.add_refresh_token(&ref_token, user.id)
 			.await
 			.map_err(|e| AuthServiceError::ServerError(e.to_string()))?;
@@ -135,7 +148,7 @@ impl AuthService {
 		&self,
 		ref_token: &str,
 	) -> Result<(String, String), AuthServiceError> {
-		let db_entry = self.db.get_refresh_token(ref_token).await;
+		let db_entry = self.token_repo.get_refresh_token(ref_token).await;
 
 		if let Err(err) = db_entry {
 			return Err(AuthServiceError::ServerError(err.to_string()));
@@ -153,14 +166,14 @@ impl AuthService {
 		let token_age = current_time - db_entry.created_at;
 
 		if token_age > REFRESH_TOKEN_LENGTH {
-			if let Err(err) = self.db.delete_refresh_token(ref_token).await {
+			if let Err(err) = self.token_repo.delete_refresh_token(ref_token).await {
 				return Err(AuthServiceError::ServerError(err.to_string()));
 			}
 
 			return Err(AuthServiceError::Unauthorized);
 		}
 
-		if let Err(err) = self.db.delete_refresh_token(ref_token).await {
+		if let Err(err) = self.token_repo.delete_refresh_token(ref_token).await {
 			return Err(AuthServiceError::ServerError(err.to_string()));
 		}
 
@@ -168,7 +181,7 @@ impl AuthService {
 		let new_ref_token = Self::create_refresh_token();
 
 		if let Err(err) = self
-			.db
+			.token_repo
 			.add_refresh_token(&new_ref_token, db_entry.user_id)
 			.await
 		{
@@ -179,7 +192,7 @@ impl AuthService {
 	}
 
 	pub async fn delete_refresh_token(&self, ref_token: &str) -> Result<(), AuthServiceError> {
-		let result = self.db.delete_refresh_token(ref_token);
+		let result = self.token_repo.delete_refresh_token(ref_token);
 
 		if let Err(err) = result.await {
 			return Err(AuthServiceError::ServerError(err.to_string()));
@@ -213,7 +226,7 @@ impl AuthService {
 			}
 		};
 
-		let Ok(user) = self.db.get_user_by_id(user_uuid).await else {
+		let Ok(user) = self.user_repo.get_user_by_id(user_uuid).await else {
 			return Err(AuthServiceError::Unauthorized);
 		};
 
