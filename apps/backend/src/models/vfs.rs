@@ -47,5 +47,41 @@ pub trait FileManager: Send + Sync {
 	async fn stat(&self, path: &PathBuf) -> Result<Vec<VFSEntry>, FileManagerError>;
 }
 
-// TODO: Implement
 pub struct VirtualFileManager {}
+
+impl VirtualFileManager {
+	pub fn new() -> Self {
+		Self {}
+	}
+}
+
+#[async_trait]
+impl FileManager for VirtualFileManager {
+	async fn read_file(&self, _path: &PathBuf) -> Result<Vec<u8>, FileManagerError> {
+		todo!()
+	}
+
+	async fn write_file(&self, _path: &PathBuf, _content: &[u8]) -> Result<(), FileManagerError> {
+		todo!()
+	}
+
+	async fn delete(&self, _path: &PathBuf) -> Result<(), FileManagerError> {
+		todo!()
+	}
+
+	async fn create_dir(&self, _path: &PathBuf) -> Result<(), FileManagerError> {
+		todo!()
+	}
+
+	async fn list_dir(&self, _path: &PathBuf) -> Result<Vec<VFSEntry>, FileManagerError> {
+		todo!()
+	}
+
+	async fn relocate(&self, _path: &PathBuf) -> Result<(), FileManagerError> {
+		todo!()
+	}
+
+	async fn stat(&self, _path: &PathBuf) -> Result<Vec<VFSEntry>, FileManagerError> {
+		todo!()
+	}
+}
