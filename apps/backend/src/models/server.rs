@@ -4,6 +4,7 @@ use crate::config::SERVER_WATCHER_TICK;
 use crate::models::files::server_config::PartialServerConfig;
 use crate::models::files::server_config::ServerConfig;
 use crate::models::game::Game;
+use crate::models::vfs::FileManager;
 use crate::services::binary::BinaryService;
 use serde::Deserialize;
 use serde::Serialize;
@@ -135,6 +136,7 @@ pub struct Server {
 	process: RwLock<ServerProcessState>,
 	console_lines: RwLock<VecDeque<ConsoleLine>>,
 	next_line_num: AtomicU64,
+	vfs: Arc<dyn FileManager>,
 }
 
 impl Server {
