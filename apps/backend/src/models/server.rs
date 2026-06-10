@@ -93,15 +93,6 @@ impl ServerRuntime {
 	}
 }
 
-/// Server instance representation
-pub struct Server {
-	pub id: Uuid,
-	pub config: RwLock<ServerConfig>,
-	pub process: RwLock<ServerProcessState>,
-	pub console_lines: RwLock<VecDeque<ConsoleLine>>,
-	pub next_line_num: AtomicU64,
-}
-
 /// Server process state
 pub enum ServerProcessState {
 	Stopped,
@@ -137,7 +128,21 @@ pub struct ServerInfo {
 	pub state: ServerStateInfo,
 }
 
+/// Server instance representation
+pub struct Server {
+	id: Uuid,
+	config: RwLock<ServerConfig>,
+	process: RwLock<ServerProcessState>,
+	console_lines: RwLock<VecDeque<ConsoleLine>>,
+	next_line_num: AtomicU64,
+}
+
 impl Server {
+	/// Get a server's ID
+	pub async fn id(&self) -> Uuid {
+		self.id
+	}
+
 	/// Gets information about a server instance by ID.
 	#[instrument(name = "Server.GetServerInfo", skip(self))]
 	pub async fn get_server_info(&self) -> ServerInfo {
