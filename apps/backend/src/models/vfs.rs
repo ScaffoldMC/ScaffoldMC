@@ -32,7 +32,9 @@ pub enum FileManagerError {
 #[async_trait]
 pub trait FileManager: Send + Sync {
 	/// Create a new file manager with the given permissions
-	fn new(base_path: PathBuf, permissions: Vec<(PathBuf, VFSPermissions)>) -> Self;
+	fn new(base_path: PathBuf, permissions: Vec<(PathBuf, VFSPermissions)>) -> Self
+	where
+		Self: Sized;
 
 	/// Read a file
 	async fn read_file(&self, path: &PathBuf) -> Result<Vec<u8>, FileManagerError>;
