@@ -154,7 +154,7 @@ impl Server {
 			}
 		};
 
-		let vfs = VirtualFileManager::new(server_dir, vec![]);
+		let vfs = VirtualFileManager::new(server_dir);
 
 		Ok(Self {
 			id: uuid,
