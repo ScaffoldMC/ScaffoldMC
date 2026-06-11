@@ -16,6 +16,12 @@ pub enum VFSEntry {
 	Dir(VFSDirectoryEntry),
 }
 
+pub struct VFSPermissions {
+	pub read: bool,
+	pub write: bool,
+	pub delete: bool,
+}
+
 pub enum FileManagerError {
 	NotFound,
 	PermissionDenied,
@@ -25,6 +31,9 @@ pub enum FileManagerError {
 
 #[async_trait]
 pub trait FileManager: Send + Sync {
+	/// Create a new file manager with the given permissions
+	fn new(base_path: PathBuf, permissions: Vec<(PathBuf, VFSPermissions)>) -> Self;
+
 	/// Read a file
 	async fn read_file(&self, path: &PathBuf) -> Result<Vec<u8>, FileManagerError>;
 
@@ -47,16 +56,20 @@ pub trait FileManager: Send + Sync {
 	async fn stat(&self, path: &PathBuf) -> Result<Vec<VFSEntry>, FileManagerError>;
 }
 
-pub struct VirtualFileManager {}
-
-impl VirtualFileManager {
-	pub fn new() -> Self {
-		Self {}
-	}
+pub struct VirtualFileManager {
+	base_path: PathBuf,
+	permissions: Vec<(PathBuf, VFSPermissions)>,
 }
 
 #[async_trait]
 impl FileManager for VirtualFileManager {
+	fn new(base_path: PathBuf, permissions: Vec<(PathBuf, VFSPermissions)>) -> Self {
+		Self {
+			base_path,
+			permissions,
+		}
+	}
+
 	async fn read_file(&self, _path: &PathBuf) -> Result<Vec<u8>, FileManagerError> {
 		todo!()
 	}
