@@ -1,10 +1,12 @@
 use crate::config;
+use crate::config::canonical_server_dir;
+use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
 use crate::models::files::server_config::PartialServerConfig;
 use crate::models::files::server_config::ServerConfig;
 use crate::models::game::Game;
-use crate::models::vfs::FileManager;
+use crate::models::vfs::{FileManager, VirtualFileManager};
 use crate::services::binary::BinaryService;
 use serde::Deserialize;
 use serde::Serialize;
@@ -140,8 +142,32 @@ pub struct Server {
 }
 
 impl Server {
+	/// Create a server instance from an ID by loading its config file. Returns None if loading fails.
+	pub fn new(uuid: Uuid) -> Result<Self, String> {
+		let server_dir = canonical_server_dir(uuid);
+		let config_path = server_dir.join(SERVER_CONFIG_FILE_NAME);
+
+		let server_config = match ServerConfig::load_from_file(config_path.clone()) {
+			Ok(cfg) => cfg,
+			Err(e) => {
+				return Err(e.to_string());
+			}
+		};
+
+		let vfs = VirtualFileManager::new(server_dir, vec![]);
+
+		Ok(Self {
+			id: uuid,
+			config: RwLock::new(server_config),
+			process: RwLock::new(ServerProcessState::Stopped),
+			console_lines: RwLock::new(VecDeque::new()),
+			next_line_num: AtomicU64::new(0),
+			vfs: Arc::new(vfs),
+		})
+	}
+
 	/// Get a server's ID
-	pub async fn id(&self) -> Uuid {
+	pub fn id(&self) -> Uuid {
 		self.id
 	}
 

@@ -110,7 +110,7 @@ async fn post(
 	match server.send_command(&request.command).await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
-			tracing::error!("Error sending command to server {}: {}", server.id, err);
+			tracing::error!("Error sending command to server {}: {}", server.id(), err);
 			StatusCode::INTERNAL_SERVER_ERROR.into_response()
 		}
 	}
