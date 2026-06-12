@@ -4,7 +4,7 @@ use crate::api_clients::piston_meta::PistonMetaAPIClient;
 use crate::bin_providers::paper::PaperBinaryProvider;
 use crate::bin_providers::DownloadInfo;
 use crate::bin_providers::{fabric::FabricBinaryProvider, vanilla::VanillaBinaryProvider};
-use crate::models::files::binaries_lockfile::{
+use crate::models::file_schemas::binaries_lockfile::{
 	BinaryLockfile, BinaryLockfileEntry, BinaryLockfileHash,
 };
 use crate::models::game::java::MinecraftJavaLoader;

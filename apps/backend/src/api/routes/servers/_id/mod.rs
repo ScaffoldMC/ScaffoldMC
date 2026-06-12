@@ -1,6 +1,6 @@
 use crate::{
 	api::middleware::server::require_server,
-	models::{files::server_config::PartialServerConfig, server::Server},
+	models::{file_schemas::server_config::PartialServerConfig, server::Server},
 	AppState,
 };
 use axum::{
