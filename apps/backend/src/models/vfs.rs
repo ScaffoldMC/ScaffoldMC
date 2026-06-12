@@ -1,5 +1,8 @@
 use async_trait::async_trait;
+use std::fs::create_dir;
 use std::path::PathBuf;
+use tokio::fs::{remove_file, File};
+use tokio::io::{BufReader, BufWriter};
 
 pub struct VFSDirectoryEntry {
 	pub path: String,
@@ -30,11 +33,11 @@ pub trait FileManager: Send + Sync {
 	where
 		Self: Sized;
 
-	/// Read a file
-	async fn read_file(&self, path: &PathBuf) -> Result<Vec<u8>, FileManagerError>;
+	/// Get a read buffer to a file
+	async fn read_file(&self, path: &PathBuf) -> Result<BufReader<File>, FileManagerError>;
 
-	/// Write a file
-	async fn write_file(&self, path: &PathBuf, content: &[u8]) -> Result<(), FileManagerError>;
+	/// Get a write buffer to a file
+	async fn write_file(&self, path: &PathBuf) -> Result<BufWriter<File>, FileManagerError>;
 
 	/// Delete a file or directory
 	async fn delete(&self, path: &PathBuf) -> Result<(), FileManagerError>;
@@ -62,23 +65,42 @@ impl FileManager for VirtualFileManager {
 		Self { base_path }
 	}
 
-	async fn read_file(&self, _path: &PathBuf) -> Result<Vec<u8>, FileManagerError> {
-		todo!()
+	async fn read_file(&self, path: &PathBuf) -> Result<BufReader<File>, FileManagerError> {
+		let file = File::open(path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		let buf_reader = BufReader::new(file);
+
+		Ok(buf_reader)
 	}
 
-	async fn write_file(&self, _path: &PathBuf, _content: &[u8]) -> Result<(), FileManagerError> {
-		todo!()
+	async fn write_file(&self, path: &PathBuf) -> Result<BufWriter<File>, FileManagerError> {
+		let file = File::open(path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		let buf_writer = BufWriter::new(file);
+
+		Ok(buf_writer)
 	}
 
-	async fn delete(&self, _path: &PathBuf) -> Result<(), FileManagerError> {
-		todo!()
+	async fn delete(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+		remove_file(path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		Ok(())
 	}
 
-	async fn create_dir(&self, _path: &PathBuf) -> Result<(), FileManagerError> {
-		todo!()
+	async fn create_dir(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+		create_dir(path).map_err(|err| FileManagerError::IoError(err))?;
+
+		Ok(())
 	}
 
 	async fn list_dir(&self, _path: &PathBuf) -> Result<Vec<VFSEntry>, FileManagerError> {
+		// TODO: map read_dir result to struct
 		todo!()
 	}
 
