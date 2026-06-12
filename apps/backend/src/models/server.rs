@@ -3,10 +3,10 @@ use crate::config::canonical_server_dir;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
+use crate::models::file_manager::{scoped::ScopedFileManager, FileManager};
 use crate::models::file_schemas::server_config::PartialServerConfig;
 use crate::models::file_schemas::server_config::ServerConfig;
 use crate::models::game::Game;
-use crate::models::vfs::{FileManager, VirtualFileManager};
 use crate::services::binary::BinaryService;
 use serde::Deserialize;
 use serde::Serialize;
@@ -154,7 +154,7 @@ impl Server {
 			}
 		};
 
-		let vfs = VirtualFileManager::new(server_dir);
+		let vfs = ScopedFileManager::new(server_dir);
 
 		Ok(Self {
 			id: uuid,
