@@ -1,10 +1,12 @@
 use crate::models::file_manager::types::ScopedFileManagerError::PermissionDenied;
-use crate::models::file_manager::types::{FSEntry, ScopedFileManagerError};
+use crate::models::file_manager::types::{
+	FSDirectoryEntry, FSEntry, FSFileEntry, ScopedFileManagerError,
+};
 use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
 use std::fs::create_dir;
 use std::path::PathBuf;
-use tokio::fs::{remove_file, File};
+use tokio::fs::{read_dir, remove_file, File};
 use tokio::io::{BufReader, BufWriter};
 
 pub struct ScopedFileManager {
@@ -80,8 +82,34 @@ impl FileManager for ScopedFileManager {
 	async fn list_dir(&self, path: &PathBuf) -> Result<Vec<FSEntry>, ScopedFileManagerError> {
 		let path = self.check_path(path)?;
 
-		// TODO: map read_dir result to struct
-		todo!()
+		let mut dir = read_dir(path)
+			.await
+			.map_err(|err| ScopedFileManagerError::IoError(err))?;
+
+		let mut entries = Vec::new();
+
+		while let Some(entry) = dir
+			.next_entry()
+			.await
+			.map_err(|err| ScopedFileManagerError::IoError(err))?
+		{
+			let file_type = entry
+				.file_type()
+				.await
+				.map_err(|err| ScopedFileManagerError::IoError(err))?;
+
+			if file_type.is_file() {
+				entries.push(FSEntry::File(FSFileEntry {
+					name: entry.file_name(),
+				}));
+			} else if file_type.is_dir() {
+				entries.push(FSEntry::Dir(FSDirectoryEntry {
+					name: entry.file_name(),
+				}));
+			}
+		}
+
+		Ok(entries)
 	}
 
 	async fn relocate(&self, path: &PathBuf) -> Result<(), ScopedFileManagerError> {

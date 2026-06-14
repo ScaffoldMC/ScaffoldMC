@@ -1,11 +1,11 @@
+use std::ffi::OsString;
+
 pub struct FSDirectoryEntry {
-	pub path: String,
-	pub entries: Vec<FSFileEntry>,
+	pub name: OsString,
 }
 
 pub struct FSFileEntry {
-	pub path: String,
-	pub content: Vec<u8>,
+	pub name: OsString,
 }
 
 pub enum FSEntry {
