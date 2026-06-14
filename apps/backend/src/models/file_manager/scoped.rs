@@ -4,9 +4,8 @@ use crate::models::file_manager::types::{
 };
 use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
-use std::fs::create_dir;
 use std::path::PathBuf;
-use tokio::fs::{read_dir, remove_file, File};
+use tokio::fs::{create_dir, read_dir, remove_file, rename, File};
 use tokio::io::{BufReader, BufWriter};
 
 pub struct ScopedFileManager {
@@ -72,7 +71,9 @@ impl FileManager for ScopedFileManager {
 	async fn create_dir(&self, path: &PathBuf) -> Result<(), FileManagerError> {
 		let path = self.check_path(path)?;
 
-		create_dir(path).map_err(|err| FileManagerError::IoError(err))?;
+		create_dir(path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
 
 		Ok(())
 	}
@@ -110,10 +111,15 @@ impl FileManager for ScopedFileManager {
 		Ok(entries)
 	}
 
-	async fn relocate(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+	async fn relocate(&self, path: &PathBuf, new_path: &PathBuf) -> Result<(), FileManagerError> {
 		let path = self.check_path(path)?;
+		let new_path = self.check_path(new_path)?;
 
-		todo!()
+		rename(path, new_path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		Ok(())
 	}
 
 	async fn stat(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError> {

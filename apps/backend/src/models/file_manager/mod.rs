@@ -25,7 +25,7 @@ pub trait FileManager: Send + Sync {
 	async fn list_dir(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError>;
 
 	/// Move a file or directory
-	async fn relocate(&self, path: &PathBuf) -> Result<(), FileManagerError>;
+	async fn relocate(&self, path: &PathBuf, new_path: &PathBuf) -> Result<(), FileManagerError>;
 
 	/// Get information about a file or directory.
 	async fn stat(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError>;
