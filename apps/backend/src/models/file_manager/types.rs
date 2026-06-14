@@ -13,7 +13,7 @@ pub enum FSEntry {
 	Dir(FSDirectoryEntry),
 }
 
-pub enum ScopedFileManagerError {
+pub enum FileManagerError {
 	PermissionDenied,
 	IoError(std::io::Error),
 }
