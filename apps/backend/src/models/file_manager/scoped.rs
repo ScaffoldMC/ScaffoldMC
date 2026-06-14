@@ -5,7 +5,7 @@ use crate::models::file_manager::types::{
 use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
 use std::path::PathBuf;
-use tokio::fs::{create_dir, read_dir, remove_file, rename, File};
+use tokio::fs::{create_dir, metadata, read_dir, remove_file, rename, File};
 use tokio::io::{BufReader, BufWriter};
 
 pub struct ScopedFileManager {
@@ -97,9 +97,15 @@ impl FileManager for ScopedFileManager {
 				.await
 				.map_err(|err| FileManagerError::IoError(err))?;
 
+			let metadata = entry
+				.metadata()
+				.await
+				.map_err(|err| FileManagerError::IoError(err))?;
+
 			if file_type.is_file() {
 				entries.push(FSEntry::File(FSFileEntry {
 					name: entry.file_name(),
+					size: metadata.len(),
 				}));
 			} else if file_type.is_dir() {
 				entries.push(FSEntry::Dir(FSDirectoryEntry {
@@ -122,9 +128,24 @@ impl FileManager for ScopedFileManager {
 		Ok(())
 	}
 
-	async fn stat(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError> {
+	async fn stat(&self, path: &PathBuf) -> Result<FSEntry, FileManagerError> {
 		let path = self.check_path(path)?;
 
-		todo!()
+		let metadata = metadata(path.clone())
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		if metadata.is_file() {
+			Ok(FSEntry::File(FSFileEntry {
+				name: path.file_name().unwrap_or_default().to_os_string(),
+				size: metadata.len(),
+			}))
+		} else if metadata.is_dir() {
+			Ok(FSEntry::Dir(FSDirectoryEntry {
+				name: path.file_name().unwrap_or_default().to_os_string(),
+			}))
+		} else {
+			Err(FileManagerError::UnknownType)
+		}
 	}
 }

@@ -6,6 +6,7 @@ pub struct FSDirectoryEntry {
 
 pub struct FSFileEntry {
 	pub name: OsString,
+	pub size: u64,
 }
 
 pub enum FSEntry {
@@ -15,5 +16,6 @@ pub enum FSEntry {
 
 pub enum FileManagerError {
 	PermissionDenied,
+	UnknownType,
 	IoError(std::io::Error),
 }
