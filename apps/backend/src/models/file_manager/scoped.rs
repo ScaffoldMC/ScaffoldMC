@@ -1,4 +1,4 @@
-use crate::models::file_manager::types::FileManagerError::PermissionDenied;
+use crate::models::file_manager::types::FileManagerError::InvalidPath;
 use crate::models::file_manager::types::{
 	FSDirectoryEntry, FSEntry, FSFileEntry, FileManagerError,
 };
@@ -27,7 +27,7 @@ impl ScopedFileManager {
 		if canon_path.starts_with(&self.base_path) {
 			Ok(canon_path)
 		} else {
-			Err(PermissionDenied)
+			Err(InvalidPath)
 		}
 	}
 }
@@ -102,15 +102,18 @@ impl FileManager for ScopedFileManager {
 				.await
 				.map_err(|err| FileManagerError::IoError(err))?;
 
+			let name = entry
+				.file_name()
+				.into_string()
+				.map_err(|_| FileManagerError::EncodingError)?;
+
 			if file_type.is_file() {
 				entries.push(FSEntry::File(FSFileEntry {
-					name: entry.file_name(),
+					name,
 					size: metadata.len(),
 				}));
 			} else if file_type.is_dir() {
-				entries.push(FSEntry::Dir(FSDirectoryEntry {
-					name: entry.file_name(),
-				}));
+				entries.push(FSEntry::Dir(FSDirectoryEntry { name }));
 			}
 		}
 
@@ -135,15 +138,20 @@ impl FileManager for ScopedFileManager {
 			.await
 			.map_err(|err| FileManagerError::IoError(err))?;
 
+		let name = path
+			.file_name()
+			.ok_or(FileManagerError::InvalidPath)?
+			.to_owned()
+			.into_string()
+			.map_err(|_| FileManagerError::EncodingError)?;
+
 		if metadata.is_file() {
 			Ok(FSEntry::File(FSFileEntry {
-				name: path.file_name().unwrap_or_default().to_os_string(),
+				name,
 				size: metadata.len(),
 			}))
 		} else if metadata.is_dir() {
-			Ok(FSEntry::Dir(FSDirectoryEntry {
-				name: path.file_name().unwrap_or_default().to_os_string(),
-			}))
+			Ok(FSEntry::Dir(FSDirectoryEntry { name }))
 		} else {
 			Err(FileManagerError::UnknownType)
 		}

@@ -24,10 +24,12 @@ pub enum FSEntry {
 
 #[derive(Debug, Error)]
 pub enum FileManagerError {
-	#[error("Permission denied")]
-	PermissionDenied,
+	#[error("Path is invalid or outside of allowed directory")]
+	InvalidPath,
 	#[error("Unknown file type")]
 	UnknownType,
+	#[error("Non UTF-8 string encountered in file name")]
+	EncodingError,
 	#[error("I/O error: {0}")]
 	IoError(std::io::Error),
 }
