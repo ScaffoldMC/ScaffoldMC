@@ -1,5 +1,5 @@
 use crate::config;
-use crate::config::canonical_server_dir;
+use crate::config::server_dir;
 use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
@@ -144,7 +144,10 @@ pub struct Server {
 impl Server {
 	/// Create a server instance from an ID by loading its config file. Returns None if loading fails.
 	pub fn new(uuid: Uuid) -> Result<Self, String> {
-		let server_dir = canonical_server_dir(uuid);
+		let server_dir = server_dir(uuid)
+			.canonicalize()
+			.map_err(|err| err.to_string())?;
+
 		let config_path = server_dir.join(SERVER_CONFIG_FILE_NAME);
 
 		let server_config = match ServerConfig::load_from_file(config_path.clone()) {
@@ -231,7 +234,7 @@ impl Server {
 			ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
 		})?;
 
-		let server_dir = config::canonical_server_dir(self.id);
+		let server_dir = config::server_dir(self.id);
 		let server_dir = std::fs::canonicalize(&server_dir)
 			.map_err(|e| ServerError::StartError(format!("Invalid server directory path: {e}")))?;
 

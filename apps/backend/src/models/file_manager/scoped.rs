@@ -24,6 +24,8 @@ impl ScopedFileManager {
 			.canonicalize()
 			.map_err(|err| FileManagerError::IoError(err))?;
 
+		tracing::info!("path: {:?}", canon_path);
+
 		if canon_path.starts_with(&self.base_path) {
 			Ok(canon_path)
 		} else {

@@ -160,7 +160,7 @@ impl ServerService {
 	#[instrument(name = "ServerService.CreateServer", skip(self))]
 	pub async fn create(&self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
-		let server_dir = config::canonical_server_dir(server_id);
+		let server_dir = config::server_dir(server_id);
 
 		if !server_dir.exists() {
 			std::fs::create_dir_all(&server_dir).map_err(|e| e.to_string())?;
@@ -230,7 +230,7 @@ impl ServerService {
 			.remove(&server_id)
 			.ok_or(ServerServiceError::NoSuchServer(server_id.to_string()))?;
 
-		let server_dir = config::canonical_server_dir(server_id);
+		let server_dir = config::server_dir(server_id);
 		std::fs::remove_dir_all(&server_dir).map_err(|e| {
 			ServerServiceError::DeleteError(format!("Failed to delete server files: {e}"))
 		})?;

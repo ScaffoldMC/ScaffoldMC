@@ -34,6 +34,6 @@ pub static SERVERS_DIRECTORY: LazyLock<String> = LazyLock::new(|| format!("{DATA
 // Helper functions
 
 /// Get the canonical directory for a server
-pub fn canonical_server_dir(server_id: Uuid) -> PathBuf {
+pub fn server_dir(server_id: Uuid) -> PathBuf {
 	format!("{}/{}", SERVERS_DIRECTORY.clone(), server_id).into()
 }
