@@ -370,6 +370,11 @@ impl Server {
 		Ok(iter.take(SERVER_CONSOLE_MAX_LINES).cloned().collect())
 	}
 
+	/// Get the server's file manager
+	pub fn get_fs(&self) -> Arc<dyn FileManager> {
+		self.vfs.clone()
+	}
+
 	/// Internal: Generic reader task for stdout/stderr of a server process
 	fn reader_task<R: AsyncRead + Unpin + Send + 'static>(
 		server: Arc<Server>,
