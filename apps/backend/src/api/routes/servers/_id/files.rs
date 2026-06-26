@@ -12,10 +12,12 @@ use std::sync::Arc;
 use tokio_util::io::ReaderStream;
 
 pub fn create_router() -> Router<Arc<AppState>> {
-	Router::new().route(
-		"/{*path}",
-		routing::get(get).post(post).delete(delete).put(put),
-	)
+	Router::new()
+		.route(
+			"/{*path}",
+			routing::get(get).post(post).delete(delete).put(put),
+		)
+		.route("/", routing::get(get_root).put(put_root))
 }
 
 fn handle_error(error: FileManagerError) -> impl IntoResponse {
@@ -45,10 +47,18 @@ async fn post() -> impl IntoResponse {
 	StatusCode::CREATED.into_response()
 }
 
+async fn get_root(Extension(server): Extension<Arc<Server>>) -> impl IntoResponse {
+	get_handler(server, "").await.into_response()
+}
+
 async fn get(
 	Path((_, file_path)): Path<(String, String)>,
 	Extension(server): Extension<Arc<Server>>,
 ) -> impl IntoResponse {
+	get_handler(server, &file_path).await.into_response()
+}
+
+async fn get_handler(server: Arc<Server>, file_path: &str) -> impl IntoResponse {
 	let file_manager = server.get_fs();
 	let path_buf = PathBuf::from(file_path);
 	let path_stat = file_manager.stat(&path_buf).await;
@@ -96,6 +106,8 @@ async fn delete() -> impl IntoResponse {
 	// TODO: Delete a file
 	StatusCode::NO_CONTENT.into_response()
 }
+
+async fn put_root() -> impl IntoResponse {}
 
 async fn put() -> impl IntoResponse {
 	// TODO: Update a file contents
