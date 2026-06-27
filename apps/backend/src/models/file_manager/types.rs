@@ -24,8 +24,10 @@ pub enum FSEntry {
 
 #[derive(Debug, Error)]
 pub enum FileManagerError {
+	#[error("Path does not resolve to a file or directory")]
+	NotFound,
 	#[error("Path is invalid or outside of allowed directory")]
-	InvalidPath,
+	NoPermission,
 	#[error("Unknown file type")]
 	UnknownType,
 	#[error("Non UTF-8 string encountered in file name")]

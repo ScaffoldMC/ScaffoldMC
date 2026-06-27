@@ -22,23 +22,16 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 fn handle_error(error: FileManagerError) -> impl IntoResponse {
 	match error {
-		FileManagerError::InvalidPath => (
-			StatusCode::BAD_REQUEST,
-			"Provided path is inaccessible or does not exist",
-		)
-			.into_response(),
-		FileManagerError::UnknownType => {
-			tracing::error!("Encountered unknown file type");
-			(StatusCode::INTERNAL_SERVER_ERROR, "File type unknown").into_response()
+		FileManagerError::NoPermission => {
+			(StatusCode::BAD_REQUEST, error.to_string()).into_response()
 		}
-		FileManagerError::EncodingError => {
-			tracing::error!("Encountered encoding error");
-			(StatusCode::INTERNAL_SERVER_ERROR, "Encoding error").into_response()
+		FileManagerError::UnknownType
+		| FileManagerError::EncodingError
+		| FileManagerError::IoError(_) => {
+			tracing::error!("{}", error.to_string());
+			(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
 		}
-		FileManagerError::IoError(error) => {
-			tracing::error!("Encountered I/O error {}", error);
-			(StatusCode::INTERNAL_SERVER_ERROR, "Encoding error").into_response()
-		}
+		FileManagerError::NotFound => (StatusCode::NOT_FOUND, error.to_string()).into_response(),
 	}
 }
 

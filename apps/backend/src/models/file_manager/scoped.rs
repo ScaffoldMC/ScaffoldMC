@@ -1,4 +1,4 @@
-use crate::models::file_manager::types::FileManagerError::InvalidPath;
+use crate::models::file_manager::types::FileManagerError::{IoError, NoPermission, NotFound};
 use crate::models::file_manager::types::{
 	FSDirectoryEntry, FSEntry, FSFileEntry, FileManagerError,
 };
@@ -6,7 +6,7 @@ use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
 use std::path::PathBuf;
 use tokio::fs::{create_dir, metadata, read_dir, remove_file, rename, File};
-use tokio::io::{BufReader, BufWriter};
+use tokio::io::{self, BufReader, BufWriter};
 
 pub struct ScopedFileManager {
 	base_path: PathBuf,
@@ -20,16 +20,24 @@ impl ScopedFileManager {
 	/// Ensure the provided path is under base_path to prevent illegal paths
 	pub fn check_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
 		let joined = self.base_path.join(path);
-		let canon_path = joined
-			.canonicalize()
-			.map_err(|err| FileManagerError::IoError(err))?;
+		let canon_path_result = joined.canonicalize();
+
+		if let Err(err) = canon_path_result {
+			if err.kind() == io::ErrorKind::NotFound {
+				return Err(NotFound);
+			}
+
+			return Err(IoError(err));
+		}
+
+		let canon_path = canon_path_result.unwrap();
 
 		tracing::info!("path: {:?}", canon_path);
 
 		if canon_path.starts_with(&self.base_path) {
 			Ok(canon_path)
 		} else {
-			Err(InvalidPath)
+			Err(NoPermission)
 		}
 	}
 }
@@ -142,7 +150,7 @@ impl FileManager for ScopedFileManager {
 
 		let name = path
 			.file_name()
-			.ok_or(FileManagerError::InvalidPath)?
+			.ok_or(FileManagerError::NoPermission)?
 			.to_owned()
 			.into_string()
 			.map_err(|_| FileManagerError::EncodingError)?;
