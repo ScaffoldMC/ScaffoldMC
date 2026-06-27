@@ -102,8 +102,17 @@ async fn get_handler(server: Arc<Server>, file_path: &str) -> impl IntoResponse 
 	}
 }
 
-async fn delete() -> impl IntoResponse {
-	// TODO: Delete a file
+async fn delete(
+	Path((_, file_path)): Path<(String, String)>,
+	Extension(server): Extension<Arc<Server>>,
+) -> impl IntoResponse {
+	let file_manager = server.get_fs();
+	let path_buf = PathBuf::from(file_path);
+
+	if let Err(err) = file_manager.delete(&path_buf).await {
+		return handle_error(err).into_response();
+	}
+
 	StatusCode::NO_CONTENT.into_response()
 }
 
