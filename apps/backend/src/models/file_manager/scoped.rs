@@ -38,6 +38,15 @@ impl ScopedFileManager {
 			Ok(())
 		}
 	}
+
+	/// Prevent mutating the scoped root itself
+	pub fn ensure_not_scoped_root(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+		if path == &self.base_path {
+			Err(NoPermission)
+		} else {
+			Ok(())
+		}
+	}
 }
 
 #[async_trait]
@@ -71,6 +80,7 @@ impl FileManager for ScopedFileManager {
 	async fn delete(&self, path: &PathBuf) -> Result<(), FileManagerError> {
 		let path = self.normalize_path(path)?;
 		self.ensure_path_exists(&path)?;
+		self.ensure_not_scoped_root(&path)?;
 
 		if path.is_file() {
 			remove_file(path)
@@ -153,6 +163,7 @@ impl FileManager for ScopedFileManager {
 	async fn relocate(&self, path: &PathBuf, new_path: &PathBuf) -> Result<(), FileManagerError> {
 		let path = self.normalize_path(path)?;
 		self.ensure_path_exists(&path)?;
+		self.ensure_not_scoped_root(&path)?;
 
 		let new_path = self.normalize_path(new_path)?;
 
