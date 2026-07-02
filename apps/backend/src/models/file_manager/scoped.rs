@@ -59,7 +59,7 @@ impl FileManager for ScopedFileManager {
 		let path = self.normalize_path(path)?;
 		self.ensure_path_exists(&path)?;
 
-		let file = File::open(path)
+		let file = File::create(path)
 			.await
 			.map_err(|err| FileManagerError::IoError(err))?;
 
