@@ -118,11 +118,10 @@ async fn get_handler(
 					.unwrap()
 					.into_response()
 			}
-			FSEntry::Dir(_) => (
-				StatusCode::BAD_REQUEST,
-				"Cannot fetch content for a directory",
-			)
-				.into_response(),
+			FSEntry::Dir(_) => match file_manager.list_dir(&path_buf).await {
+				Ok(dir_content) => (StatusCode::OK, Json(dir_content)).into_response(),
+				Err(err) => handle_error(err).into_response(),
+			},
 		}
 	} else {
 		(StatusCode::OK, Json(path_stat)).into_response()
