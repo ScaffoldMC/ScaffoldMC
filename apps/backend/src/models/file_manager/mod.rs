@@ -21,6 +21,9 @@ pub trait FileManager: Send + Sync {
 	/// Create a directory
 	async fn create_dir(&self, path: &PathBuf) -> Result<(), FileManagerError>;
 
+	/// Create a file
+	async fn create_file(&self, path: &PathBuf) -> Result<(), FileManagerError>;
+
 	/// List the contents of a directory
 	async fn list_dir(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError>;
 

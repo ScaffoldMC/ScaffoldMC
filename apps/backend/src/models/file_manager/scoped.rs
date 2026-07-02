@@ -89,6 +89,16 @@ impl FileManager for ScopedFileManager {
 		Ok(())
 	}
 
+	async fn create_file(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+		let path = self.normalize_path(path)?;
+
+		File::create(path)
+			.await
+			.map_err(|err| FileManagerError::IoError(err))?;
+
+		Ok(())
+	}
+
 	async fn list_dir(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError> {
 		let path = self.normalize_path(path)?;
 		self.ensure_path_exists(&path)?;
