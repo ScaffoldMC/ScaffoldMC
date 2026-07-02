@@ -1,12 +1,13 @@
-use crate::models::file_manager::types::FileManagerError::{IoError, NoPermission, NotFound};
+use crate::models::file_manager::types::FileManagerError::{NoPermission, NotFound};
 use crate::models::file_manager::types::{
 	FSDirectoryEntry, FSEntry, FSFileEntry, FileManagerError,
 };
 use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
+use path_clean::clean;
 use std::path::PathBuf;
 use tokio::fs::{create_dir, metadata, read_dir, remove_file, rename, File};
-use tokio::io::{self, BufReader, BufWriter};
+use tokio::io::{BufReader, BufWriter};
 
 pub struct ScopedFileManager {
 	base_path: PathBuf,
@@ -17,27 +18,24 @@ impl ScopedFileManager {
 		Self { base_path }
 	}
 
-	/// Ensure the provided path is under base_path to prevent illegal paths
-	pub fn check_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
+	/// Ensure the provided path is under base_path to prevent illegal paths and normalize it
+	pub fn normalize_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
 		let joined = self.base_path.join(path);
-		let canon_path_result = joined.canonicalize();
+		let clean_path = clean(joined);
 
-		if let Err(err) = canon_path_result {
-			if err.kind() == io::ErrorKind::NotFound {
-				return Err(NotFound);
-			}
-
-			return Err(IoError(err));
-		}
-
-		let canon_path = canon_path_result.unwrap();
-
-		tracing::info!("path: {:?}", canon_path);
-
-		if canon_path.starts_with(&self.base_path) {
-			Ok(canon_path)
+		if clean_path.starts_with(&self.base_path) {
+			Ok(clean_path)
 		} else {
 			Err(NoPermission)
+		}
+	}
+
+	/// Ensure a path exists
+	pub fn ensure_path_exists(&self, path: &PathBuf) -> Result<(), FileManagerError> {
+		if !path.exists() {
+			Err(NotFound)
+		} else {
+			Ok(())
 		}
 	}
 }
@@ -45,7 +43,8 @@ impl ScopedFileManager {
 #[async_trait]
 impl FileManager for ScopedFileManager {
 	async fn read_file(&self, path: &PathBuf) -> Result<BufReader<File>, FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
 
 		let file = File::open(path)
 			.await
@@ -57,7 +56,8 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn write_file(&self, path: &PathBuf) -> Result<BufWriter<File>, FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
 
 		let file = File::open(path)
 			.await
@@ -69,7 +69,8 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn delete(&self, path: &PathBuf) -> Result<(), FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
 
 		remove_file(path)
 			.await
@@ -79,7 +80,7 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn create_dir(&self, path: &PathBuf) -> Result<(), FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
 
 		create_dir(path)
 			.await
@@ -89,7 +90,8 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn list_dir(&self, path: &PathBuf) -> Result<Vec<FSEntry>, FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
 
 		let mut dir = read_dir(path)
 			.await
@@ -131,8 +133,10 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn relocate(&self, path: &PathBuf, new_path: &PathBuf) -> Result<(), FileManagerError> {
-		let path = self.check_path(path)?;
-		let new_path = self.check_path(new_path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
+
+		let new_path = self.normalize_path(new_path)?;
 
 		rename(path, new_path)
 			.await
@@ -142,7 +146,8 @@ impl FileManager for ScopedFileManager {
 	}
 
 	async fn stat(&self, path: &PathBuf) -> Result<FSEntry, FileManagerError> {
-		let path = self.check_path(path)?;
+		let path = self.normalize_path(path)?;
+		self.ensure_path_exists(&path)?;
 
 		let metadata = metadata(path.clone())
 			.await

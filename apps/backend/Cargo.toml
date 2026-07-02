@@ -16,6 +16,7 @@ futures-util = "0.3.31"
 hex = { version = "0.4.3", features = ["serde"] }
 jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 password-auth = "1.0.0"
+path-clean = "1.0.1"
 pem = { version = "3.0.5", features = ["serde"] }
 rand = "0.9.1"
 reqwest = { version = "0.12.20", default-features = false, features = [
