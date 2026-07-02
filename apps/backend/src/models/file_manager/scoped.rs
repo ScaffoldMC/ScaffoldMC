@@ -6,7 +6,7 @@ use crate::models::file_manager::FileManager;
 use async_trait::async_trait;
 use path_clean::clean;
 use std::path::PathBuf;
-use tokio::fs::{create_dir, metadata, read_dir, remove_file, rename, File};
+use tokio::fs::{create_dir, metadata, read_dir, remove_dir_all, remove_file, rename, File};
 use tokio::io::{BufReader, BufWriter};
 
 pub struct ScopedFileManager {
@@ -72,9 +72,17 @@ impl FileManager for ScopedFileManager {
 		let path = self.normalize_path(path)?;
 		self.ensure_path_exists(&path)?;
 
-		remove_file(path)
-			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+		if path.is_file() {
+			remove_file(path)
+				.await
+				.map_err(|err| FileManagerError::IoError(err))?;
+		} else if path.is_dir() {
+			remove_dir_all(path)
+				.await
+				.map_err(|err| FileManagerError::IoError(err))?;
+		} else {
+			return Err(FileManagerError::UnknownType);
+		}
 
 		Ok(())
 	}
