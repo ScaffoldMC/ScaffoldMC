@@ -41,6 +41,10 @@ fn handle_error(error: FileManagerError) -> impl IntoResponse {
 	}
 }
 
+fn to_root_relative_path(path: String) -> PathBuf {
+	PathBuf::from(path.trim_start_matches('/'))
+}
+
 async fn post(
 	Path((_, file_path)): Path<(String, String)>,
 	Query(query): Query<FilesPostQueryParams>,
@@ -173,9 +177,9 @@ async fn put_handler(
 	let path_buf = PathBuf::from(file_path);
 
 	match query.operation {
-		FilesPutOperation::Rename | FilesPutOperation::Move => {
+		FilesPutOperation::Rename => {
 			let new_path = match query.to {
-				Some(path) => PathBuf::from(path),
+				Some(path) => to_root_relative_path(path),
 				None => {
 					return (
 						StatusCode::BAD_REQUEST,
@@ -184,6 +188,44 @@ async fn put_handler(
 						.into_response()
 				}
 			};
+
+			if let Err(err) = file_manager.relocate(&path_buf, &new_path).await {
+				return handle_error(err).into_response();
+			}
+
+			StatusCode::OK.into_response()
+		}
+		FilesPutOperation::Move => {
+			let to_path = match query.to {
+				Some(path) => to_root_relative_path(path),
+				None => {
+					return (
+						StatusCode::BAD_REQUEST,
+						"The 'to' query parameter is required for rename and move operations",
+					)
+						.into_response()
+				}
+			};
+
+			let destination_dir = match file_manager.stat(&to_path).await {
+				Ok(FSEntry::Dir(_)) => to_path,
+				Ok(FSEntry::File(_)) => {
+					return (
+						StatusCode::BAD_REQUEST,
+						"The 'to' path must be an existing directory for move operations",
+					)
+						.into_response()
+				}
+				Err(err) => return handle_error(err).into_response(),
+			};
+
+			let entry_name = match file_manager.stat(&path_buf).await {
+				Ok(FSEntry::File(file)) => file.name,
+				Ok(FSEntry::Dir(dir)) => dir.name,
+				Err(err) => return handle_error(err).into_response(),
+			};
+
+			let new_path = destination_dir.join(entry_name);
 
 			if let Err(err) = file_manager.relocate(&path_buf, &new_path).await {
 				return handle_error(err).into_response();
