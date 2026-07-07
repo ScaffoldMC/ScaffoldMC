@@ -1,8 +1,11 @@
 use crate::config;
+use crate::config::server_dir;
+use crate::config::SERVER_CONFIG_FILE_NAME;
 use crate::config::SERVER_CONSOLE_MAX_LINES;
 use crate::config::SERVER_WATCHER_TICK;
-use crate::models::files::server_config::PartialServerConfig;
-use crate::models::files::server_config::ServerConfig;
+use crate::models::file_manager::{scoped::ScopedFileManager, FileManager};
+use crate::models::file_schemas::server_config::PartialServerConfig;
+use crate::models::file_schemas::server_config::ServerConfig;
 use crate::models::game::Game;
 use crate::services::binary::BinaryService;
 use serde::Deserialize;
@@ -93,15 +96,6 @@ impl ServerRuntime {
 	}
 }
 
-/// Server instance representation
-pub struct Server {
-	pub id: Uuid,
-	pub config: RwLock<ServerConfig>,
-	pub process: RwLock<ServerProcessState>,
-	pub console_lines: RwLock<VecDeque<ConsoleLine>>,
-	pub next_line_num: AtomicU64,
-}
-
 /// Server process state
 pub enum ServerProcessState {
 	Stopped,
@@ -137,7 +131,49 @@ pub struct ServerInfo {
 	pub state: ServerStateInfo,
 }
 
+/// Server instance representation
+pub struct Server {
+	id: Uuid,
+	config: RwLock<ServerConfig>,
+	process: RwLock<ServerProcessState>,
+	console_lines: RwLock<VecDeque<ConsoleLine>>,
+	next_line_num: AtomicU64,
+	vfs: Arc<dyn FileManager>,
+}
+
 impl Server {
+	/// Create a server instance from an ID by loading its config file. Returns None if loading fails.
+	pub fn new(uuid: Uuid) -> Result<Self, String> {
+		let server_dir = server_dir(uuid)
+			.canonicalize()
+			.map_err(|err| err.to_string())?;
+
+		let config_path = server_dir.join(SERVER_CONFIG_FILE_NAME);
+
+		let server_config = match ServerConfig::load_from_file(config_path.clone()) {
+			Ok(cfg) => cfg,
+			Err(e) => {
+				return Err(e.to_string());
+			}
+		};
+
+		let vfs = ScopedFileManager::new(server_dir);
+
+		Ok(Self {
+			id: uuid,
+			config: RwLock::new(server_config),
+			process: RwLock::new(ServerProcessState::Stopped),
+			console_lines: RwLock::new(VecDeque::new()),
+			next_line_num: AtomicU64::new(0),
+			vfs: Arc::new(vfs),
+		})
+	}
+
+	/// Get a server's ID
+	pub fn id(&self) -> Uuid {
+		self.id
+	}
+
 	/// Gets information about a server instance by ID.
 	#[instrument(name = "Server.GetServerInfo", skip(self))]
 	pub async fn get_server_info(&self) -> ServerInfo {
@@ -198,7 +234,7 @@ impl Server {
 			ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
 		})?;
 
-		let server_dir = config::canonical_server_dir(self.id);
+		let server_dir = config::server_dir(self.id);
 		let server_dir = std::fs::canonicalize(&server_dir)
 			.map_err(|e| ServerError::StartError(format!("Invalid server directory path: {e}")))?;
 
@@ -335,6 +371,11 @@ impl Server {
 			.filter(|l| since_line.is_none_or(|s| l.num > s));
 
 		Ok(iter.take(SERVER_CONSOLE_MAX_LINES).cloned().collect())
+	}
+
+	/// Get the server's file manager
+	pub fn get_fs(&self) -> Arc<dyn FileManager> {
+		self.vfs.clone()
 	}
 
 	/// Internal: Generic reader task for stdout/stderr of a server process

@@ -29,3 +29,40 @@ pub struct ServerCommandRequest {
 pub struct ConsoleQueryParams {
 	pub since: Option<u64>,
 }
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct FilesGetQueryParams {
+	pub content: Option<String>,
+}
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum FilesPostType {
+	File,
+	Directory,
+}
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct FilesPostQueryParams {
+	#[serde(rename = "type")]
+	pub entry_type: FilesPostType,
+}
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum FilesPutOperation {
+	Rename,
+	Move,
+	Write,
+}
+
+#[derive(TS, Debug, Clone, Serialize, Deserialize)]
+#[ts(export)]
+pub struct FilesPutQueryParams {
+	pub operation: FilesPutOperation,
+	pub to: Option<String>,
+}

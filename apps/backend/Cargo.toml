@@ -16,6 +16,7 @@ futures-util = "0.3.31"
 hex = { version = "0.4.3", features = ["serde"] }
 jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 password-auth = "1.0.0"
+path-clean = "1.0.1"
 pem = { version = "3.0.5", features = ["serde"] }
 rand = "0.9.1"
 reqwest = { version = "0.12.20", default-features = false, features = [
@@ -38,10 +39,11 @@ thiserror = "2.0.12"
 time = { version = "0.3.41", features = ["serde"] }
 tokio = { version = "1.44.2", features = ["full"] }
 tokio-stream = "0.1.18"
+tokio-util = { version = "0.7.18", features = ["io"] }
 toml = "0.8.20"
 tower = "0.5.2"
 tower-cookies = "0.11.0"
-tower-http = { version = "0.6.6", features = ["cors"] }
+tower-http = { version = "0.6.6", features = ["cors", "normalize-path"] }
 tower-service = "0.3.3"
 tracing = "0.1.44"
 tracing-subscriber = "0.3.22"

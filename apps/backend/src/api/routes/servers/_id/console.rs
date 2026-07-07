@@ -40,7 +40,10 @@ async fn get(
 					&& server_info.state != ServerStateInfo::Stopped
 				{
 					// If state has changed since from stop to start, end the stream
-					tracing::info!("Server {} has restarted, ending console stream", server.id);
+					tracing::info!(
+						"Server {} has restarted, ending console stream",
+						server.id()
+					);
 					return None;
 				}
 
@@ -52,7 +55,7 @@ async fn get(
 					Err(err) => {
 						tracing::error!(
 							"Error getting console stream for server {}: {}",
-							server.id,
+							server.id(),
 							err
 						);
 						tokio::time::sleep(Duration::from_millis(500)).await;
@@ -75,7 +78,7 @@ async fn get(
 					Err(err) => {
 						tracing::error!(
 							"Failed to serialize console snapshot for server {}: {}",
-							server.id,
+							server.id(),
 							err
 						);
 
@@ -107,7 +110,7 @@ async fn post(
 	match server.send_command(&request.command).await {
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
-			tracing::error!("Error sending command to server {}: {}", server.id, err);
+			tracing::error!("Error sending command to server {}: {}", server.id(), err);
 			StatusCode::INTERNAL_SERVER_ERROR.into_response()
 		}
 	}

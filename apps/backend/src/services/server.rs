@@ -1,17 +1,14 @@
 use crate::bin_providers::DownloadDependency;
 use crate::config;
 use crate::config::SERVER_CONFIG_FILE_NAME;
-use crate::models::files::server_config::ServerConfig;
+use crate::models::file_schemas::server_config::ServerConfig;
 use crate::models::game::Game;
 use crate::models::server::Server;
-use crate::models::server::ServerProcessState;
 use crate::models::server::ServerStateInfo;
 use crate::services::binary::BinaryService;
 use crate::services::Service;
 use std::collections::HashMap;
-use std::collections::VecDeque;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicU64;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::RwLock;
@@ -122,25 +119,17 @@ impl ServerService {
 				continue;
 			};
 
-			let config_path = path.join(SERVER_CONFIG_FILE_NAME);
+			let server = Server::new(uuid);
 
-			let server_config = match ServerConfig::load_from_file(config_path.clone()) {
-				Ok(cfg) => cfg,
-				Err(e) => {
-					tracing::error!("Failed to load server config from {:?}: {}", config_path, e);
-					continue;
+			match server {
+				Ok(server) => {
+					let server_arced = Arc::new(server);
+					servers.insert(uuid, server_arced);
 				}
-			};
-
-			let server = Arc::new(Server {
-				id: uuid,
-				config: RwLock::new(server_config),
-				process: RwLock::new(ServerProcessState::Stopped),
-				console_lines: RwLock::new(VecDeque::new()),
-				next_line_num: AtomicU64::new(0),
-			});
-
-			servers.insert(uuid, server);
+				Err(err) => {
+					tracing::error!("Failed to load server instance {}: {}", uuid, err);
+				}
+			}
 		}
 
 		Self {
@@ -170,7 +159,7 @@ impl ServerService {
 	#[instrument(name = "ServerService.CreateServer", skip(self))]
 	pub async fn create(&self, name: &str, server_type: Game) -> Result<Uuid, String> {
 		let server_id = Uuid::new_v4();
-		let server_dir = config::canonical_server_dir(server_id);
+		let server_dir = config::server_dir(server_id);
 
 		if !server_dir.exists() {
 			std::fs::create_dir_all(&server_dir).map_err(|e| e.to_string())?;
@@ -210,18 +199,13 @@ impl ServerService {
 			.save_to_file(config_path)
 			.map_err(|e| e.to_string())?;
 
-		let server = Arc::new(Server {
-			id: server_id,
-			config: RwLock::new(server_config),
-			process: RwLock::new(ServerProcessState::Stopped),
-			console_lines: RwLock::new(VecDeque::new()),
-			next_line_num: AtomicU64::new(0),
-		});
+		let server = Server::new(server_id).map_err(|e| e.clone())?;
+		let server_arced = Arc::new(server);
 
 		tracing::info!("Creating new server instance: name='{}'", name);
 
 		let mut servers_guard = self.servers.write().await;
-		servers_guard.insert(server_id, server);
+		servers_guard.insert(server_id, server_arced);
 		Ok(server_id)
 	}
 
@@ -245,7 +229,7 @@ impl ServerService {
 			.remove(&server_id)
 			.ok_or(ServerServiceError::NoSuchServer(server_id.to_string()))?;
 
-		let server_dir = config::canonical_server_dir(server_id);
+		let server_dir = config::server_dir(server_id);
 		std::fs::remove_dir_all(&server_dir).map_err(|e| {
 			ServerServiceError::DeleteError(format!("Failed to delete server files: {e}"))
 		})?;

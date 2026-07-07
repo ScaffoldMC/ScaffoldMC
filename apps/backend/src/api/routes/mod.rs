@@ -10,7 +10,7 @@ use crate::AppState;
 use axum::{http, middleware, Router};
 use std::sync::Arc;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, normalize_path::NormalizePathLayer};
 
 pub fn create_router(state: Arc<AppState>) -> Router {
 	let cors = CorsLayer::new()
@@ -44,5 +44,6 @@ pub fn create_router(state: Arc<AppState>) -> Router {
 		.route_layer(middleware::from_fn(log_request))
 		.layer(CookieManagerLayer::new())
 		.layer(cors)
+		.layer(NormalizePathLayer::trim_trailing_slash())
 		.with_state(state)
 }
