@@ -26,7 +26,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 		.route("/", routing::get(get_root).put(put_root))
 }
 
-fn handle_error(error: FileManagerError) -> impl IntoResponse {
+fn handle_error(error: &FileManagerError) -> impl IntoResponse {
 	match error {
 		FileManagerError::NoPermission => {
 			(StatusCode::BAD_REQUEST, error.to_string()).into_response()
@@ -41,7 +41,7 @@ fn handle_error(error: FileManagerError) -> impl IntoResponse {
 	}
 }
 
-fn to_root_relative_path(path: String) -> PathBuf {
+fn to_root_relative_path(path: &str) -> PathBuf {
 	PathBuf::from(path.trim_start_matches('/'))
 }
 
@@ -62,7 +62,7 @@ async fn post(
 				.into_response()
 		}
 		Err(FileManagerError::NotFound) => {}
-		Err(err) => return handle_error(err).into_response(),
+		Err(err) => return handle_error(&err).into_response(),
 	}
 
 	let result = match query.entry_type {
@@ -71,7 +71,7 @@ async fn post(
 	};
 
 	if let Err(err) = result {
-		return handle_error(err).into_response();
+		return handle_error(&err).into_response();
 	}
 
 	StatusCode::CREATED.into_response()
@@ -102,7 +102,7 @@ async fn get_handler(
 
 	let path_stat = match file_manager.stat(&path_buf).await {
 		Ok(path_stat) => path_stat,
-		Err(err) => return handle_error(err).into_response(),
+		Err(err) => return handle_error(&err).into_response(),
 	};
 
 	if query.content.is_some() {
@@ -110,7 +110,7 @@ async fn get_handler(
 			FSEntry::File(_) => {
 				let file_content = match file_manager.read_file(&path_buf).await {
 					Ok(file_content) => file_content,
-					Err(err) => return handle_error(err).into_response(),
+					Err(err) => return handle_error(&err).into_response(),
 				};
 
 				let stream = ReaderStream::new(file_content);
@@ -124,7 +124,7 @@ async fn get_handler(
 			}
 			FSEntry::Dir(_) => match file_manager.list_dir(&path_buf).await {
 				Ok(dir_content) => (StatusCode::OK, Json(dir_content)).into_response(),
-				Err(err) => handle_error(err).into_response(),
+				Err(err) => handle_error(&err).into_response(),
 			},
 		}
 	} else {
@@ -140,7 +140,7 @@ async fn delete(
 	let path_buf = PathBuf::from(file_path);
 
 	if let Err(err) = file_manager.delete(&path_buf).await {
-		return handle_error(err).into_response();
+		return handle_error(&err).into_response();
 	}
 
 	StatusCode::NO_CONTENT.into_response()
@@ -179,7 +179,7 @@ async fn put_handler(
 	match query.operation {
 		FilesPutOperation::Rename => {
 			let new_path = match query.to {
-				Some(path) => to_root_relative_path(path),
+				Some(path) => to_root_relative_path(&path),
 				None => {
 					return (
 						StatusCode::BAD_REQUEST,
@@ -190,14 +190,14 @@ async fn put_handler(
 			};
 
 			if let Err(err) = file_manager.relocate(&path_buf, &new_path).await {
-				return handle_error(err).into_response();
+				return handle_error(&err).into_response();
 			}
 
 			StatusCode::OK.into_response()
 		}
 		FilesPutOperation::Move => {
 			let to_path = match query.to {
-				Some(path) => to_root_relative_path(path),
+				Some(path) => to_root_relative_path(&path),
 				None => {
 					return (
 						StatusCode::BAD_REQUEST,
@@ -216,19 +216,19 @@ async fn put_handler(
 					)
 						.into_response()
 				}
-				Err(err) => return handle_error(err).into_response(),
+				Err(err) => return handle_error(&err).into_response(),
 			};
 
 			let entry_name = match file_manager.stat(&path_buf).await {
 				Ok(FSEntry::File(file)) => file.name,
 				Ok(FSEntry::Dir(dir)) => dir.name,
-				Err(err) => return handle_error(err).into_response(),
+				Err(err) => return handle_error(&err).into_response(),
 			};
 
 			let new_path = destination_dir.join(entry_name);
 
 			if let Err(err) = file_manager.relocate(&path_buf, &new_path).await {
-				return handle_error(err).into_response();
+				return handle_error(&err).into_response();
 			}
 
 			StatusCode::OK.into_response()
@@ -236,7 +236,7 @@ async fn put_handler(
 		FilesPutOperation::Write => {
 			let path_stat = match file_manager.stat(&path_buf).await {
 				Ok(path_stat) => path_stat,
-				Err(err) => return handle_error(err).into_response(),
+				Err(err) => return handle_error(&err).into_response(),
 			};
 
 			if let FSEntry::Dir(_) = path_stat {
@@ -245,12 +245,10 @@ async fn put_handler(
 
 			let mut file_writer = match file_manager.write_file(&path_buf).await {
 				Ok(file_writer) => file_writer,
-				Err(err) => return handle_error(err).into_response(),
+				Err(err) => return handle_error(&err).into_response(),
 			};
 
-			let body_stream = req_body
-				.into_data_stream()
-				.map_err(|err| std::io::Error::other(err));
+			let body_stream = req_body.into_data_stream().map_err(std::io::Error::other);
 
 			let mut body_reader = StreamReader::new(body_stream);
 

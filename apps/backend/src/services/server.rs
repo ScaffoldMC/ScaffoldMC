@@ -128,7 +128,6 @@ impl ServerService {
 				}
 				Err(err) => {
 					tracing::error!("Failed to load server instance {}: {}", uuid, err);
-					continue;
 				}
 			}
 		}
