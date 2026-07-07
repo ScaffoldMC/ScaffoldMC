@@ -5,6 +5,7 @@ export * from "../../backend/bindings/ConsoleQueryParams";
 export * from "../../backend/bindings/ConsoleStreamType";
 export * from "../../backend/bindings/CreateServerRequest";
 export * from "../../backend/bindings/FSDirectoryEntry";
+export * from "../../backend/bindings/FSEntry";
 export * from "../../backend/bindings/FSFileEntry";
 export * from "../../backend/bindings/FilesGetQueryParams";
 export * from "../../backend/bindings/FilesPostQueryParams";
