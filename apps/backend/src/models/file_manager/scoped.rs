@@ -18,7 +18,7 @@ impl ScopedFileManager {
 		Self { base_path }
 	}
 
-	/// Ensure the provided path is under base_path to prevent illegal paths and normalize it
+	/// Ensure the provided path is under `base_path` to prevent illegal paths and normalize it
 	pub fn normalize_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
 		let joined = self.base_path.join(path);
 		let clean_path = clean(joined);
@@ -32,11 +32,11 @@ impl ScopedFileManager {
 
 	/// Ensure a path exists
 	pub fn ensure_path_exists(&self, path: &PathBuf) -> Result<(), FileManagerError> {
-		if !path.exists() {
-			Err(NotFound)
-		} else {
-			Ok(())
-		}
+		if path.exists() {
+  			Ok(())
+  		} else {
+  			Err(NotFound)
+  		}
 	}
 
 	/// Prevent mutating the scoped root itself
@@ -57,7 +57,7 @@ impl FileManager for ScopedFileManager {
 
 		let file = File::open(path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		let buf_reader = BufReader::new(file);
 
@@ -70,7 +70,7 @@ impl FileManager for ScopedFileManager {
 
 		let file = File::create(path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		let buf_writer = BufWriter::new(file);
 
@@ -85,11 +85,11 @@ impl FileManager for ScopedFileManager {
 		if path.is_file() {
 			remove_file(path)
 				.await
-				.map_err(|err| FileManagerError::IoError(err))?;
+				.map_err(FileManagerError::IoError)?;
 		} else if path.is_dir() {
 			remove_dir_all(path)
 				.await
-				.map_err(|err| FileManagerError::IoError(err))?;
+				.map_err(FileManagerError::IoError)?;
 		} else {
 			return Err(FileManagerError::UnknownType);
 		}
@@ -102,7 +102,7 @@ impl FileManager for ScopedFileManager {
 
 		create_dir(path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		Ok(())
 	}
@@ -112,7 +112,7 @@ impl FileManager for ScopedFileManager {
 
 		File::create(path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		Ok(())
 	}
@@ -123,24 +123,24 @@ impl FileManager for ScopedFileManager {
 
 		let mut dir = read_dir(path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		let mut entries = Vec::new();
 
 		while let Some(entry) = dir
 			.next_entry()
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?
+			.map_err(FileManagerError::IoError)?
 		{
 			let file_type = entry
 				.file_type()
 				.await
-				.map_err(|err| FileManagerError::IoError(err))?;
+				.map_err(FileManagerError::IoError)?;
 
 			let metadata = entry
 				.metadata()
 				.await
-				.map_err(|err| FileManagerError::IoError(err))?;
+				.map_err(FileManagerError::IoError)?;
 
 			let name = entry
 				.file_name()
@@ -169,7 +169,7 @@ impl FileManager for ScopedFileManager {
 
 		rename(path, new_path)
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		Ok(())
 	}
@@ -180,7 +180,7 @@ impl FileManager for ScopedFileManager {
 
 		let metadata = metadata(path.clone())
 			.await
-			.map_err(|err| FileManagerError::IoError(err))?;
+			.map_err(FileManagerError::IoError)?;
 
 		let name = path
 			.file_name()

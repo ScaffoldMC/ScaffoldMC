@@ -200,7 +200,7 @@ impl ServerService {
 			.save_to_file(config_path)
 			.map_err(|e| e.to_string())?;
 
-		let server = Server::new(server_id).map_err(|e| e.to_string())?;
+		let server = Server::new(server_id).map_err(|e| e.clone())?;
 		let server_arced = Arc::new(server);
 
 		tracing::info!("Creating new server instance: name='{}'", name);

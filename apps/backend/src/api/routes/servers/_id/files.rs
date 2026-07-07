@@ -151,7 +151,7 @@ async fn put_root(
 	Extension(server): Extension<Arc<Server>>,
 	request: Request,
 ) -> impl IntoResponse {
-	put_handler("".into(), query, server, request.into_body())
+	put_handler(String::new(), query, server, request.into_body())
 		.await
 		.into_response()
 }
@@ -250,7 +250,7 @@ async fn put_handler(
 
 			let body_stream = req_body
 				.into_data_stream()
-				.map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err));
+				.map_err(|err| std::io::Error::other(err));
 
 			let mut body_reader = StreamReader::new(body_stream);
 
