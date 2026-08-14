@@ -47,6 +47,15 @@ impl ScopedFileManager {
 			Ok(())
 		}
 	}
+
+	fn get_relative_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
+		let normalized_path = self.normalize_path(path)?;
+
+		normalized_path
+			.strip_prefix(&self.base_path)
+			.map(|p| p.to_path_buf())
+			.map_err(|_| NoPermission)
+	}
 }
 
 #[async_trait]
@@ -124,6 +133,11 @@ impl FileManager for ScopedFileManager {
 
 			let metadata = entry.metadata().await.map_err(FileManagerError::IoError)?;
 
+			let path = self
+				.get_relative_path(&entry.path())?
+				.to_string_lossy()
+				.to_string();
+
 			let name = entry
 				.file_name()
 				.into_string()
@@ -132,10 +146,11 @@ impl FileManager for ScopedFileManager {
 			if file_type.is_file() {
 				entries.push(FSEntry::File(FSFileEntry {
 					name,
+					path,
 					size: metadata.len(),
 				}));
 			} else if file_type.is_dir() {
-				entries.push(FSEntry::Dir(FSDirectoryEntry { name }));
+				entries.push(FSEntry::Dir(FSDirectoryEntry { name, path }));
 			}
 		}
 
@@ -171,13 +186,19 @@ impl FileManager for ScopedFileManager {
 			.into_string()
 			.map_err(|_| FileManagerError::EncodingError)?;
 
+		let path_string = self.get_relative_path(&path)?.to_string_lossy().to_string();
+
 		if metadata.is_file() {
 			Ok(FSEntry::File(FSFileEntry {
 				name,
+				path: path_string,
 				size: metadata.len(),
 			}))
 		} else if metadata.is_dir() {
-			Ok(FSEntry::Dir(FSDirectoryEntry { name }))
+			Ok(FSEntry::Dir(FSDirectoryEntry {
+				name,
+				path: path_string,
+			}))
 		} else {
 			Err(FileManagerError::UnknownType)
 		}
