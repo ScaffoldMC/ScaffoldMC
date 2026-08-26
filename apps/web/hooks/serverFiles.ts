@@ -46,8 +46,16 @@ export function useServerFilesystem(serverId: string) {
 	const getMetadata = (path: string) => fetchEntry<FSEntry>(path);
 	const listDirectory = (path: string) =>
 		fetchEntry<FSEntry[]>(path, { content: "1" });
-	const readFile = async (path: string) =>
-		fetchEntry<string>(path, { content: "1" });
+	const readFile = async (path: string) => {
+		const { data } = await api.get<string>(
+			getServerFilesPath(serverId, path),
+			{
+				params: { content: "1" },
+				responseType: "text",
+			},
+		);
+		return data;
+	};
 
 	const createFile = async (path: string) =>
 		mutateFilesystem(async () => {
