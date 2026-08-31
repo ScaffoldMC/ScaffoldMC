@@ -80,10 +80,12 @@ function DirectoryListing({
 
 	return (
 		<>
-			<FilesListButton onClick={handleClick} selected={selected}>
-				<FolderIcon size={18} />
-				{dir.name}
-			</FilesListButton>
+			<FilesListButton
+				onClick={handleClick}
+				selected={selected}
+				fsEntry={{ type: "dir", ...dir }}
+			/>
+
 			<div className="flex" hidden={!open}>
 				<div className="bg-border-static rounded-full w-0.5 ml-2 my-1" />
 				<FileTree
@@ -105,9 +107,10 @@ function FileListing({ file }: { file: FSFileEntry }) {
 	};
 
 	return (
-		<FilesListButton onClick={handleClick} selected={selected}>
-			<FileIcon size={18} />
-			{file.name}
-		</FilesListButton>
+		<FilesListButton
+			onClick={handleClick}
+			selected={selected}
+			fsEntry={{ type: "file", ...file }}
+		/>
 	);
 }
