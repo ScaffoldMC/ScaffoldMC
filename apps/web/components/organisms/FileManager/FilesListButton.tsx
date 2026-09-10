@@ -8,7 +8,8 @@ import {
 } from "@/components/molecules/ContextMenu/ContextMenu";
 import { cn } from "@/lib/util";
 import { cva } from "class-variance-authority";
-import { SubmitEventHandler, useState } from "react";
+import { useServerFilesystem } from "@/hooks/serverFiles";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { FSEntry } from "@/lib/servertypes";
 import { FileIcon, FolderIcon } from "lucide-react";
@@ -28,7 +29,7 @@ const buttonStyles = cva(
 				true: cn(
 					"text-text-primary bg-accent-lightest dark:bg-accent-darkest",
 				),
-				false: "hover:bg-accent-darkest hover:text-text-primary",
+				false: "hover:bg-accent-lightest dark:hover:bg-accent-darkest hover:text-text-primary",
 			},
 		},
 		defaultVariants: {
@@ -41,23 +42,44 @@ export interface FilesListButtonProps {
 	selected: boolean;
 	onClick: () => void;
 	fsEntry: FSEntry;
+	serverId: string;
 }
 
 export function FilesListButton({
 	selected,
 	onClick,
 	fsEntry,
+	serverId,
 }: FilesListButtonProps) {
 	const className = buttonStyles({ selected });
 	const [renameMode, setRenameMode] = useState(false);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const { renameEntry } = useServerFilesystem(serverId);
 
-	const handleSubmit: SubmitEventHandler = (event) => {
+	useEffect(() => {
+		if (!renameMode) {
+			return;
+		}
+
+		const frame = requestAnimationFrame(() => {
+			inputRef.current?.focus();
+			inputRef.current?.select();
+		});
+
+		return () => cancelAnimationFrame(frame);
+	}, [renameMode]);
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const formData = new FormData(event.target);
-		const entryName = formData.get("entryName");
+		const entryName = inputRef.current?.value.trim();
 
+		if (!entryName || entryName === fsEntry.name) {
+			setRenameMode(false);
+			return;
+		}
+
+		await renameEntry({ path: fsEntry.path, to: entryName });
 		setRenameMode(false);
-		console.log(entryName);
 	};
 
 	return (
@@ -74,10 +96,12 @@ export function FilesListButton({
 
 							<form onSubmit={handleSubmit}>
 								<TextInput
+									ref={inputRef}
 									name="entryName"
 									variant="ghost"
 									type="text"
-									autoFocus
+									defaultValue={fsEntry.name}
+									onBlur={() => setRenameMode(false)}
 								/>
 							</form>
 						</div>
@@ -98,7 +122,13 @@ export function FilesListButton({
 					)}
 				</ContextMenuTrigger>
 				<ContextMenuPortal>
-					<ContextMenuContent>
+					<ContextMenuContent
+						onCloseAutoFocus={(event) => {
+							if (renameMode) {
+								event.preventDefault();
+							}
+						}}
+					>
 						<ContextMenuItem onClick={() => setRenameMode(true)}>
 							Rename
 						</ContextMenuItem>

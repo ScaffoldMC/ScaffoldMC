@@ -45,7 +45,11 @@ function FileTree({
 				}
 
 				return (
-					<FileListing key={`${path}/${entry.name}`} file={entry} />
+					<FileListing
+						key={`${path}/${entry.name}`}
+						file={entry}
+						serverId={serverId}
+					/>
 				);
 			})}
 		</ul>
@@ -84,6 +88,7 @@ function DirectoryListing({
 				onClick={handleClick}
 				selected={selected}
 				fsEntry={{ type: "dir", ...dir }}
+				serverId={serverId}
 			/>
 
 			<div className="flex" hidden={!open}>
@@ -98,7 +103,13 @@ function DirectoryListing({
 	);
 }
 
-function FileListing({ file }: { file: FSFileEntry }) {
+function FileListing({
+	file,
+	serverId,
+}: {
+	file: FSFileEntry;
+	serverId: string;
+}) {
 	const { selectedFile, setSelectedFile } = useContext(FileManagerContext);
 	const selected = selectedFile?.name === file.name;
 
@@ -111,6 +122,7 @@ function FileListing({ file }: { file: FSFileEntry }) {
 			onClick={handleClick}
 			selected={selected}
 			fsEntry={{ type: "file", ...file }}
+			serverId={serverId}
 		/>
 	);
 }
