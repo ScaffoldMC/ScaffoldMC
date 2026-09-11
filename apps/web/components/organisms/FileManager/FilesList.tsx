@@ -1,11 +1,11 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { useServerFilesystem } from "@/hooks/serverFiles";
 import { FSDirectoryEntry, FSEntry, FSFileEntry } from "@/lib/servertypes";
-import { cn } from "@/lib/util";
-import { FileIcon, FolderIcon } from "lucide-react";
 import { useContext, useState } from "react";
 import { FileManagerContext } from "./FileManager";
 import { FilesListButton } from "./FilesListButton";
+import { FilePlusCorner, FolderPlus } from "lucide-react";
+import { getAvailableName } from "@/lib/util";
 
 export function FilesList({
 	files,
@@ -14,8 +14,34 @@ export function FilesList({
 	files: FSEntry[];
 	serverId: string;
 }) {
+	const { createFile, createDirectory, getMetadata } =
+		useServerFilesystem(serverId);
+	const { setSelectedFile } = useContext(FileManagerContext);
+
+	const handleCreateFile = async () => {
+		const path = getAvailableName(files, "New File");
+		await createFile(path);
+
+		const entry = await getMetadata(path);
+		if (entry.type === "file") {
+			setSelectedFile(entry);
+		}
+	};
+
+	const handleCreateDirectory = () => {
+		createDirectory(getAvailableName(files, "New Directory"));
+	};
+
 	return (
 		<div className="flex min-w-0 flex-col rounded-md border border-border-static bg-surface">
+			<div className="flex gap-1 p-1 pb-0">
+				<Button level="ghost" onClick={handleCreateFile}>
+					<FilePlusCorner size={18} />
+				</Button>
+				<Button level="ghost" onClick={handleCreateDirectory}>
+					<FolderPlus size={18} />
+				</Button>
+			</div>
 			<FileTree files={files} serverId={serverId} />
 		</div>
 	);

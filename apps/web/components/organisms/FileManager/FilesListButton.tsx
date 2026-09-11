@@ -6,7 +6,7 @@ import {
 	ContextMenuPortal,
 	ContextMenuTrigger,
 } from "@/components/molecules/ContextMenu/ContextMenu";
-import { cn } from "@/lib/util";
+import { cn, getAvailableName } from "@/lib/util";
 import { cva } from "class-variance-authority";
 import { useServerFilesystem } from "@/hooks/serverFiles";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -54,7 +54,8 @@ export function FilesListButton({
 	const className = buttonStyles({ selected });
 	const [renameMode, setRenameMode] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { renameEntry } = useServerFilesystem(serverId);
+	const { renameEntry, deleteEntry, createDirectory, listDirectory } =
+		useServerFilesystem(serverId);
 
 	useEffect(() => {
 		if (!renameMode) {
@@ -80,6 +81,13 @@ export function FilesListButton({
 
 		await renameEntry({ path: fsEntry.path, to: entryName });
 		setRenameMode(false);
+	};
+
+	const createSubDirectory = async () => {
+		const existingEntries = await listDirectory(fsEntry.path);
+		const newDirName = getAvailableName(existingEntries, "New Directory");
+
+		createDirectory(fsEntry.path + "/" + newDirName);
 	};
 
 	return (
@@ -132,7 +140,19 @@ export function FilesListButton({
 						<ContextMenuItem onClick={() => setRenameMode(true)}>
 							Rename
 						</ContextMenuItem>
-						<ContextMenuItem>Delete</ContextMenuItem>
+						<ContextMenuItem
+							onClick={() => deleteEntry(fsEntry.path)}
+						>
+							Delete
+						</ContextMenuItem>
+
+						{fsEntry.type === "dir" && (
+							<ContextMenuItem
+								onClick={() => createSubDirectory()}
+							>
+								Create Directory
+							</ContextMenuItem>
+						)}
 					</ContextMenuContent>
 				</ContextMenuPortal>
 			</ContextMenu>

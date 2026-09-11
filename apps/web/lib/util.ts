@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { ClassNameValue, twMerge } from "tailwind-merge";
-import { Game } from "./servertypes";
+import { FSEntry, Game } from "./servertypes";
 
 export function singularOrPlural(
 	count: number,
@@ -39,4 +39,17 @@ export function gameString(game: Game): string {
 		default:
 			return "Unknown Game";
 	}
+}
+
+export function getAvailableName(files: FSEntry[], baseName: string) {
+	const names = new Set(files.map((file) => file.name));
+	let name = baseName;
+	let suffix = 1;
+
+	while (names.has(name)) {
+		name = `${baseName} (${suffix})`;
+		suffix += 1;
+	}
+
+	return name;
 }
