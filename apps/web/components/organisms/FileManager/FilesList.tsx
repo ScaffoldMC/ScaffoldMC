@@ -3,6 +3,7 @@ import { useServerFilesystem } from "@/hooks/serverFiles";
 import { FSDirectoryEntry, FSEntry, FSFileEntry } from "@/lib/servertypes";
 import { useContext, useState } from "react";
 import { FileManagerContext } from "./FileManager";
+import { DeleteEntryDialog } from "./DeleteEntryDialog";
 import { FilesListButton } from "./FilesListButton";
 import { FilePlusCorner, FolderPlus } from "lucide-react";
 import { getAvailableName } from "@/lib/util";
@@ -16,7 +17,10 @@ export function FilesList({
 }) {
 	const { createFile, createDirectory, getMetadata } =
 		useServerFilesystem(serverId);
-	const { setSelectedFile } = useContext(FileManagerContext);
+	const { selectedFile, setSelectedFile } = useContext(FileManagerContext);
+	const [entryToDelete, setEntryToDelete] = useState<FSEntry | null>(null);
+	const [deleting, setDeleting] = useState(false);
+	const { deleteEntry } = useServerFilesystem(serverId);
 
 	const handleCreateFile = async () => {
 		const path = getAvailableName(files, "New File");
@@ -32,8 +36,41 @@ export function FilesList({
 		createDirectory(getAvailableName(files, "New Directory"));
 	};
 
+	const requestDelete = (entry: FSEntry) => {
+		requestAnimationFrame(() => setEntryToDelete(entry));
+	};
+
+	const handleDelete = async () => {
+		if (!entryToDelete) return;
+
+		const deletedPath = entryToDelete.path.replace(/^\/+|\/+$/g, "");
+		const selectedPath = selectedFile?.path.replace(/^\/+|\/+$/g, "");
+
+		if (
+			selectedPath === deletedPath ||
+			selectedPath?.startsWith(`${deletedPath}/`)
+		) {
+			setSelectedFile(null);
+		}
+
+		setDeleting(true);
+
+		try {
+			await deleteEntry(entryToDelete.path);
+		} finally {
+			setDeleting(false);
+			setEntryToDelete(null);
+		}
+	};
+
 	return (
 		<div className="flex min-w-0 flex-col rounded-md border border-border-static bg-surface">
+			<DeleteEntryDialog
+				entry={entryToDelete}
+				deleting={deleting}
+				onCancel={() => setEntryToDelete(null)}
+				onConfirm={handleDelete}
+			/>
 			<div className="flex gap-1 p-1 pb-0">
 				<Button level="ghost" onClick={handleCreateFile}>
 					<FilePlusCorner size={18} />
@@ -42,7 +79,11 @@ export function FilesList({
 					<FolderPlus size={18} />
 				</Button>
 			</div>
-			<FileTree files={files} serverId={serverId} />
+			<FileTree
+				files={files}
+				serverId={serverId}
+				onDelete={requestDelete}
+			/>
 		</div>
 	);
 }
@@ -50,10 +91,12 @@ export function FilesList({
 function FileTree({
 	files,
 	serverId,
+	onDelete,
 	path = "",
 }: {
 	files: FSEntry[];
 	serverId: string;
+	onDelete: (entry: FSEntry) => void;
 	path?: string;
 }) {
 	return (
@@ -65,6 +108,7 @@ function FileTree({
 							key={`${path}/${entry.name}`}
 							dir={entry}
 							serverId={serverId}
+							onDelete={onDelete}
 							path={path}
 						/>
 					);
@@ -75,6 +119,7 @@ function FileTree({
 						key={`${path}/${entry.name}`}
 						file={entry}
 						serverId={serverId}
+						onDelete={onDelete}
 					/>
 				);
 			})}
@@ -85,10 +130,12 @@ function FileTree({
 function DirectoryListing({
 	dir,
 	serverId,
+	onDelete,
 	path = "",
 }: {
 	dir: FSDirectoryEntry;
 	serverId: string;
+	onDelete: (entry: FSEntry) => void;
 	path?: string;
 }) {
 	const [open, setOpen] = useState(false);
@@ -113,6 +160,7 @@ function DirectoryListing({
 			<FilesListButton
 				onClick={handleClick}
 				selected={selected}
+				onDelete={onDelete}
 				fsEntry={{ type: "dir", ...dir }}
 				serverId={serverId}
 			/>
@@ -122,6 +170,7 @@ function DirectoryListing({
 				<FileTree
 					files={content ?? []}
 					serverId={serverId}
+					onDelete={onDelete}
 					path={nextPath}
 				/>
 			</div>
@@ -132,9 +181,11 @@ function DirectoryListing({
 function FileListing({
 	file,
 	serverId,
+	onDelete,
 }: {
 	file: FSFileEntry;
 	serverId: string;
+	onDelete: (entry: FSEntry) => void;
 }) {
 	const { selectedFile, setSelectedFile } = useContext(FileManagerContext);
 	const selected = selectedFile?.name === file.name;
@@ -147,6 +198,7 @@ function FileListing({
 		<FilesListButton
 			onClick={handleClick}
 			selected={selected}
+			onDelete={onDelete}
 			fsEntry={{ type: "file", ...file }}
 			serverId={serverId}
 		/>

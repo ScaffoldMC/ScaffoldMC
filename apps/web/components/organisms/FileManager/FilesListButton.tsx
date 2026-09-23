@@ -9,10 +9,11 @@ import {
 import { cn, getAvailableName } from "@/lib/util";
 import { cva } from "class-variance-authority";
 import { useServerFilesystem } from "@/hooks/serverFiles";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
 import { FSEntry } from "@/lib/servertypes";
 import { FileIcon, FolderIcon } from "lucide-react";
+import { FileManagerContext } from "./FileManager";
 
 const buttonStyles = cva(
 	cn(
@@ -41,6 +42,7 @@ const buttonStyles = cva(
 export interface FilesListButtonProps {
 	selected: boolean;
 	onClick: () => void;
+	onDelete: (entry: FSEntry) => void;
 	fsEntry: FSEntry;
 	serverId: string;
 }
@@ -48,14 +50,16 @@ export interface FilesListButtonProps {
 export function FilesListButton({
 	selected,
 	onClick,
+	onDelete,
 	fsEntry,
 	serverId,
 }: FilesListButtonProps) {
 	const className = buttonStyles({ selected });
 	const [renameMode, setRenameMode] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { renameEntry, deleteEntry, createDirectory, listDirectory } =
+	const { renameEntry, createDirectory, listDirectory, getMetadata } =
 		useServerFilesystem(serverId);
+	const { setSelectedFile } = useContext(FileManagerContext);
 
 	useEffect(() => {
 		if (!renameMode) {
@@ -80,6 +84,14 @@ export function FilesListButton({
 		}
 
 		await renameEntry({ path: fsEntry.path, to: entryName });
+
+		if (fsEntry.type === "file") {
+			const renamedEntry = await getMetadata(entryName);
+			if (renamedEntry.type === "file") {
+				setSelectedFile(renamedEntry);
+			}
+		}
+
 		setRenameMode(false);
 	};
 
@@ -140,9 +152,7 @@ export function FilesListButton({
 						<ContextMenuItem onClick={() => setRenameMode(true)}>
 							Rename
 						</ContextMenuItem>
-						<ContextMenuItem
-							onClick={() => deleteEntry(fsEntry.path)}
-						>
+						<ContextMenuItem onClick={() => onDelete(fsEntry)}>
 							Delete
 						</ContextMenuItem>
 
