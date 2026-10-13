@@ -1,0 +1,127 @@
+.ace-scaffoldmc .ace_gutter {
+	background: #edf4f4;
+	color: #3a7a82;
+}
+
+.ace-scaffoldmc .ace_gutter-active-line {
+	background-color: #e4eeee;
+	color: #172224;
+}
+
+.ace-scaffoldmc .ace_print-margin {
+	width: 1px;
+	background: #c8dcdc;
+}
+
+.ace-scaffoldmc {
+	background-color: #f7fafa;
+	color: #172224;
+}
+
+.ace-scaffoldmc .ace_cursor {
+	color: #172224;
+}
+
+.ace-scaffoldmc .ace_marker-layer .ace_selection {
+	background: #d0f5f0;
+}
+
+.ace-scaffoldmc .ace_marker-layer .ace_active-line {
+	background: #e4eeee;
+}
+
+.ace-scaffoldmc .ace_marker-layer .ace_selected-word {
+	border: 1px solid #8bbfc4;
+}
+
+.ace-scaffoldmc .ace_invisible {
+	color: #8bbfc4;
+}
+
+.ace-scaffoldmc .ace_keyword,
+.ace-scaffoldmc .ace_meta {
+	color: #007a6e;
+}
+
+.ace-scaffoldmc .ace_constant.ace_language,
+.ace-scaffoldmc .ace_constant.ace_numeric {
+	color: #00b4a0;
+}
+
+.ace-scaffoldmc .ace_string {
+	color: #3a7a82;
+}
+
+.ace-scaffoldmc .ace_comment {
+	color: #8bbfc4;
+}
+
+.ace-scaffoldmc .ace_invalid {
+	background-color: #ffdddd;
+	color: #172224;
+}
+
+@media (prefers-color-scheme: dark) {
+	.ace-scaffoldmc .ace_gutter {
+		background: #0e1618;
+		color: #7aacb0;
+	}
+
+	.ace-scaffoldmc .ace_gutter-active-line {
+		background-color: #1e2c2f;
+		color: #d6ebec;
+	}
+
+	.ace-scaffoldmc .ace_print-margin {
+		width: 1px;
+		background: #2a3e42;
+	}
+
+	.ace-scaffoldmc {
+		background-color: #172224;
+		color: #d6ebec;
+	}
+
+	.ace-scaffoldmc .ace_cursor {
+		color: #d6ebec;
+	}
+
+	.ace-scaffoldmc .ace_marker-layer .ace_selection {
+		background: #253538;
+	}
+
+	.ace-scaffoldmc .ace_marker-layer .ace_active-line {
+		background: #1e2c2f;
+	}
+
+	.ace-scaffoldmc .ace_marker-layer .ace_selected-word {
+		border: 1px solid #3a5458;
+	}
+
+	.ace-scaffoldmc .ace_invisible {
+		color: #4a7478;
+	}
+
+	.ace-scaffoldmc .ace_keyword,
+	.ace-scaffoldmc .ace_meta {
+		color: #7fe0d4;
+	}
+
+	.ace-scaffoldmc .ace_constant.ace_language,
+	.ace-scaffoldmc .ace_constant.ace_numeric {
+		color: #00b4a0;
+	}
+
+	.ace-scaffoldmc .ace_string {
+		color: #d0f5f0;
+	}
+
+	.ace-scaffoldmc .ace_comment {
+		color: #4a7478;
+	}
+
+	.ace-scaffoldmc .ace_invalid {
+		background-color: #5a1f1f;
+		color: #ffdcdc;
+	}
+}

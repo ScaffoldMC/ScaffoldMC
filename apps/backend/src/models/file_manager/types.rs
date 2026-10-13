@@ -6,6 +6,7 @@ use ts_rs::TS;
 #[ts(export)]
 pub struct FSDirectoryEntry {
 	pub name: String,
+	pub path: String,
 }
 
 #[derive(TS, Debug, Serialize)]
@@ -13,9 +14,11 @@ pub struct FSDirectoryEntry {
 pub struct FSFileEntry {
 	pub name: String,
 	pub size: u64,
+	pub path: String,
 }
 
 #[derive(TS, Debug, Serialize)]
+#[ts(export)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum FSEntry {
 	File(FSFileEntry),

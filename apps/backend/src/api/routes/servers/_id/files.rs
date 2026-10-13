@@ -23,7 +23,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 			"/{*path}",
 			routing::get(get).post(post).delete(delete).put(put),
 		)
-		.route("/", routing::get(get_root).put(put_root))
+		.route("/", routing::get(get_root).post(post_root).put(put_root))
 }
 
 fn handle_error(error: &FileManagerError) -> impl IntoResponse {
@@ -49,6 +49,21 @@ async fn post(
 	Path((_, file_path)): Path<(String, String)>,
 	Query(query): Query<FilesPostQueryParams>,
 	Extension(server): Extension<Arc<Server>>,
+) -> impl IntoResponse {
+	post_handler(file_path, query, server).await
+}
+
+async fn post_root(
+	Query(query): Query<FilesPostQueryParams>,
+	Extension(server): Extension<Arc<Server>>,
+) -> impl IntoResponse {
+	post_handler(String::new(), query, server).await
+}
+
+async fn post_handler(
+	file_path: String,
+	query: FilesPostQueryParams,
+	server: Arc<Server>,
 ) -> impl IntoResponse {
 	let file_manager = server.get_fs();
 	let path_buf = PathBuf::from(file_path);
