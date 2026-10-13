@@ -48,12 +48,12 @@ impl ScopedFileManager {
 		}
 	}
 
-	fn get_relative_path(&self, path: &PathBuf) -> Result<PathBuf, FileManagerError> {
+	fn get_relative_path(&self, path: &Path) -> Result<PathBuf, FileManagerError> {
 		let normalized_path = self.normalize_path(path)?;
 
 		normalized_path
 			.strip_prefix(&self.base_path)
-			.map(|p| p.to_path_buf())
+			.map(Path::to_path_buf)
 			.map_err(|_| NoPermission)
 	}
 }

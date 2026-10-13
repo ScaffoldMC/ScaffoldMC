@@ -1,14 +1,12 @@
 import AceEditor from "react-ace";
 import "./TextEditor.ace.css";
 
-/* eslint-disable import/no-unresolved */
 import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/mode-properties";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/ext-language_tools";
-/* eslint-enable import/no-unresolved */
 
 export enum TextEditorMode {
 	JSON = "json",
