@@ -7,6 +7,7 @@ use tokio::io::{BufReader, BufWriter};
 pub mod scoped;
 pub mod types;
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait FileManager: Send + Sync {
 	/// Get a read buffer to a file

@@ -20,12 +20,14 @@ import { ServerInfo } from "@/lib/servertypes";
 import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsole";
 import { ServerStartStopButton } from "@/components/organisms/ServerStartStopButton/ServerStartStopButton";
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
-import { CloudBackup, Settings, Terminal } from "lucide-react";
+import { CloudBackup, Folder, Settings, Terminal } from "lucide-react";
 import { ServerConfigForm } from "@/components/organisms/ServerConfigForm/ServerConfigForm";
 import { ServerDangerActions } from "@/components/organisms/ServerDangerActions/ServerDangerActions";
+import { FileManager } from "@/components/organisms/FileManager/FileManager";
 
 export default function Page() {
 	const { slug } = useParams();
+	const serverId = slug.toString();
 
 	const server = useQuery({
 		queryKey: ["server", slug],
@@ -57,7 +59,7 @@ export default function Page() {
 					<p>{server.data.state}</p>
 				</div>
 				<div className="absolute right-0">
-					<ServerStartStopButton serverId={slug.toString()} />
+					<ServerStartStopButton serverId={serverId} />
 				</div>
 			</div>
 
@@ -65,6 +67,9 @@ export default function Page() {
 				<TabsList>
 					<TabsTrigger value="console">
 						<Terminal size={18} /> Console
+					</TabsTrigger>
+					<TabsTrigger value="files">
+						<Folder size={18} /> Files
 					</TabsTrigger>
 					<TabsTrigger value="settings">
 						<Settings size={18} />
@@ -76,13 +81,16 @@ export default function Page() {
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="console">
-					<ServerConsole serverId={slug.toString()} />
+					<ServerConsole serverId={serverId} />
+				</TabsContent>
+				<TabsContent value="files">
+					<FileManager serverId={serverId} />
 				</TabsContent>
 				<TabsContent value="settings" className="flex flex-col gap-2">
 					<h2>Configuration</h2>
-					<ServerConfigForm serverId={slug.toString()} />
+					<ServerConfigForm serverId={serverId} />
 					<h2>Danger Zone</h2>
-					<ServerDangerActions serverId={slug.toString()} />
+					<ServerDangerActions serverId={serverId} />
 				</TabsContent>
 				<TabsContent value="backups">
 					<b>Backups</b>

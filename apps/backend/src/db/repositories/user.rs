@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use sqlx::types::Uuid;
 
 /// Repository structure for managing users in the database.
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait UserRepository: Send + Sync {
 	async fn get_user_by_id(&self, user_id: Uuid) -> Result<User, sqlx::Error>;

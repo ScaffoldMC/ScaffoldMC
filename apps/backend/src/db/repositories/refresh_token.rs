@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use sqlx::{types::time::OffsetDateTime, types::Uuid};
 
 /// Repository structure for managing refresh tokens in the database.
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait RefreshTokenRepository: Send + Sync {
 	async fn add_refresh_token(&self, token_id: &str, user_id: Uuid) -> Result<(), sqlx::Error>;
