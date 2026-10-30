@@ -192,7 +192,7 @@ impl BinaryService {
 
 	/// Internal: Load the binary lockfile.
 	async fn load_lockfile(&self) -> Result<BinaryLockfile, String> {
-		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
+		let lockfile_path = PathBuf::from(format!("{}/binary.lock", self.binaries_dir));
 
 		if !lockfile_path.exists() {
 			return Ok(BinaryLockfile::default());
@@ -209,7 +209,7 @@ impl BinaryService {
 
 	/// Internal: Save the binary lockfile.
 	async fn save_lockfile(&self, lockfile: &BinaryLockfile) -> Result<(), String> {
-		let lockfile_path = PathBuf::from(format!("{}/binary.lock", &self.binaries_dir));
+		let lockfile_path = PathBuf::from(format!("{}/binary.lock", self.binaries_dir));
 
 		let file_content = toml::to_string(lockfile).map_err(|e| e.to_string())?;
 
