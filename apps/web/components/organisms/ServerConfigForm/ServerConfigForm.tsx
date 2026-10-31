@@ -65,9 +65,9 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 						<JvmSelector
 							name={field.name}
 							value={field.value ?? ""}
-							onChange={(event) => {
+							onChange={(value) => {
 								field.onBlur();
-								field.onChange(event);
+								field.onChange(value);
 							}}
 							onBlur={field.onBlur}
 							ref={field.ref}
