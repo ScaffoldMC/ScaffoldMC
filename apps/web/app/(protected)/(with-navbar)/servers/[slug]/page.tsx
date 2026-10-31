@@ -20,7 +20,7 @@ import { ServerInfo } from "@/lib/servertypes";
 import { ServerConsole } from "@/components/organisms/ServerConsole/ServerConsole";
 import { ServerStartStopButton } from "@/components/organisms/ServerStartStopButton/ServerStartStopButton";
 import PageLayout from "@/components/atoms/PageLayout/PageLayout";
-import { CloudBackup, Folder, Settings, Terminal } from "lucide-react";
+import { Folder, Settings, Terminal } from "lucide-react";
 import { ServerConfigForm } from "@/components/organisms/ServerConfigForm/ServerConfigForm";
 import { ServerDangerActions } from "@/components/organisms/ServerDangerActions/ServerDangerActions";
 import { FileManager } from "@/components/organisms/FileManager/FileManager";
@@ -75,10 +75,6 @@ export default function Page() {
 						<Settings size={18} />
 						Settings
 					</TabsTrigger>
-					<TabsTrigger value="backups">
-						<CloudBackup size={18} />
-						Backups
-					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="console">
 					<ServerConsole serverId={serverId} />
@@ -91,9 +87,6 @@ export default function Page() {
 					<ServerConfigForm serverId={serverId} />
 					<h2>Danger Zone</h2>
 					<ServerDangerActions serverId={serverId} />
-				</TabsContent>
-				<TabsContent value="backups">
-					<b>Backups</b>
 				</TabsContent>
 			</HashTabs>
 		</PageLayout>
