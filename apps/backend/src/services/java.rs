@@ -183,7 +183,7 @@ impl JavaService {
 				version_string = Some(rest.trim().to_string());
 			}
 
-			if let Some(rest) = line.strip_prefix("java.vm.name =") {
+			if let Some(rest) = line.strip_prefix("java.vm.vendor =") {
 				vendor = Some(rest.trim().to_string());
 			}
 
