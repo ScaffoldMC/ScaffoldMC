@@ -223,95 +223,105 @@ impl Server {
 		*process_guard = ServerProcessState::Starting;
 		drop(process_guard);
 
-		let config_guard = self.config.read().await;
+		let start_result = async {
+			let config_guard = self.config.read().await;
 
-		// Build absolute paths for server binary and directory
-		let binary_path = binary_service
-			.ensure_binary(&config_guard.game)
-			.await
-			.map_err(|e| ServerError::StartError(e.clone()))?;
-		let binary_path = std::fs::canonicalize(&binary_path)
-			.map_err(|e| ServerError::StartError(format!("Invalid binary path: {e}")))?;
-		let binary_path = binary_path.to_str().ok_or_else(|| {
-			ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
-		})?;
+			// Build absolute paths for server binary and directory
+			let binary_path = binary_service
+				.ensure_binary(&config_guard.game)
+				.await
+				.map_err(|e| ServerError::StartError(e.clone()))?;
+			let binary_path = std::fs::canonicalize(&binary_path)
+				.map_err(|e| ServerError::StartError(format!("Invalid binary path: {e}")))?;
+			let binary_path = binary_path.to_str().ok_or_else(|| {
+				ServerError::StartError("Binary path contains invalid UTF-8 characters".to_string())
+			})?;
 
-		let server_dir = config::server_dir(self.id);
-		let server_dir = std::fs::canonicalize(&server_dir)
-			.map_err(|e| ServerError::StartError(format!("Invalid server directory path: {e}")))?;
+			let server_dir = config::server_dir(self.id);
+			let server_dir = std::fs::canonicalize(&server_dir).map_err(|e| {
+				ServerError::StartError(format!("Invalid server directory path: {e}"))
+			})?;
 
-		// Create command to start the server process
-		let mut cmd = match config_guard.game {
-			Game::MinecraftJava(_) => {
-				let java_path =
-					config_guard
-						.java_path
-						.clone()
-						.ok_or(ServerError::MissingDependency(
-							"No java version is specified".to_string(),
-						))?;
+			// Create command to start the server process
+			let mut cmd =
+				match config_guard.game {
+					Game::MinecraftJava(_) => {
+						let java_path = config_guard.java_path.clone().ok_or(
+							ServerError::MissingDependency(
+								"No java version is specified".to_string(),
+							),
+						)?;
 
-				if !java_path.exists() {
-					return Err(ServerError::MissingDependency(format!(
-						"Specified Java path does not exist"
-					)));
-				}
+						if !java_path.exists() {
+							return Err(ServerError::MissingDependency(format!(
+								"Specified Java path does not exist"
+							)));
+						}
 
-				let mut cmd = Command::new(java_path);
+						let mut cmd = Command::new(java_path);
 
-				cmd.arg("-jar");
-				cmd.arg(binary_path);
+						cmd.arg("-jar");
+						cmd.arg(binary_path);
 
-				for arg in &config_guard.args {
-					cmd.arg(arg);
-				}
+						for arg in &config_guard.args {
+							cmd.arg(arg);
+						}
 
-				cmd
-			}
-		};
+						cmd
+					}
+				};
 
-		cmd.current_dir(&server_dir);
-		cmd.stdin(std::process::Stdio::piped());
-		cmd.stdout(std::process::Stdio::piped());
-		cmd.stderr(std::process::Stdio::piped());
+			cmd.current_dir(&server_dir);
+			cmd.stdin(std::process::Stdio::piped());
+			cmd.stdout(std::process::Stdio::piped());
+			cmd.stderr(std::process::Stdio::piped());
 
-		// Spawn child and create runtime
-		let mut child = cmd
-			.spawn()
-			.map_err(|e| ServerError::StartError(e.to_string()))?;
+			// Spawn child and create runtime
+			let mut child = cmd
+				.spawn()
+				.map_err(|e| ServerError::StartError(e.to_string()))?;
 
-		let stdin = child.stdin.take();
-		let stdout = child.stdout.take();
-		let stderr = child.stderr.take();
+			let stdin = child.stdin.take();
+			let stdout = child.stdout.take();
+			let stderr = child.stderr.take();
 
-		let (command_tx, command_rx) = mpsc::channel::<ProcessCommand>(64);
-		let (running_tx, running_rx) = watch::channel(true);
+			let (command_tx, command_rx) = mpsc::channel::<ProcessCommand>(64);
+			let (running_tx, running_rx) = watch::channel(true);
 
-		let runtime = Arc::new(ServerRuntime {
-			command_tx,
-			running_rx,
-		});
+			let runtime = Arc::new(ServerRuntime {
+				command_tx,
+				running_rx,
+			});
 
-		// Set state to running
-		let mut process_guard = self.process.write().await;
-		*process_guard = ServerProcessState::Running(runtime.clone());
-		drop(process_guard);
+			// Set state to running
+			let mut process_guard = self.process.write().await;
+			*process_guard = ServerProcessState::Running(runtime.clone());
+			drop(process_guard);
 
-		// Reset console buffer and line number
-		self.next_line_num.store(0, Ordering::Relaxed);
-		self.console_lines.write().await.clear();
+			// Reset console buffer and line number
+			self.next_line_num.store(0, Ordering::Relaxed);
+			self.console_lines.write().await.clear();
 
-		Self::start_watcher(
-			self,
-			child,
-			running_tx.clone(),
-			command_rx,
-			stdin,
-			stdout,
-			stderr,
-		);
+			Self::start_watcher(
+				self,
+				child,
+				running_tx.clone(),
+				command_rx,
+				stdin,
+				stdout,
+				stderr,
+			);
 
-		Ok(())
+			Ok(())
+		}
+		.await;
+
+		if start_result.is_err() {
+			let mut process_guard = self.process.write().await;
+			*process_guard = ServerProcessState::Stopped;
+		}
+
+		start_result
 	}
 
 	/// Stops the server instance.
