@@ -22,6 +22,7 @@ pub struct PartialServerConfig {
 	pub game: Option<Game>,
 	pub args: Option<Vec<String>>,
 	pub stop_command: Option<String>,
+	pub java_path: Option<PathBuf>,
 }
 
 #[derive(TS, Debug, Clone, Deserialize, Serialize)]

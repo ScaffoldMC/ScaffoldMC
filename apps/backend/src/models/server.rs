@@ -373,6 +373,10 @@ impl Server {
 			config_guard.stop_command = stop_command;
 		}
 
+		if let Some(java_path) = new_config.java_path {
+			config_guard.java_path = Some(java_path);
+		}
+
 		Ok(())
 	}
 
