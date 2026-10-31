@@ -32,6 +32,7 @@ pub struct ServerConfig {
 	pub game: Game,
 	pub args: Vec<String>,
 	pub stop_command: String,
+	pub java_path: Option<PathBuf>,
 }
 
 impl ServerConfig {

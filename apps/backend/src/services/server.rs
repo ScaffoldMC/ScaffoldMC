@@ -6,6 +6,7 @@ use crate::models::game::Game;
 use crate::models::server::Server;
 use crate::models::server::ServerStateInfo;
 use crate::services::binary::BinaryService;
+use crate::services::java::JavaService;
 use crate::services::Service;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -26,6 +27,7 @@ pub enum ServerServiceError {
 pub struct ServerService {
 	servers: RwLock<HashMap<Uuid, Arc<Server>>>,
 	binary_service: Arc<BinaryService>,
+	java_service: Arc<JavaService>,
 }
 
 impl Service for ServerService {
@@ -75,7 +77,7 @@ impl Service for ServerService {
 impl ServerService {
 	/// Creates a new `ServerService` instance.
 	#[instrument(name = "ServerService.Startup", skip_all)]
-	pub fn new(binary_service: Arc<BinaryService>) -> Self {
+	pub fn new(binary_service: Arc<BinaryService>, java_service: Arc<JavaService>) -> Self {
 		tracing::info!("Loading server instances");
 
 		let path = PathBuf::from(config::SERVERS_DIRECTORY.clone());
@@ -135,6 +137,7 @@ impl ServerService {
 		Self {
 			servers: RwLock::new(servers),
 			binary_service,
+			java_service,
 		}
 	}
 
@@ -177,12 +180,25 @@ impl ServerService {
 
 		// Extract dependency info
 		let mut java_args: Vec<String> = vec![];
+		let mut java_path: Option<PathBuf> = None;
 
 		for dep in bin_info.dependencies {
 			match dep {
 				DownloadDependency::Java(java_dependency) => {
 					if let Some(args) = java_dependency.args {
 						java_args = args;
+					}
+
+					let suitable_jvms = self
+						.java_service
+						.get_first_suitable_jvm(java_dependency.version)
+						.await;
+
+					match suitable_jvms {
+						Ok(jvm) => java_path = Some(jvm.path),
+						Err(err) => {
+							tracing::error!("Failed to find a suitable JVM: {}", err)
+						}
 					}
 				}
 			}
@@ -193,6 +209,7 @@ impl ServerService {
 			game: server_type,
 			args: java_args,
 			stop_command: "stop".into(), // TODO: Velocity uses "shutdown"
+			java_path,
 		};
 
 		server_config
