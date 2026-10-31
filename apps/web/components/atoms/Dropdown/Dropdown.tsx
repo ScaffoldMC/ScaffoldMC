@@ -9,7 +9,7 @@ export function Dropdown({
 }: {
 	children: React.ReactNode;
 	className: string;
-	ref: Ref<HTMLSelectElement>;
+	ref?: Ref<HTMLSelectElement>;
 } & SelectHTMLAttributes<HTMLSelectElement>) {
 	return (
 		<select

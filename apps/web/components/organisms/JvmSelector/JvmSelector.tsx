@@ -1,8 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChangeEventHandler, useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Button } from "@/components/atoms/Button/Button";
 import { Dropdown } from "@/components/atoms/Dropdown/Dropdown";
 import { TextInput } from "@/components/atoms/TextInput/TextInput";
+import {
+	DialogContent,
+	DialogOverlay,
+	DialogPortal,
+	DialogRoot,
+} from "@/components/organisms/Dialog/Dialog";
 import api from "@/lib/axios";
+import { XIcon } from "lucide-react";
 
 interface Jvm {
 	major_version: number;
@@ -11,8 +20,6 @@ interface Jvm {
 	arch: string;
 	path: string;
 }
-
-const CUSTOM_VALUE = "__custom__";
 
 export function JvmSelector({
 	name,
@@ -25,8 +32,10 @@ export function JvmSelector({
 	value?: string;
 	onChange: (value: string) => void;
 	onBlur: () => void;
-	ref?: React.Ref<HTMLSelectElement>;
+	ref?: React.Ref<HTMLInputElement>;
 }) {
+	const [selectorOpen, setSelectorOpen] = useState(false);
+	const [detectedPath, setDetectedPath] = useState("");
 	const jvms = useQuery<Jvm[]>({
 		queryKey: ["jvms"],
 		queryFn: async () => {
@@ -36,84 +45,84 @@ export function JvmSelector({
 	});
 
 	const selectedPath = value ?? "";
-	const hasSelectedJvm = jvms.data?.some((jvm) => jvm.path === selectedPath);
-	const [customSelected, setCustomSelected] = useState(false);
-	const customSelectionRef = useRef(false);
-
-	useEffect(() => {
-		if (customSelectionRef.current) {
-			customSelectionRef.current = false;
-			return;
-		}
-
-		setCustomSelected(Boolean(selectedPath && !hasSelectedJvm));
-	}, [selectedPath, hasSelectedJvm]);
-
-	const handleSelectChange: ChangeEventHandler<HTMLSelectElement> = (
-		event,
-	) => {
-		if (event.target.value === CUSTOM_VALUE) {
-			customSelectionRef.current = true;
-			setCustomSelected(true);
-			onChange("");
-		} else {
-			setCustomSelected(false);
-			onChange(event.target.value);
-		}
-		onBlur();
-	};
-
-	if (jvms.isError) {
-		return (
-			<p className="text-sm text-text-secondary">
-				Unable to load installed Java runtimes.
-			</p>
-		);
-	}
 
 	return (
-		<div className="flex min-w-0 flex-col gap-1">
-			<Dropdown
-				ref={ref}
-				className="w-full max-w-xl"
-				name={name}
-				value={customSelected ? CUSTOM_VALUE : selectedPath}
-				onChange={handleSelectChange}
-				onBlur={onBlur}
-				disabled={jvms.isLoading}
-				aria-busy={jvms.isLoading}
-			>
-				<option value="">
-					{jvms.isLoading
-						? "Loading Java runtimes..."
-						: !jvms.data?.length
-							? "No Java runtimes found"
-							: "Select a Java runtime"}
-				</option>
-				{jvms.data?.map((jvm) => (
-					<option key={jvm.path} value={jvm.path}>
-						Java {jvm.major_version} - {jvm.version_string} -{" "}
-						{jvm.vendor} ({jvm.arch})
-					</option>
-				))}
-				<option value={CUSTOM_VALUE}>Custom</option>
-			</Dropdown>
-			{customSelected && (
+		<>
+			<div className="flex min-w-0 flex-row gap-2">
 				<TextInput
-					name={`${name}-custom`}
+					ref={ref}
+					name={name}
 					value={selectedPath}
 					placeholder="Path to Java executable"
-					aria-label="Custom Java path"
 					className="w-full max-w-xl"
 					onChange={(event) => onChange(event.target.value)}
 					onBlur={onBlur}
 				/>
-			)}
-			{selectedPath && !customSelected && (
-				<span className="break-all text-xs text-text-secondary">
-					{selectedPath}
-				</span>
-			)}
-		</div>
+				<Button
+					type="button"
+					level="secondary"
+					size="default"
+					onClick={() => {
+						setDetectedPath("");
+						setSelectorOpen(true);
+					}}
+				>
+					Detect
+				</Button>
+			</div>
+			<DialogRoot open={selectorOpen} onOpenChange={setSelectorOpen}>
+				<DialogPortal>
+					<DialogOverlay />
+					<DialogContent className="items-stretch gap-4 p-6">
+						<div className="flex items-center justify-between">
+							<DialogPrimitive.Title>
+								Select JVM
+							</DialogPrimitive.Title>
+							<DialogPrimitive.Close asChild>
+								<Button type="button" level="ghost">
+									<XIcon size={18} />
+								</Button>
+							</DialogPrimitive.Close>
+						</div>
+						<DialogPrimitive.Description>
+							Select an installed Java runtime to use.
+						</DialogPrimitive.Description>
+						{jvms.isError ? (
+							<p className="text-sm text-text-secondary">
+								Unable to load installed Java runtimes.
+							</p>
+						) : (
+							<Dropdown
+								className="w-full"
+								disabled={jvms.isLoading || !jvms.data?.length}
+								aria-busy={jvms.isLoading}
+								value={detectedPath}
+								onChange={(event) => {
+									setDetectedPath(event.target.value);
+									onChange(event.target.value);
+									onBlur();
+									setSelectorOpen(false);
+								}}
+							>
+								<option value="" disabled>
+									{jvms.isLoading
+										? "Loading Java runtimes..."
+										: !jvms.data?.length
+											? "No Java runtimes found"
+											: "Select a Java runtime"}
+								</option>
+								{jvms.data?.map((jvm) => (
+									<option key={jvm.path} value={jvm.path}>
+										Java {jvm.major_version} -{" "}
+										{jvm.version_string} - {jvm.vendor} (
+										{jvm.arch})
+									</option>
+								))}
+							</Dropdown>
+						)}
+					</DialogContent>
+				</DialogPortal>
+			</DialogRoot>
+		</>
 	);
 }
