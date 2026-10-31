@@ -19,6 +19,7 @@ pub struct JavaVersion {
 	pub version_string: String,
 	pub vendor: String,
 	pub arch: String,
+	pub path: PathBuf,
 }
 
 impl Service for JavaService {}
@@ -31,18 +32,30 @@ impl JavaService {
 		JavaService {}
 	}
 
+	/// Retrieves suitable JVMs for the specified major version.
+	/// Returns a list of paths.
+	pub async fn get_suitable_jvms(
+		&self,
+		major_version: u8,
+	) -> Result<Vec<JavaVersion>, JavaServiceError> {
+		let javas = self.get_versions().await?;
+		let suitable: Vec<JavaVersion> = javas
+			.into_iter()
+			.filter(|java| java.major_version == major_version)
+			.collect();
+
+		Ok(suitable)
+	}
+
 	/// Retrieves a suitable Java version for the specified major version.
 	/// Returns the first matching version found.
-	pub async fn get_suitable_for(
+	pub async fn get_first_suitable_jvm(
 		&self,
 		major_version: u8,
 	) -> Result<JavaVersion, JavaServiceError> {
-		let javas = self.get_versions().await?;
-		let suitable = javas
-			.into_iter()
-			.find(|java| java.major_version == major_version);
+		let mut jvms = self.get_suitable_jvms(major_version).await?;
 
-		suitable.ok_or(JavaServiceError::NotFound(format!(
+		jvms.pop().ok_or(JavaServiceError::NotFound(format!(
 			"No suitable Java version found for major version {major_version}"
 		)))
 	}
@@ -127,7 +140,7 @@ impl JavaService {
 
 			let probe_output = command_output.unwrap();
 			let output = String::from_utf8_lossy(&probe_output.stderr); // Java version info is printed to stderr
-			let version = Self::parse_java_output(&output);
+			let version = Self::parse_java_output(&output, jvm);
 			javas.push(version);
 		}
 
@@ -135,7 +148,7 @@ impl JavaService {
 	}
 
 	/// Parses the Java properties output to extract Java version information.
-	fn parse_java_output(output: &str) -> JavaVersion {
+	fn parse_java_output(output: &str, path: PathBuf) -> JavaVersion {
 		let mut major_version: Option<u8> = None;
 		let mut version_string: Option<String> = None;
 		let mut vendor: Option<String> = None;
@@ -170,7 +183,7 @@ impl JavaService {
 				version_string = Some(rest.trim().to_string());
 			}
 
-			if let Some(rest) = line.strip_prefix("java.vm.name =") {
+			if let Some(rest) = line.strip_prefix("java.vm.vendor =") {
 				vendor = Some(rest.trim().to_string());
 			}
 
@@ -184,6 +197,7 @@ impl JavaService {
 			version_string: version_string.unwrap_or_else(|| "Unknown".into()),
 			vendor: vendor.unwrap_or_else(|| "Unknown".into()),
 			arch: arch.unwrap_or_else(|| "Unknown".into()),
+			path,
 		}
 	}
 }

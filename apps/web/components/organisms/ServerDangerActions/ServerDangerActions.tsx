@@ -74,7 +74,6 @@ export function ServerDangerActions({ serverId }: { serverId: string }) {
 					</DialogContent>
 				</DialogPortal>
 			</DialogRoot>
-
 			<div className="w-full flex justify-between items-center">
 				<span className="text-xl">Delete Server</span>
 				<Button

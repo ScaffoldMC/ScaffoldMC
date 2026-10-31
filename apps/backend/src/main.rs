@@ -80,10 +80,15 @@ impl AppState {
 		let binary_service = Arc::new(BinaryService::new(reqwest_client.clone()));
 		let user_service = Arc::new(UserService::new(user_repo.clone()));
 		let java_service = Arc::new(JavaService::new());
+		let server_service = Arc::new(ServerService::new(
+			binary_service.clone(),
+			java_service.clone(),
+		));
+		let auth_service = Arc::new(AuthService::new(user_repo, refresh_token_repo, secrets));
 
 		AppState {
-			server_service: Arc::new(ServerService::new(binary_service.clone())),
-			auth_service: Arc::new(AuthService::new(user_repo, refresh_token_repo, secrets)),
+			server_service,
+			auth_service,
 			binary_service,
 			user_service,
 			java_service,

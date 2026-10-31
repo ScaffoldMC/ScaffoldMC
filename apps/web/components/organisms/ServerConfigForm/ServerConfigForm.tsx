@@ -6,6 +6,7 @@ import { ListInput } from "@/components/atoms/ListInput/ListInput";
 import { Controller, useForm } from "react-hook-form";
 import { useServer } from "@/hooks/servers";
 import { VersionChanger } from "../VersionChanger/VersionChanger";
+import { JvmSelector } from "../JvmSelector/JvmSelector";
 import { useEffect } from "react";
 
 export function ServerConfigForm({ serverId }: { serverId: string }) {
@@ -24,6 +25,7 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 			stop_command: server.data?.config.stop_command,
 			args: server.data?.config.args,
 			game: server.data?.config.game,
+			java_path: server.data?.config.java_path,
 		},
 	});
 
@@ -40,6 +42,7 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 			stop_command: server.data.config.stop_command,
 			args: server.data.config.args,
 			game: server.data.config.game,
+			java_path: server.data.config.java_path,
 		});
 	}, [server.data?.config, reset]);
 
@@ -52,6 +55,25 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 			<FormField>
 				<Label htmlFor="stop_command">Stop Command</Label>
 				<TextInput name="stop_command" {...register("stop_command")} />
+			</FormField>
+			<FormField>
+				<Label htmlFor="java_path">Java Path</Label>
+				<Controller
+					name="java_path"
+					control={control}
+					render={({ field }) => (
+						<JvmSelector
+							name={field.name}
+							value={field.value ?? ""}
+							onChange={(value) => {
+								field.onBlur();
+								field.onChange(value);
+							}}
+							onBlur={field.onBlur}
+							ref={field.ref}
+						/>
+					)}
+				/>
 			</FormField>
 			<FormField>
 				<Label htmlFor="args">Args</Label>

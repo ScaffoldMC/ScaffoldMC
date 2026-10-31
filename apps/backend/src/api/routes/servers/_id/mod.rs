@@ -53,7 +53,7 @@ async fn start_post(
 ) -> impl IntoResponse {
 	if let Err(err) = server.start(state.binary_service.clone()).await {
 		tracing::error!("Error starting server: {}", err);
-		StatusCode::INTERNAL_SERVER_ERROR.into_response()
+		(StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
 	} else {
 		StatusCode::OK.into_response()
 	}
@@ -64,7 +64,7 @@ async fn stop_post(Extension(server): Extension<Arc<Server>>) -> impl IntoRespon
 		Ok(()) => StatusCode::OK.into_response(),
 		Err(err) => {
 			tracing::error!("Error stopping server: {}", err);
-			StatusCode::INTERNAL_SERVER_ERROR.into_response()
+			(StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
 		}
 	}
 }

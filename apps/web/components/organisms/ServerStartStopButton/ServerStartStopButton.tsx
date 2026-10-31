@@ -20,7 +20,10 @@ export function ServerStartStopButton({ serverId }: { serverId: string }) {
 				await startServer();
 			}
 		} catch (error) {
-			console.error("Failed to start/stop server:", error);
+			// TODO: Swap out browser alert with a toast
+			alert(
+				`Failed to ${isRunning ? "start" : "stop"} server ${server.data?.config.name}: ${error.response.data}`,
+			);
 		}
 
 		setLoading(false);
