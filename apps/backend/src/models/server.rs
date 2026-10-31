@@ -46,6 +46,8 @@ pub enum ServerError {
 	NotRunning,
 	#[error("No such server: {0}")]
 	NoSuchServer(String),
+	#[error("Missing required dependency to start server: {0}")]
+	MissingDependency(String),
 }
 
 #[derive(Clone, Serialize, Deserialize, ts_rs::TS)]
@@ -241,7 +243,15 @@ impl Server {
 		// Create command to start the server process
 		let mut cmd = match config_guard.game {
 			Game::MinecraftJava(_) => {
-				let mut cmd = Command::new("java");
+				let java_path =
+					config_guard
+						.java_path
+						.clone()
+						.ok_or(ServerError::MissingDependency(
+							"No java version is specified".to_string(),
+						))?;
+
+				let mut cmd = Command::new(java_path);
 
 				cmd.arg("-jar");
 				cmd.arg(binary_path);
