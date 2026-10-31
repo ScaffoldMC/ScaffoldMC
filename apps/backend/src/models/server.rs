@@ -251,6 +251,12 @@ impl Server {
 							"No java version is specified".to_string(),
 						))?;
 
+				if !java_path.exists() {
+					return Err(ServerError::MissingDependency(format!(
+						"Specified Java path does not exist"
+					)));
+				}
+
 				let mut cmd = Command::new(java_path);
 
 				cmd.arg("-jar");
