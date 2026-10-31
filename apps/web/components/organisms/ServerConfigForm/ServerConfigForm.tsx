@@ -61,7 +61,18 @@ export function ServerConfigForm({ serverId }: { serverId: string }) {
 				<Controller
 					name="java_path"
 					control={control}
-					render={({ field }) => <JvmSelector {...field} />}
+					render={({ field }) => (
+						<JvmSelector
+							name={field.name}
+							value={field.value ?? ""}
+							onChange={(event) => {
+								field.onBlur();
+								field.onChange(event);
+							}}
+							onBlur={field.onBlur}
+							ref={field.ref}
+						/>
+					)}
 				/>
 			</FormField>
 			<FormField>
