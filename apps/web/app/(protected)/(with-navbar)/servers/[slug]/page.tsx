@@ -83,9 +83,7 @@ export default function Page() {
 					<FileManager serverId={serverId} />
 				</TabsContent>
 				<TabsContent value="settings" className="flex flex-col gap-2">
-					<h2>Configuration</h2>
 					<ServerConfigForm serverId={serverId} />
-					<h2>Danger Zone</h2>
 					<ServerDangerActions serverId={serverId} />
 				</TabsContent>
 			</HashTabs>
