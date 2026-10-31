@@ -253,9 +253,9 @@ impl Server {
 						)?;
 
 						if !java_path.exists() {
-							return Err(ServerError::MissingDependency(format!(
-								"Specified Java path does not exist"
-							)));
+							return Err(ServerError::MissingDependency(
+								"Specified Java path does not exist".to_string(),
+							));
 						}
 
 						let mut cmd = Command::new(java_path);

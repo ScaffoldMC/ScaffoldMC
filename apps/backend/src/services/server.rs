@@ -197,7 +197,7 @@ impl ServerService {
 					match suitable_jvms {
 						Ok(jvm) => java_path = Some(jvm.path),
 						Err(err) => {
-							tracing::error!("Failed to find a suitable JVM: {}", err)
+							tracing::error!("Failed to find a suitable JVM: {}", err);
 						}
 					}
 				}
